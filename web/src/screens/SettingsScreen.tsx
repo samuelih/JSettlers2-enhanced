@@ -92,6 +92,11 @@ export function SettingsScreen(): JSX.Element | null {
       }
     >
       <div className={styles.body} data-testid="settings-body">
+        <p className={styles.intro}>
+          Personalize how the game looks, sounds, and performs. Changes apply
+          instantly and are remembered on this device.
+        </p>
+
         {/* ---- Theme --------------------------------------------------- */}
         <div className={styles.field}>
           <label className={styles.label} htmlFor={themeId}>

@@ -110,12 +110,16 @@ export function LobbyScreen(): JSX.Element {
   return (
     <div className={styles.wrap} data-testid="lobby-screen">
       <div className={styles.toolbar}>
-        <p className={styles.serverLine}>
-          Server version:{' '}
-          <span className={styles.version} data-testid="server-version">
-            {versionLabel}
-          </span>
-        </p>
+        <div className={styles.toolbarText}>
+          <h2 className={styles.heading}>Game Lobby</h2>
+          <p className={styles.serverLine}>
+            <span className={styles.serverDot} aria-hidden="true" />
+            Connected · server{' '}
+            <span className={styles.version} data-testid="server-version">
+              {versionLabel}
+            </span>
+          </p>
+        </div>
         <Button
           variant="primary"
           onClick={openDialog}
@@ -125,26 +129,37 @@ export function LobbyScreen(): JSX.Element {
         </Button>
       </div>
 
-      <Panel title={`Games (${games.length})`} flushBody>
+      <Panel title={`Open games (${games.length})`} flushBody>
         {games.length === 0 ? (
-          <p className={styles.empty} data-testid="game-list-empty">
-            No games yet. Create one to get started.
-          </p>
+          <div className={styles.empty} data-testid="game-list-empty">
+            <span className={styles.emptyMark} aria-hidden="true">
+              ♜
+            </span>
+            <p className={styles.emptyTitle}>No games yet</p>
+            <p className={styles.emptyHint}>
+              Create a game to start playing against friends or bots.
+            </p>
+            <Button variant="secondary" size="sm" onClick={openDialog}>
+              Create a game
+            </Button>
+          </div>
         ) : (
           <ul className={styles.list} data-testid="game-list">
             {games.map((g) => (
               <li key={g.name} className={styles.item} data-testid="game-item">
-                <span className={styles.name} data-testid="game-item-name">
-                  {g.name}
-                </span>
-                {g.options !== '' && (
-                  <span className={styles.options} data-testid="game-options">
-                    {g.options}
+                <div className={styles.itemMain}>
+                  <span className={styles.name} data-testid="game-item-name">
+                    {g.name}
                   </span>
-                )}
+                  {g.options !== '' && (
+                    <span className={styles.options} data-testid="game-options">
+                      {g.options}
+                    </span>
+                  )}
+                </div>
                 {g.started ? (
                   <span className={styles.started} data-testid="game-started">
-                    in progress
+                    In progress
                   </span>
                 ) : (
                   <Button

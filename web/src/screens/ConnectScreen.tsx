@@ -32,38 +32,50 @@ export function ConnectScreen(): JSX.Element {
 
   return (
     <div className={styles.wrap} data-testid="connect-screen">
+      <div className={styles.hero}>
+        <span className={styles.eyebrow}>Settlers of Catan</span>
+        <h1 className={styles.heroTitle}>Welcome to JSettlers</h1>
+        <p className={styles.heroSubtitle}>
+          Connect to a game server to play against friends or bots.
+        </p>
+      </div>
+
       <Panel title="Connect to server" className={styles.panel}>
         <form className={styles.form} onSubmit={onSubmit}>
-          <label className={styles.field}>
-            <span className={styles.label}>Host</span>
-            <input
-              className={styles.input}
-              type="text"
-              name="host"
-              value={host}
-              onChange={(e) => setHost(e.target.value)}
-              data-testid="host-input"
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>Port</span>
-            <input
-              className={styles.input}
-              type="text"
-              inputMode="numeric"
-              name="port"
-              value={port}
-              onChange={(e) => setPort(e.target.value)}
-              data-testid="port-input"
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </label>
+          <div className={styles.row}>
+            <label className={`${styles.field} ${styles.fieldHost}`}>
+              <span className={styles.label}>Host</span>
+              <input
+                className={styles.input}
+                type="text"
+                name="host"
+                value={host}
+                onChange={(e) => setHost(e.target.value)}
+                data-testid="host-input"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </label>
+            <label className={`${styles.field} ${styles.fieldPort}`}>
+              <span className={styles.label}>Port</span>
+              <input
+                className={styles.input}
+                type="text"
+                inputMode="numeric"
+                name="port"
+                value={port}
+                onChange={(e) => setPort(e.target.value)}
+                data-testid="port-input"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </label>
+          </div>
           <Button
             type="submit"
             variant="primary"
+            size="lg"
+            fullWidth
             disabled={connecting}
             data-testid="connect-button"
           >
@@ -71,9 +83,12 @@ export function ConnectScreen(): JSX.Element {
           </Button>
         </form>
 
-        <p className={styles.status} data-testid="connect-status" role="status">
-          {statusText(status)}
-        </p>
+        <div className={styles.statusBar}>
+          <span className={styles.statusDot} data-status={status} aria-hidden="true" />
+          <p className={styles.status} data-testid="connect-status" role="status">
+            {statusText(status)}
+          </p>
+        </div>
         {error != null && error !== '' && (
           <p className={styles.error} data-testid="connect-error" role="alert">
             {error}

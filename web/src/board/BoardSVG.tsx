@@ -11,6 +11,7 @@ import { HexTile } from './pieces/HexTile';
 import { PortMarker } from './pieces/PortMarker';
 import { Robber, Pirate } from './pieces/RobberPirate';
 import { Piece } from './pieces/Pieces';
+import { BoardDefs } from './pieces/BoardDefs';
 import styles from './BoardSVG.module.css';
 
 export interface BoardSVGProps {
@@ -76,6 +77,9 @@ export function BoardSVG({
       aria-label="Game board"
       preserveAspectRatio="xMidYMid meet"
     >
+      {/* Gradients, clip path & filters shared by all tiles/pieces. */}
+      <BoardDefs />
+
       {/* Hexes */}
       <g data-testid="board-hexes">
         {board.hexes.map((hex) => (
@@ -125,10 +129,12 @@ export function BoardSVG({
                 />
                 {/* Clickable hit area at the edge midpoint. A circle has a real
                     bounding box (an axis-aligned <line> does not), so it's
-                    reliably clickable by users and test drivers. */}
+                    reliably clickable by users and test drivers. The pulse class
+                    gives a subtle attention animation (CSS-gated by reduced
+                    motion / low quality). */}
                 <circle
                   data-testid={`edge-${coord}`}
-                  className={styles.edgeTarget}
+                  className={`${styles.edgeTarget} ${styles.targetPulse}`}
                   cx={mx}
                   cy={my}
                   r={HALFDELTA_X * 0.34}
@@ -147,7 +153,7 @@ export function BoardSVG({
               <circle
                 key={coord}
                 data-testid={`node-${coord}`}
-                className={styles.nodeTarget}
+                className={`${styles.nodeTarget} ${styles.targetPulse}`}
                 cx={p.x}
                 cy={p.y}
                 r={HALFDELTA_X * 0.32}

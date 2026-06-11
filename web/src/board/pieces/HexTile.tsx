@@ -1,10 +1,11 @@
 import type { JSX } from 'react';
-import { hexKind, type BoardHex } from '../types';
-import { hexToPixel, hexPolygonPoints, dicePipCount, HALFDELTA_X } from '../coords';
+import { hexKind, type BoardHex, type HexKind } from '../types';
+import { hexToPixel, hexPolygonPoints, dicePipCount, HALFDELTA_X, HALFDELTA_Y } from '../coords';
 import styles from '../BoardSVG.module.css';
+import { ResourceMotif } from './ResourceMotif';
 
 /** Map a HexKind to its CSS-module fill class. */
-const HEX_CLASS: Record<ReturnType<typeof hexKind>, string> = {
+const HEX_CLASS: Record<HexKind, string> = {
   clay: styles.hexClay,
   ore: styles.hexOre,
   sheep: styles.hexSheep,
@@ -15,6 +16,24 @@ const HEX_CLASS: Record<ReturnType<typeof hexKind>, string> = {
   water: styles.hexWater,
   fog: styles.hexFog,
   unknown: styles.hexUnknown,
+};
+
+/**
+ * Per-kind gradient id (defined once in {@link BoardSVG}'s `<defs>`). The
+ * gradient layers a subtle light→dark sheen over the flat CSS-variable fill so
+ * tiles read as raised terrain while still being fully theme-driven.
+ */
+const HEX_GRADIENT: Record<HexKind, string> = {
+  clay: 'hexgrad-clay',
+  ore: 'hexgrad-ore',
+  sheep: 'hexgrad-sheep',
+  wheat: 'hexgrad-wheat',
+  wood: 'hexgrad-wood',
+  desert: 'hexgrad-desert',
+  gold: 'hexgrad-gold',
+  water: 'hexgrad-water',
+  fog: 'hexgrad-fog',
+  unknown: 'hexgrad-unknown',
 };
 
 /** Pip-dot layout (relative offsets) keyed by pip count 1..5. */
@@ -50,10 +69,16 @@ export interface HexTileProps {
 }
 
 /**
- * One pointy-top hex polygon filled per its {@link hexKind}, plus a dice-number
- * token (circle showing the number and a row of pip dots) for resource hexes.
- * Desert, water, gold and fog show no number. 6 and 8 are drawn "hot" (red) to
- * mirror the physical game's high-probability emphasis.
+ * One pointy-top hex polygon filled per its {@link hexKind}, with a subtle
+ * top-light gradient sheen, an inner bevel stroke, a small per-resource motif
+ * (brick rows, ore chunks, sheep, wheat sheaf, tree, sand, gold glint, waves),
+ * plus a clean dice-number token (circle showing the number and a row of pip
+ * dots) for resource hexes. Desert, water, gold and fog show no number. 6 and 8
+ * are drawn "hot" (red) to mirror the physical game's high-probability emphasis.
+ *
+ * The hex `<polygon>` remains the click target; motif and token layers are
+ * `pointerEvents="none"` so they never intercept board interaction. All colors
+ * resolve from CSS custom properties so themes / color-blind palettes apply.
  */
 export function HexTile({ hex, onClick }: HexTileProps): JSX.Element {
   const { x: cx, y: cy } = hexToPixel(hex.coord);
@@ -66,14 +91,25 @@ export function HexTile({ hex, onClick }: HexTileProps): JSX.Element {
 
   return (
     <g data-testid={`hex-${hex.coord}`} data-hexkind={kind} data-dicenum={hex.diceNum}>
+      {/* Flat themed fill — also the click target. */}
       <polygon
         className={`${styles.hex} ${HEX_CLASS[kind]}${onClick ? ` ${styles.hexClickable}` : ''}`}
         points={points}
         onClick={onClick ? () => onClick(hex.coord) : undefined}
       />
+      {/* Gradient sheen on top of the flat fill for a raised-terrain feel. */}
+      <polygon className={styles.hexSheen} points={points} fill={`url(#${HEX_GRADIENT[kind]})`} pointerEvents="none" />
+      {/* Inner bevel: a slightly inset outline for crisp tile edges. */}
+      <polygon className={styles.hexBevel} points={hexPolygonPoints(cx, cy, 0.9)} pointerEvents="none" />
+
+      {/* Per-resource decorative motif, clipped to the hex. */}
+      <ResourceMotif kind={kind} cx={cx} cy={cy} hx={HALFDELTA_X} hy={HALFDELTA_Y} />
+
       {showNumber && (
-        <g data-testid={`dice-${hex.coord}`} pointerEvents="none">
+        <g data-testid={`dice-${hex.coord}`} className={styles.diceTokenGroup} pointerEvents="none">
+          <circle className={styles.diceTokenShadow} cx={cx} cy={cy + 0.9} r={tokenR} />
           <circle className={styles.diceToken} cx={cx} cy={cy} r={tokenR} />
+          <circle className={styles.diceTokenRing} cx={cx} cy={cy} r={tokenR * 0.86} />
           <text
             className={`${styles.diceNum}${hot ? ` ${styles.diceNumHot}` : ''}`}
             x={cx}
@@ -88,7 +124,7 @@ export function HexTile({ hex, onClick }: HexTileProps): JSX.Element {
               className={hot ? styles.dicePipHot : styles.dicePip}
               cx={cx + dx}
               cy={cy + tokenR * 0.55}
-              r={0.9}
+              r={1}
             />
           ))}
         </g>

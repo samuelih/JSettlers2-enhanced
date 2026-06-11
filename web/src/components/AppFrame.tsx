@@ -15,9 +15,10 @@ export interface AppFrameProps {
 }
 
 /**
- * Top-level chrome: a sticky header (title + a flexible slot + theme toggle)
- * over a main content area. The theme toggle flips light/dark by setting
- * `data-theme` on the document root (see useTheme / tokens.css).
+ * Top-level chrome: a sticky app bar (brand mark + title, a flexible slot, the
+ * navigation actions, and a theme toggle) over a scrollable main content area.
+ * The theme toggle flips light/dark by setting `data-theme` on the document
+ * root (see useTheme / tokens.css).
  */
 export function AppFrame({
   title = 'JSettlers',
@@ -32,11 +33,15 @@ export function AppFrame({
     <div className={styles.frame} data-testid="app-shell">
       <header className={styles.header}>
         <div className={styles.brand}>
+          <span className={styles.mark} aria-hidden="true">
+            <span className={styles.markHex} />
+          </span>
           <h1 className={styles.title}>{title}</h1>
         </div>
         {headerSlot != null && <div className={styles.headerSlot}>{headerSlot}</div>}
         <div className={styles.actions}>
-          {headerActions}
+          {headerActions != null && <nav className={styles.nav}>{headerActions}</nav>}
+          <span className={styles.divider} aria-hidden="true" />
           <button
             type="button"
             className={styles.themeToggle}

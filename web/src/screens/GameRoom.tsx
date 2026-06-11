@@ -41,8 +41,11 @@ function Seat({
     <li
       className={`${styles.seat} ${isMine ? styles.seatMine : ''}`}
       data-testid={`seat-${seat}`}
+      data-occupied={occupant !== null ? 'true' : 'false'}
     >
-      <span className={styles.seatNum}>Seat {seat + 1}</span>
+      <span className={styles.seatNum} data-color={`p${seat}`}>
+        {seat + 1}
+      </span>
 
       {occupant !== null ? (
         <span
@@ -56,7 +59,7 @@ function Seat({
         </span>
       ) : (
         <span className={styles.empty} data-testid={`seat-empty-${seat}`}>
-          empty
+          Empty seat
         </span>
       )}
 
@@ -127,14 +130,24 @@ export function GameRoom(): JSX.Element | null {
   return (
     <div className={styles.wrap} data-testid="game-room">
       <div className={styles.header}>
-        <h2 className={styles.title} data-testid="game-room-name">
-          {cg.gameName}
-        </h2>
-        {cg.options !== '' && (
-          <span className={styles.options} data-testid="game-room-options">
-            {cg.options}
-          </span>
-        )}
+        <div className={styles.headerText}>
+          <span className={styles.eyebrow}>Game room</span>
+          <h2 className={styles.title} data-testid="game-room-name">
+            {cg.gameName}
+          </h2>
+          <p className={styles.summary} data-testid="game-room-summary">
+            {humans} player{humans === 1 ? '' : 's'}, {bots} bot
+            {bots === 1 ? '' : 's'} · {cg.maxPlayers} seats
+            {cg.options !== '' && (
+              <>
+                {' · '}
+                <span className={styles.options} data-testid="game-room-options">
+                  {cg.options}
+                </span>
+              </>
+            )}
+          </p>
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -145,11 +158,6 @@ export function GameRoom(): JSX.Element | null {
           Leave
         </Button>
       </div>
-
-      <p className={styles.summary} data-testid="game-room-summary">
-        {humans} player{humans === 1 ? '' : 's'}, {bots} bot
-        {bots === 1 ? '' : 's'} · {cg.maxPlayers} seats
-      </p>
 
       <Panel title="Seats" flushBody>
         <ul className={styles.seats} data-testid="seat-list">
@@ -162,6 +170,7 @@ export function GameRoom(): JSX.Element | null {
       <div className={styles.actions}>
         <Button
           variant="primary"
+          size="lg"
           onClick={onStart}
           disabled={!iAmSeated}
           data-testid="start-game"
@@ -170,7 +179,7 @@ export function GameRoom(): JSX.Element | null {
         </Button>
         {!iAmSeated && (
           <span className={styles.hint} data-testid="start-hint">
-            Sit down to start the game.
+            Sit down at a seat to start the game.
           </span>
         )}
       </div>

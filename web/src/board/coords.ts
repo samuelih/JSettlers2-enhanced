@@ -333,10 +333,13 @@ export function edgeToPixel(coord: number): EdgePixels {
  * vertical segments NW→SW and NE→SE. Listed clockwise from the N apex, the six
  * corners are exactly the {@link getAdjacentNodesToHex} order, so a piece drawn
  * at any node lands on a hex corner.
+ *
+ * @param scale optional radial scale (default 1); e.g. 0.9 yields an inset
+ *   hexagon outline used for a decorative inner bevel.
  */
-export function hexPolygonPoints(cx: number, cy: number): string {
-  const hx = HALFDELTA_X;
-  const hy = HALFDELTA_Y;
+export function hexPolygonPoints(cx: number, cy: number, scale = 1): string {
+  const hx = HALFDELTA_X * scale;
+  const hy = HALFDELTA_Y * scale;
   const pts: Array<[number, number]> = [
     [cx, cy - hy], // N
     [cx + hx, cy - hy], // NE

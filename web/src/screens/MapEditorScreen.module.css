@@ -6,8 +6,8 @@
 .wrap {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-5);
   min-height: 0;
 }
 
@@ -15,12 +15,35 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.subtitle code {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  padding: 0.05em 0.35em;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
 }
 
 .headerSpacer {
@@ -38,6 +61,22 @@
 @media (max-width: 56rem) {
   .layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 40rem) {
+  .wrap {
+    padding: var(--space-4) var(--space-3);
+    gap: var(--space-4);
+  }
+
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  /* Let the action buttons drop below the title instead of squeezing. */
+  .headerSpacer {
+    flex-basis: 100%;
   }
 }
 

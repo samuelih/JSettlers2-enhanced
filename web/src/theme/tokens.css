@@ -313,3 +313,111 @@ html {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
 }
+
+/* ===================================================================== *
+ *  Board art & motion tokens (Phase 6 — visual polish).
+ *
+ *  APPEND-ONLY block, owned by the board agent. Adds the variables the
+ *  enriched SVG board (gradients, resource motifs, dock/ship ports, piece
+ *  glyphs, robber/pirate) and its animations consume. All values resolve from
+ *  the existing palette where possible so themes / color-blind palettes keep
+ *  working. Each motion variable carries a full transition/animation shorthand
+ *  so a single token can be zeroed for reduced-motion / low-quality without
+ *  redefining timing in CSS modules.
+ * ===================================================================== */
+:root {
+  /* Hex tile bevel + dice-token edge. */
+  --hex-bevel: rgba(255, 255, 255, 0.2);
+  --dice-token-edge: rgba(20, 18, 14, 0.4);
+
+  /* Resource motif inks (subtle, painted over the hex fill). */
+  --motif-fill: rgba(20, 18, 14, 0.2);
+  --motif-stroke: rgba(20, 18, 14, 0.3);
+  --motif-ink: rgba(20, 18, 14, 0.55);
+  --motif-trunk: rgba(70, 45, 25, 0.7);
+  --motif-wheat: rgba(120, 84, 18, 0.5);
+  --motif-gold: rgba(180, 134, 24, 0.6);
+  --motif-glint: rgba(255, 255, 255, 0.85);
+  --motif-wave: rgba(255, 255, 255, 0.5);
+
+  /* Port dock / ship glyph. */
+  --port-plank: var(--port-stroke);
+  --port-ship: #6b5a36;
+  --port-sail: #f4ecd8;
+
+  /* Pirate ship rigging + sail, piece door/window detail. */
+  --pirate-sail: #d9d6cc;
+  --piece-detail: rgba(20, 18, 14, 0.55);
+
+  /* Motion shorthands (full transition / animation values). */
+  --robber-move: 360ms cubic-bezier(0.34, 1.2, 0.64, 1);
+  --piece-pop: 260ms cubic-bezier(0.34, 1.4, 0.64, 1);
+  --target-pulse: 1.6s ease-in-out infinite;
+  --dice-roll-spin: 520ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* Dark theme: brighten motif inks and bevel so emblems stay legible on the
+ * darker, more saturated hex fills. */
+:root[data-theme='dark'],
+[data-theme='dark'] {
+  --hex-bevel: rgba(255, 255, 255, 0.1);
+  --motif-fill: rgba(0, 0, 0, 0.3);
+  --motif-stroke: rgba(0, 0, 0, 0.4);
+  --motif-ink: rgba(0, 0, 0, 0.6);
+  --motif-wave: rgba(255, 255, 255, 0.4);
+  --dice-token-bg: #e9e0c9;
+  --dice-token-edge: rgba(0, 0, 0, 0.45);
+}
+
+/* Low rendering-quality mode: collapse the board motion shorthands so the
+ * marker glide, placement pop, target pulse and dice spin are instantaneous. */
+:root[data-render-quality='low'],
+[data-render-quality='low'] {
+  --robber-move: 0ms;
+  --piece-pop: 0ms;
+  --target-pulse: 0ms;
+  --dice-roll-spin: 0ms;
+}
+
+/* Global dice-roll keyframes. Defined here (board agent owns tokens + motion)
+ * and applied via inline style in the dice display, which remounts on each new
+ * roll so the tumble replays. A separate per-die wobble adds life. */
+@keyframes jsboard-dice-roll {
+  0% {
+    transform: rotate(-22deg) scale(0.7);
+    opacity: 0.4;
+  }
+  55% {
+    transform: rotate(14deg) scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes jsboard-die-tumble {
+  0% {
+    transform: translateY(-30%) rotate(-90deg);
+  }
+  60% {
+    transform: translateY(8%) rotate(12deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Reduced-motion / low-quality: no dice tumble. */
+@media (prefers-reduced-motion: reduce) {
+  .jsboard-dice-animated,
+  .jsboard-die-animated {
+    animation: none !important;
+  }
+}
+:root[data-render-quality='low'] .jsboard-dice-animated,
+[data-render-quality='low'] .jsboard-dice-animated,
+:root[data-render-quality='low'] .jsboard-die-animated,
+[data-render-quality='low'] .jsboard-die-animated {
+  animation: none !important;
+}

@@ -54,6 +54,7 @@ import {
   buildRequest,
   useGameStore,
 } from '../store/gameStore';
+import { playSound } from '../util/sound';
 import styles from './GameScreen.module.css';
 
 /** Resource picker order + display labels (CLAY..WOOD). */
@@ -480,6 +481,64 @@ function currentPlayerName(cg: CurrentGame): string {
  * the next phase; the data they need (potentialNodes, mySeat, currentPlayer)
  * is already in the store.
  */
+/**
+ * Observe in-game state changes and emit feedback for them (Phase 6 polish):
+ *
+ *  - a `roll` sound + an incrementing roll-sequence number (drives the dice
+ *    tumble animation) whenever a fresh dice total appears;
+ *  - a `build` sound whenever a new piece is added to the board (placement);
+ *  - a `turn` sound when it becomes the local player's turn.
+ *
+ * All sounds are gated inside {@link playSound} by the global sound setting, so
+ * this only decides *when* to play. Returns the current roll sequence so the
+ * dice display can replay its animation on each new roll. Safe to call with a
+ * null game (no-ops, returns 0).
+ */
+function useGameFeedback(cg: CurrentGame | null): number {
+  const [rollSeq, setRollSeq] = useState(0);
+  const prevDiceTotal = useRef<number | null>(null);
+  const prevPieceCount = useRef<number>(0);
+  const prevMyTurn = useRef<boolean>(false);
+  const prevGameName = useRef<string | null>(null);
+
+  const diceTotal = cg?.lastDice?.total ?? null;
+  const pieceCount = cg?.pieces.length ?? 0;
+  const myTurn = cg != null && cg.mySeat >= 0 && cg.mySeat === cg.currentPlayerNumber;
+  const gameName = cg?.gameName ?? null;
+
+  useEffect(() => {
+    // Reset baselines when switching games so we don't fire on initial sync.
+    if (gameName !== prevGameName.current) {
+      prevGameName.current = gameName;
+      prevDiceTotal.current = diceTotal;
+      prevPieceCount.current = pieceCount;
+      prevMyTurn.current = myTurn;
+      return; // <--- Early return: new game baseline established ---
+    }
+
+    // Dice roll: a non-null total that differs from the previous one.
+    if (diceTotal !== null && diceTotal !== prevDiceTotal.current) {
+      playSound('roll');
+      setRollSeq((n) => n + 1);
+    }
+    prevDiceTotal.current = diceTotal;
+
+    // Piece placement: the board piece count grew.
+    if (pieceCount > prevPieceCount.current) {
+      playSound('build');
+    }
+    prevPieceCount.current = pieceCount;
+
+    // Your turn: transition from not-my-turn to my-turn.
+    if (myTurn && !prevMyTurn.current) {
+      playSound('turn');
+    }
+    prevMyTurn.current = myTurn;
+  }, [gameName, diceTotal, pieceCount, myTurn]);
+
+  return rollSeq;
+}
+
 export function GameScreen(): JSX.Element | null {
   const cg = useGameStore((s) => s.currentGame);
   const error = useGameStore((s) => s.error);
@@ -492,6 +551,11 @@ export function GameScreen(): JSX.Element | null {
       setError(undefined);
     }
   }, [error, showToast, setError]);
+
+  // Sound + dice-roll feedback derived from observed state changes. Must be
+  // called before any early return to obey the Rules of Hooks; it tolerates a
+  // null game internally.
+  const rollSeq = useGameFeedback(cg);
 
   if (cg === null) {
     return null; // <--- Early return: no joined game ---
@@ -522,6 +586,7 @@ export function GameScreen(): JSX.Element | null {
           d1={cg.lastDice?.d1 ?? 0}
           d2={cg.lastDice?.d2 ?? 0}
           total={cg.lastDice?.total ?? null}
+          rollSeq={rollSeq}
         />
         <Button
           variant="ghost"
@@ -754,28 +819,61 @@ function GameControls({
   );
 }
 
-/** Two dice faces + total, or a placeholder before the first roll. */
+/**
+ * Two dice faces + total, or a placeholder before the first roll. On each new
+ * roll the whole face group remounts (keyed by `rollSeq`) and replays a short
+ * tumble animation; the keyframes (`jsboard-dice-roll` / `jsboard-die-tumble`)
+ * and their reduced-motion / low-quality gating live in theme/tokens.css. The
+ * `--dice-roll-spin` token supplies the duration so low-quality mode zeroes it.
+ */
 function DiceDisplay({
   d1,
   d2,
   total,
+  rollSeq = 0,
 }: {
   d1: number;
   d2: number;
   total: number | null;
+  rollSeq?: number;
 }): JSX.Element {
+  const spin = 'var(--dice-roll-spin, 520ms cubic-bezier(0.2, 0.8, 0.3, 1))';
   return (
-    <div className={styles.dice} data-testid="dice-display" data-total={total ?? ''}>
+    <div className={styles.dice} data-testid="dice-display" data-total={total ?? ''} data-roll-seq={rollSeq}>
       {total === null ? (
         <span className={styles.diceEmpty}>—</span>
       ) : (
-        <>
-          {d1 > 0 && <span className={styles.die}>{d1}</span>}
-          {d2 > 0 && <span className={styles.die}>{d2}</span>}
+        <span
+          // Remount on each roll so the animation replays.
+          key={rollSeq}
+          className="jsboard-dice-animated"
+          style={{
+            display: 'inline-flex',
+            gap: 'var(--space-2, 0.5rem)',
+            alignItems: 'center',
+            animation: `jsboard-dice-roll ${spin} both`,
+          }}
+        >
+          {d1 > 0 && (
+            <span
+              className={`${styles.die} jsboard-die-animated`}
+              style={{ animation: `jsboard-die-tumble ${spin} both`, display: 'inline-flex' }}
+            >
+              {d1}
+            </span>
+          )}
+          {d2 > 0 && (
+            <span
+              className={`${styles.die} jsboard-die-animated`}
+              style={{ animation: `jsboard-die-tumble ${spin} both`, animationDelay: '60ms', display: 'inline-flex' }}
+            >
+              {d2}
+            </span>
+          )}
           <span className={styles.diceTotal} data-testid="dice-total">
             {total}
           </span>
-        </>
+        </span>
       )}
     </div>
   );

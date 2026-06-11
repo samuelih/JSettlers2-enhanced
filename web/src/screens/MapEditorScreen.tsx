@@ -108,10 +108,15 @@ export function MapEditorScreen(): JSX.Element {
   return (
     <div className={styles.wrap} data-testid="map-editor-screen">
       <header className={styles.header}>
-        <h2 className={styles.title}>Map Editor</h2>
+        <div className={styles.headerText}>
+          <h2 className={styles.title}>Map Editor</h2>
+          <p className={styles.subtitle}>
+            Design a custom board and export it as a <code>.map.json</code> file.
+          </p>
+        </div>
         <span className={styles.headerSpacer} />
         <Button variant="secondary" size="sm" data-testid="editor-new" onClick={handleNew}>
-          New
+          New map
         </Button>
         <Button
           variant="ghost"
@@ -119,7 +124,7 @@ export function MapEditorScreen(): JSX.Element {
           data-testid="map-editor-back"
           onClick={() => setAppView('lobby')}
         >
-          ← Back
+          ← Back to lobby
         </Button>
       </header>
 

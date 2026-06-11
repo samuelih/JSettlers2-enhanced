@@ -2,6 +2,12 @@
  * Styles for the SVG board renderer. Colors come exclusively from CSS custom
  * properties (theme/tokens.css) so light/dark/color-blind themes apply without
  * touching component code. Player colors are passed as inline `fill` via props.
+ *
+ * Motion: placement "pop", robber/pirate glide, highlight pulse, and the dice
+ * sheen all live here as keyframes/transitions. They are fully suppressed under
+ * `prefers-reduced-motion: reduce` and `[data-render-quality='low']` (the latter
+ * already zeroes the motion tokens in tokens.css; we also hard-stop animations
+ * below) so weak GPUs and motion-sensitive users get a static board.
  */
 
 .svg {
@@ -17,6 +23,18 @@
   stroke: var(--hex-stroke, rgba(0, 0, 0, 0.35));
   stroke-width: 1;
   stroke-linejoin: round;
+}
+.hexSheen {
+  /* Gradient overlay (set inline via fill="url(#hexgrad-*)"). */
+  stroke: none;
+  pointer-events: none;
+}
+.hexBevel {
+  fill: none;
+  stroke: var(--hex-bevel, rgba(255, 255, 255, 0.18));
+  stroke-width: 1;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 .hexClay {
   fill: var(--hex-fill-clay, #b85c38);
@@ -51,12 +69,76 @@
 .hexClickable {
   cursor: pointer;
 }
+.hexClickable:hover {
+  stroke: var(--board-highlight-ring, rgba(31, 120, 194, 0.9));
+  stroke-width: 2.5;
+}
+
+/* ---- Resource motifs ---------------------------------------------- */
+.motif {
+  pointer-events: none;
+}
+/* Filled emblem shapes (bricks, sheaf, tree, etc.) */
+.motifFill {
+  fill: var(--motif-fill, rgba(20, 18, 14, 0.22));
+  stroke: var(--motif-stroke, rgba(20, 18, 14, 0.3));
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+}
+/* Stroke-only emblem lines (dunes, wheat stalks). */
+.motifStroke {
+  fill: none;
+  stroke: var(--motif-stroke, rgba(20, 18, 14, 0.3));
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+/* Darker ink for sheep head/legs, tree trunk. */
+.motifInk {
+  fill: var(--motif-ink, rgba(20, 18, 14, 0.55));
+}
+.motifTrunk {
+  fill: var(--motif-trunk, rgba(70, 45, 25, 0.7));
+}
+/* Wheat-specific lighter sheaf tint. */
+.motifWheat .motifFill {
+  fill: var(--motif-wheat, rgba(120, 84, 18, 0.45));
+}
+.motifWheat .motifStroke {
+  stroke: var(--motif-wheat, rgba(120, 84, 18, 0.55));
+}
+/* Gold ingot + glint. */
+.motifGold .motifFill {
+  fill: var(--motif-gold, rgba(180, 134, 24, 0.6));
+  stroke: rgba(120, 86, 10, 0.5);
+}
+.motifGlint {
+  fill: var(--motif-glint, rgba(255, 255, 255, 0.85));
+}
+/* Waves on water hexes. */
+.motifWaveStroke {
+  fill: none;
+  stroke: var(--motif-wave, rgba(255, 255, 255, 0.5));
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
 
 /* ---- Dice-number token -------------------------------------------- */
+.diceTokenGroup {
+  pointer-events: none;
+}
+.diceTokenShadow {
+  fill: rgba(0, 0, 0, 0.25);
+}
 .diceToken {
   fill: var(--dice-token-bg, #f6efdd);
-  stroke: var(--hex-stroke, rgba(0, 0, 0, 0.35));
+  stroke: var(--dice-token-edge, rgba(20, 18, 14, 0.4));
   stroke-width: 0.75;
+}
+/* Glossy highlight ring inside the token. */
+.diceTokenRing {
+  fill: url(#dice-token-grad);
+  stroke: none;
+  pointer-events: none;
 }
 .diceNum {
   fill: var(--dice-token-text, #20211f);
@@ -75,28 +157,71 @@
 }
 
 /* ---- Ports --------------------------------------------------------- */
+.portPlank {
+  stroke: var(--port-plank, #8a7a52);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
 .portMarker {
   fill: var(--port-fill, #ece3cc);
   stroke: var(--port-stroke, #8a7a52);
-  stroke-width: 1;
+  stroke-width: 2;
 }
 .portLabel {
   fill: var(--port-text, #4a3f24);
-  font-weight: var(--font-weight-semibold, 600);
+  font-weight: var(--font-weight-bold, 700);
   text-anchor: middle;
   dominant-baseline: central;
 }
+.portShip {
+  fill: var(--port-ship, #6b5a36);
+  stroke: var(--port-stroke, #8a7a52);
+  stroke-width: 0.6;
+}
+.portMast {
+  stroke: var(--port-ship, #6b5a36);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+}
+.portSail {
+  fill: var(--port-sail, #f4ecd8);
+  stroke: var(--port-stroke, #8a7a52);
+  stroke-width: 0.5;
+}
 
 /* ---- Robber / pirate ---------------------------------------------- */
+.marker {
+  /* Smooth glide when the translate() transform changes (move robber/pirate). */
+  transition: transform var(--robber-move, 360ms cubic-bezier(0.34, 1.2, 0.64, 1));
+}
+.markerShadow {
+  fill: rgba(0, 0, 0, 0.3);
+}
 .robber {
   fill: var(--robber-fill, #2a2a2a);
   stroke: var(--robber-stroke, #f4f1ea);
   stroke-width: 1.5;
+  stroke-linejoin: round;
 }
 .pirate {
   fill: var(--pirate-fill, #1b1b2e);
   stroke: var(--pirate-stroke, #e6e2d8);
   stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.pirateRig {
+  stroke: var(--pirate-stroke, #e6e2d8);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+.pirateSail {
+  fill: var(--pirate-sail, #d9d6cc);
+  stroke: var(--pirate-fill, #1b1b2e);
+  stroke-width: 0.6;
+}
+.pirateSkull {
+  fill: var(--pirate-fill, #1b1b2e);
 }
 
 /* ---- Pieces -------------------------------------------------------- */
@@ -107,15 +232,47 @@
   stroke: var(--piece-stroke, rgba(0, 0, 0, 0.65));
   stroke-linecap: round;
 }
-.shipDash {
-  stroke-dasharray: 5 4;
-  stroke-linecap: butt;
+.shipHull,
+.shipSail {
+  stroke: var(--piece-stroke, rgba(0, 0, 0, 0.65));
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+}
+.shipMast {
+  stroke: var(--piece-stroke, rgba(0, 0, 0, 0.65));
+  stroke-width: 1;
+  stroke-linecap: round;
 }
 .settlement,
 .city {
-  stroke: var(--piece-stroke, rgba(0, 0, 0, 0.65));
-  stroke-width: 1;
+  stroke-width: 1.4;
   stroke-linejoin: round;
+  filter: url(#piece-shadow);
+}
+/* Doors / windows on houses & cities. */
+.pieceDetail {
+  fill: var(--piece-detail, rgba(20, 18, 14, 0.55));
+}
+
+/* Placement pop/fade-in when a piece first renders. */
+.piecePop {
+  animation: piece-pop var(--piece-pop, 260ms cubic-bezier(0.34, 1.4, 0.64, 1)) both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes piece-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ---- Interactive highlight targets -------------------------------- */
@@ -130,7 +287,24 @@
 }
 .nodeTarget:hover,
 .edgeTarget:hover {
-  fill-opacity: 0.7;
+  fill-opacity: 0.8;
+  stroke-width: 2.5;
+}
+
+/* Subtle attention pulse on legal targets. Animates opacity only (not transform/
+   size) so the click target's bounding box stays stable — both for crisp hit
+   testing and so automated drivers aren't blocked by an ever-moving element. */
+.targetPulse {
+  animation: target-pulse var(--target-pulse, 1.6s ease-in-out infinite);
+}
+@keyframes target-pulse {
+  0%,
+  100% {
+    fill-opacity: 0.3;
+  }
+  50% {
+    fill-opacity: 0.62;
+  }
 }
 
 /* Visible highlight drawn along a candidate edge; the sibling .edgeTarget circle
@@ -141,4 +315,22 @@
   stroke-opacity: 0.55;
   stroke-linecap: round;
   pointer-events: none;
+}
+
+/* ---- Motion suppression ------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .marker {
+    transition: none;
+  }
+  .piecePop,
+  .targetPulse {
+    animation: none;
+  }
+}
+:global([data-render-quality='low']) .marker {
+  transition: none;
+}
+:global([data-render-quality='low']) .piecePop,
+:global([data-render-quality='low']) .targetPulse {
+  animation: none;
 }
