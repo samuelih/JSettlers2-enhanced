@@ -15,6 +15,7 @@
 - Developing with a database (JDBC)
 - Internationalization (I18N)
 - Robots (AI)
+- Client preferences and board rendering
 - Network Communication and interop with other versions or languages
 - Coding Style
 - Release Testing
@@ -625,6 +626,21 @@ ideas.
     - UI mock-ups
     - state change / network message plans
     - robot support
+    - Phase 0 groundwork is in place as of v2.7.00, but no C&K gameplay is
+      implemented yet. The roadmap and representation decisions are documented in
+      [Cities-and-Knights-Design.md](Cities-and-Knights-Design.md); proposed network
+      messages are in the clearly-marked "PROPOSED (design stage, not implemented)"
+      section of [Message-Sequences-for-Game-Actions.md](Message-Sequences-for-Game-Actions.md).
+      Groundwork added so far is hidden behind inactive flags and changes no existing-game
+      behavior: reserved inactive-hidden game options `_CK_KNI`, `_CK_IMP`, `_CK_PROG`,
+      `_CK_BARB`, `_CK_METR` (and scenario flag `_SC_CK`) in `SOCGameOptionSet`; a disabled
+      `SC_CK` scenario stub in `SOCScenario`; `SOCSpecialItem` city-improvement track entries
+      with typeKeys `_CK_IMP/T`, `_CK_IMP/P`, `_CK_IMP/S` (Trade/Politics/Science) built via
+      `makeKnownItem(typeKey, level)` with interim standard-resource costs; and a barbarian-strength
+      counter in `SOCGame` (`advanceBarbarianStrength`/`getBarbarianStrength`, advanced once per
+      `rollDice()` when `_CK_BARB` is set), surfaced on `RollResult`. The structural blocker
+      for real gameplay is the 6th-resource (cloth/coin/paper) commodity refactor, which needs its
+      own release.
 - Support for multiple game types
     - At server: Other game types would extend GameHandler (like SOCGameHandler)
     - When client connects: Game list, scenario list, and game options would
@@ -741,6 +757,35 @@ For more details, see the SOCGameOption.activate javadoc.
 "Third-party" options can be defined by any 3rd-party client, bot, or server JSettlers fork,
 as a way to add features or flags but remain backwards-compatible with standard JSettlers.
 For more details, see the SOCGameOption.FLAG_3RD_PARTY javadoc.
+
+### Custom maps (user-defined scenarios):
+
+A server admin can add custom board maps without recompiling, by dropping `*.map.json` files
+into a directory and pointing the server at it with `-Djsettlers.custommaps.dir=<dir>`
+(`SOCServer.PROP_JSETTLERS_CUSTOMMAPS_DIR`, also settable in `jsserver.properties`). The
+server scans that directory once at startup, validates each file, registers each valid map as
+a scenario, and logs each load. Players then pick the custom map from the normal scenario list
+in New Game; clients need no update, since the server sends the layout via the standard
+`SOCBoardLayout2` message. This is off by default and is standard-rules-only for v2.7.00: a
+custom map changes only the board, not the game rules.
+
+The pipeline lives in [soc.server.CustomMapLoader](../src/main/java/soc/server/CustomMapLoader.java)
+(parse + register) and [soc.server.CustomMapValidator](../src/main/java/soc/server/CustomMapValidator.java)
+(field-by-field checks); `SOCServer.loadCustomMaps()` drives it at startup. The full file-format
+reference, a sample walkthrough, and the explicit lists of what is and isn't validated are in
+[Custom-Maps.md](Custom-Maps.md); the shipped example is
+[sample-island.map.json](../src/main/bin/custommaps/sample-island.map.json).
+
+Each custom scenario is registered through `SOCScenario.registerCustomScenario(SOCScenario)`. Its
+key must start with the reserved prefix `SOCScenario.CUSTOM_SCENARIO_KEY_PREFIX` (`"SC_X"`), which
+no built-in scenario uses, so a custom scenario can never shadow a built-in one; the loader builds
+each key as `SC_X` followed by up to 4 uppercase alphanumerics derived from the filename. The
+method throws `IllegalArgumentException` if the key lacks that prefix or is already registered.
+
+Like the savegame feature, custom maps are a **soft dependency** on `gson.jar`: it's on the shipped
+JARs' Class-Path, but `SOCServer` checks for the Gson class
+(`Class.forName("com.google.gson.Gson")`) at startup before scanning. If gson is missing, the
+server logs a warning and starts normally with custom maps disabled rather than failing.
 
 
 ## Developing with a database (JDBC)
@@ -965,6 +1010,141 @@ each turn. See that message's javadoc for details.
 For robustness testing, the `SOCRobotClient.debugRandomPause` flag can be enabled
 by editing its declaration to inject random delays into handling messages and
 commands from the server.
+
+
+## Client preferences and board rendering
+
+This section covers the client-side preference registry, the board's rendering
+and accessibility code, and the in-game build hotkeys/left-click flow. The robot
+fallback contract for unknown inventory items is also noted, since it's the
+server-side counterpart of the left-click build flow.
+
+### User preferences
+
+Persistent client settings (sound, player icon, etc) are read and written through
+the static `getPref`/`putPref` API in
+[soc.client.UserPreferences](../src/main/java/soc/client/UserPreferences.java),
+backed by `java.util.prefs`. That API is unchanged and remains how values are read
+and written everywhere in the client.
+
+On top of it, `UserPreferences` has a small `PreferenceDescriptor` registry that lets
+the [PreferencesDialog](../src/main/java/soc/client/PreferencesDialog.java) (opened from
+the "Preferences..." button on the main panel) enumerate preferences and build the right
+control for each, without hardcoding each preference's key, type, and default. Each
+`PreferenceDescriptor` carries a key, a `Type` (`BOOLEAN`, `INT`, or `CHOICE`), a default
+value, the `choices` and a `choiceStoredAsInt` flag for `CHOICE` prefs, and an i18n
+`labelKey`. The registry is built once, lazily, in `UserPreferences.buildRegistry()` and
+returned by `getRegisteredPreferences()` in insertion order (which is also the dialog's
+display order, grouped to match the dialog's section headers).
+
+**To add a new preference that auto-appears in the dialog:** add one `reg.put(...)` line in
+`buildRegistry()` with a `PreferenceDescriptor` for it, and a `pref.*` label key in
+`soc/client/strings/data*.properties`. No `PreferencesDialog` code change is needed; it reads
+the registry. Then read the value wherever you consume it via `getPref(key, default)`. Some
+prefs only take effect for newly opened windows or after restart (UI scale, UI font size,
+rendering quality, color-blind mode) — note that in the label or dialog if so.
+
+Storage-compatibility notes worth knowing before adding or changing prefs:
+
+- `hexGraphicsSet` (`PreferenceDescriptor.KEY_HEX_GRAPHICS_SET`) is a `CHOICE` pref but is stored
+  as an **integer index** into its `choices` (0 = pastel, 1 = classic), not as a String, because the
+  key predates the registry. Its descriptor sets `choiceStoredAsInt = true`; newer `CHOICE` prefs
+  store the chosen String. `PreferenceDescriptor.getCurrentChoice()` reads either form transparently.
+- `uiFontSize` (`KEY_UI_FONT_SIZE`) is read at startup in
+  `SwingMainDisplay.scaleUIManagerFontsForFontSizePref()` (small −2pt, large +3pt, xlarge +6pt),
+  not live.
+- Per-game sound mute (`SOCPlayerInterface.PREF_SOUND_MUTE`) is deliberately **not** in the registry,
+  because it's a per-game toggle rather than a global default; it's read/written directly via
+  `getPref`/`putPref` and is unchanged.
+
+### Board rendering, themes, and accessibility
+
+Board drawing is in [soc.client.SOCBoardPanel](../src/main/java/soc/client/SOCBoardPanel.java).
+A few preferences feed into it:
+
+- **Rendering-hints helper:** `SOCBoardPanel.setRenderingHints(Graphics)` applies the antialiasing
+  and image-interpolation hints to a graphics context, and should be called at every drawing/scaling
+  site so quality is consistent. The underlying preference values (`renderAntialiasing` boolean,
+  `renderInterpolation` one of nearest/bilinear/bicubic) are read once per rescale by
+  `refreshRenderingHintPrefs()` into cached fields, so `setRenderingHints` is cheap enough to call
+  per frame.
+- **Color externalization:** each hex graphics set under `resources/hexes/<set>/` ships a
+  `theme.properties` (pastel and classic provided) that externalizes the per-set color tables
+  formerly hardcoded in `SOCBoardPanel`. It's loaded once, when that set's images load, by
+  `SOCBoardPanel.loadThemeColors(...)`. Format: standard Java `.properties`, ASCII only; each value
+  is 6 hex digits `RRGGBB` (no leading `#`, which would start a comment); an empty value or the literal
+  `none` means "no color". Every key is **optional** — any omitted key falls back to the compiled-in
+  default for that set, so a missing or partial file is harmless, and the shipped files reproduce the
+  historical defaults so visual output is unchanged out of the box. Keys:
+  - `border.<type>` — hex border color, un-rotated boards; `<type>` is one of
+    `clay ore sheep wheat wood desert gold fog`.
+  - `border.rotat.<type>` — hex border color, 6-player rotated boards.
+  - `border.water` — water-hex border color (set-specific).
+  - `piri.path` — pirate-path dotted-line color for scenario `_SC_PIRI`; if omitted, derived from the
+    water color.
+  - `dice.circle.<n>` — dice-number circle fill color, `n` = 0..4 by rarity (0 = 2/12 rarest …
+    4 = 6/8 most common).
+
+  Theme files are packaged into the client/full JAR by the existing `resources/**` include in
+  `build.gradle` (no build change needed); the server JAR doesn't ship them, since the server doesn't
+  render boards. Third parties can re-skin a set by editing `theme.properties` and rebuilding resources.
+- **Dice-circle render cache:** rendered dice-number circles are cached in `diceNumberCircleCache`
+  (keyed by dice number) and rebuilt lazily, since the circle diameter, colors, and font change only on
+  rescale. The cache (and the cached font/`FontMetrics`) is invalidated in `rescaleBoard(...)`.
+- **Color-blind palettes** are implemented as alternate color tables, the same mechanism as the themes:
+  when the `colorBlindMode` preference is active (off / deuteranopia / protanopia / tritanopia), an
+  override palette is applied on top of the theme/default colors in `loadThemeColors(...)`, and
+  [ColorSquare](../src/main/java/soc/client/ColorSquare.java)`.applyColorBlindPalette()` (run once at
+  class load) remaps the solid-color UI squares. Deuteranopia/protanopia (red-green) share an
+  Okabe-Ito-inspired palette;
+  tritanopia (blue-yellow) uses a separate one. **Limitation:** only the overlaid/solid-color UI is
+  remapped — resource counters, trade dialogs, building costs, dice-number circles, piece fallback
+  colors, and the pirate-path line. The painted `.gif` hex bitmap tiles are unchanged, so the hex
+  artwork itself isn't recolored. Like the hex-graphics-set preference, `colorBlindMode` takes effect
+  only after restart or a hex-graphics-set reload (not live), because resource colors are compared by
+  object reference internally.
+
+#### Deferred graphics work
+
+The following graphics improvements were considered and intentionally deferred; each line notes why:
+
+- **Vector/`Path2D` playing pieces** — would replace the bitmap settlement/city/road art with
+  resolution-independent shapes, but is a large rewrite of the piece-drawing code with little
+  user-visible gain at current resolutions.
+- **SVG ports** — converting hex/port art to SVG would need an SVG rendering dependency, conflicting
+  with the lightweight, dependency-light client.
+- **`@2x` (high-DPI) raster assets** — would sharpen art on HiDPI displays but doubles the shipped
+  asset count and the art-pipeline work; the existing scaling-quality hints cover most of the gap.
+- **Asynchronous rendering** — offloading drawing off the AWT event thread risks tearing/sync bugs;
+  current draw times don't justify the complexity.
+- **Dynamic DPI changes** — reacting live to a window moving between displays of different scale
+  factors; the current model reads UI scale at startup, which is simpler and adequate.
+
+### In-game build hotkeys and left-click build
+
+For contributors extending the in-game UI, two mechanisms are worth pointing at:
+
+- **Gameplay hotkeys** are wired in [SOCPlayerInterface](../src/main/java/soc/client/SOCPlayerInterface.java)
+  via the inner `PIHotkeyActionListener` class and the `addHotkeysInputMap()` setup. As of v2.7.00 these
+  include Settlement (Ctrl/Cmd-S), City (Ctrl/Cmd-K), and Buy Dev Card (Ctrl/Cmd-B, 4-or-fewer-player
+  games only — in 6-player games that combo stays "Ask Special Build"), alongside the existing
+  Roll/Done/trade hotkeys. All require the Ctrl/Cmd modifier, so they never fire while typing in the
+  chat box, and the build hotkeys route through `SOCBuildingPanel.clickBuildingButton(...)` — the same
+  path as the on-screen buttons — so they're no-ops unless the action is currently legal. To add a
+  hotkey, add a constant and case to `PIHotkeyActionListener` and bind it in the InputMap/ActionMap setup.
+- **Left-click build** state lives in `SOCBoardPanel`: during normal play (`mode == NONE`),
+  `leftClickBuildTarget` / `leftClickBuildPieceType` hold a pending first-click target (a confirmation
+  prompt is shown in the message area), and a second left-click on the same target builds it. Escape or
+  a right-click cancels; the send path is identical to the right-click build menu's. This complements
+  rather than replaces the right-click menu.
+- **Robot fallback contract:** the server-side counterpart for unknown inventory items is in
+  [SOCRobotBrain](../src/main/java/soc/robot/SOCRobotBrain.java). When a bot reaches
+  `PLACING_INV_ITEM` for a scenario item it has no strategy for, `planAndPlaceInvItem()` falls back via
+  `fallbackUnknownInvItemPlacement(SOCInventoryItem)` instead of hanging until force-end (it cancels the
+  placement if the item is cancelable, else ends the turn cleanly). To give the built-in bot a real
+  strategy for a new `PLACING_INV_ITEM` item, add a branch in `planAndPlaceInvItem()` calling a new
+  `planAndPlaceInvItemPlacement_*` helper before the fallback is reached; the contract is documented in
+  those two methods' javadocs.
 
 
 ## Network Communication and interop with other versions or languages

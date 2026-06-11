@@ -51,6 +51,29 @@ JARs for recent JSettlers versions can be downloaded from
 	    - Statistics dialog shows client player's resource rolls and trades
 	    - Bugfix when Window Close button clicked: Don't hide the window if user wants to continue playing or reset board
 	      (thanks KotCzarny for reporting github issue #103)
+	    - Build pieces by left-clicking the board: During your turn, left-click a spot where you can build a road, ship, settlement, or city
+	      to select it and show a confirm prompt; left-click that same spot again to build. Right-click, press Escape, or click elsewhere to cancel.
+	        - Complements the existing right-click build menu, which is unchanged
+	        - Only offers and builds targets you can currently afford and place (same hover logic as the right-click menu)
+	        - For Forgotten Tribe, still confirms with a dialog when placing a ship that would remove a port
+	        - The "To build pieces, right-click the build location" new-user hint still appears (up to twice), now only when left-clicking somewhere that isn't a buildable target
+	    - New gameplay keyboard shortcuts during your turn (Ctrl on Linux/generic, Cmd on macOS, Alt on Windows; same convention as Roll/Done/trade shortcuts):
+	        - Ctrl/Cmd-S: Buy/place a Settlement (toggles cancel if already placing one)
+	        - Ctrl/Cmd-K: Buy/place a City (K, not C, because Ctrl-C is the Counter-offer trade shortcut)
+	        - Ctrl/Cmd-B: Buy a Development Card, only in games of 4 or fewer players; in 6-player games Ctrl/Cmd-B stays the existing "Ask Special Build" shortcut
+	        - Existing shortcuts unchanged: Ctrl-R Roll, Ctrl-D Done; new build shortcuts are no-ops unless the action is currently legal
+	    - Bot trade auto-reject countdown timer text is now always shown on its own line below the Accept/Reject/Counter buttons (previously could overlap them in the compact narrow layout)
+	    - Board rendering quality and accessibility (set in the new Preferences dialog):
+	        - Optional antialiasing (smooth board drawing) and selectable board image scaling quality (Nearest / Bilinear / Bicubic)
+	        - Color-blind assist mode (Off / Deuteranopia / Protanopia / Tritanopia) remaps the solid-color UI: resource counters, trade dialogs, building costs, dice-number circles on hexes, piece fallback colors, and the pirate-path line
+	            - Takes effect after restart or a hex-graphics-set reload, not live (same model as the Hex Graphics Set preference)
+	            - The painted hex tile artwork (.gif) is unchanged; only overlaid/solid-color UI is remapped
+	        - Each hex graphics set under `resources/hexes/<set>/` now has a `theme.properties` file (Pastel and Classic provided); third parties can edit its `key=RRGGBB` colors to re-skin a set without recompiling. Any omitted key falls back to the compiled-in default, and a deleted file falls back to all defaults, so out-of-the-box visuals are unchanged.
+	- Preferences:
+	    - New "Preferences..." button on the client's main panel opens a User Preferences dialog that centralizes client settings:
+	      Sound effects, Auto-reject bot trades after N seconds (negative disables), Remembered face icon ID, Hex graphics set (Pastel/Classic),
+	      Force UI scale (0 = auto), Smooth board drawing (antialiasing), Board image scaling quality, Color-blind assist mode, and UI font size (Small/Normal/Large/Extra large)
+	        - Changes apply on OK; some (Force UI scale, UI font size, board rendering quality) take effect only for newly opened windows or after restart
 	- New Game dialog:
 	    - If any of the chosen Game Options require a minimum client version, list those options in the confirmation dialog
 	      so user knows what to leave out if they don't want that requirement
@@ -74,6 +97,12 @@ JARs for recent JSettlers versions can be downloaded from
 	    - Interval can be changed or disabled (default 2.5 minutes) with server property `jsettlers.client.idle.ping.seconds`
 	- New `*MUTE*` and `*UNMUTE*` commands for a game's creator or admin to manage that game's chat with players and observers
 	- `*STATS*`: Sort the client version list
+	- Custom maps: Server admins can add user-defined board layouts, off by default
+	    - Enable with server property `jsettlers.custommaps.dir` (a directory to scan) plus `gson.jar` on the classpath (same dependency as the Savegame feature)
+	    - The server scans that directory once at startup for `*.map.json` files and registers each valid one as a scenario keyed `SC_X<4 chars from filename>` (such as `SC_XSAMP`); players then pick it from the normal New Game scenario list, and clients need no update
+	    - v1 is standard rules only on the sea board with the standard 10-VP win condition; a custom map changes only the board (land hexes, dice numbers, ports, land areas, optional robber/pirate start, optional shuffle flag), not the game rules
+	    - Invalid maps are skipped with a logged warning (not fatal); if two files' first 4 filename alphanumerics collide, the second is skipped
+	    - File-format reference, a sample walkthrough, naming/collision rules, and what is and isn't validated are in `doc/Custom-Maps.md`; shipped example is `src/main/bin/custommaps/sample-island.map.json`
 - Network/Message traffic:
 	- When client is this version or newer:
 	    - Client is sent every game's list of options; previous versions omitted options of any unjoinable game
@@ -101,6 +130,14 @@ JARs for recent JSettlers versions can be downloaded from
 	        - BoardInfo: add optional field fogHiddenHexes
 	        - MODEL_VERSION still 2400; earlier server versions will ignore new fields while loading a savegame
 	- Robots: If SOCGame.restoreLargestArmyState called before saveLargestArmyState, do nothing
+	- Robots: When the built-in bot is asked to place an inventory item for a scenario it has no strategy for, it no longer hangs until server force-end; instead it cancels the placement (if cancelable) or ends its turn cleanly
+	    - No new strings, config, or protocol; only sends existing messages (SOCCancelBuildRequest with INV_ITEM_PLACE_CANCEL, or endTurn)
+	    - To give the bot a real strategy for a new PLACING_INV_ITEM item, add a branch in SOCRobotBrain.planAndPlaceInvItem() before the fallback (see its javadoc and fallbackUnknownInvItemPlacement())
+	- Cities & Knights groundwork (Phase 0): Reserved infrastructure only, behind inactive flags, with no gameplay change
+	    - Added reserved inactive Cities & Knights game options (`_CK_KNI`, `_CK_IMP`, `_CK_PROG`, `_CK_BARB`, `_CK_METR`), a disabled `SC_CK` scenario stub, SOCSpecialItem city-improvement track entries (Trade/Politics/Science, levels 1-5, interim standard-resource costs), and a barbarian-strength counter in SOCGame/RollResult
+	    - All `_CK_*` options and `_SC_CK` are inactive-hidden, never appearing in the New Game UI; they can only be exercised by activating them at server startup via `jsettlers.gameopts.activate=...`
+	    - The barbarian counter advances per rollDice() call when `_CK_BARB` is set; attack resolution is a log-only stub until later phases. The commodity (cloth/coin/paper 6th resource) refactor is the structural blocker requiring its own release
+	    - See `doc/Cities-and-Knights-Design.md` for the roadmap and representation decisions; proposed network messages are in the clearly-marked "PROPOSED (design stage, not implemented)" section of `doc/Message-Sequences-for-Game-Actions.md`
 	- AskDialog, NotifyDialog can now render basic html docs (used by WhatsNewInfoDialog)
 	- To help unit tests, SOCGame.initAtServer now calls startGame_setupDevCards
 	- To help unit tests which create games:
@@ -111,6 +148,7 @@ JARs for recent JSettlers versions can be downloaded from
 	    - SOCServer.createOrJoinGame is now public, returning the created or joined SOCGame
 	    - SOCRobotBrain: New `ALWAYS_PAUSE_FASTER` static flag
 	    - SOCNewGameWithOptions(SOCGameOptionSet): Sort options alphabetically
+	    - Bugfix: TestI18NGameoptScenStrings now uses URL.toURI() instead of getPath(), so the test passes when the project path contains spaces or other URL-encoded characters
 	- Gradle 7 compatibility
 	- Gradle build auto-selects `python3` or `python` command to run tests
 	- Removed obsolete `SOCApplet`; you can run `SOCPlayerClient` instead

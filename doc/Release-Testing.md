@@ -246,6 +246,31 @@ Re-test new features of the most recent two releases listed in [Versions.md](Ver
         - When card is played, game might immediately award Largest Army and Hand Panel might show 10 VP
         - Card should fully play out (choose player, etc) before server announces game is over
 
+### Build by left-click and keyboard shortcuts
+
+- Build by left-clicking the board:
+    - During your normal turn (not initial placement), with resources to build, on each of these board layouts:
+        - Classic 4-player board
+        - 6-player board (rotated layout)
+        - Sea board (any scenario, e.g. New Shores)
+    - For each layout, test the build flow and all 3 cancel paths:
+        - Left-click a spot where you can build a road, ship, settlement, or city; should select it and show a confirm prompt in the game text area
+        - Left-click that same spot again; piece should be built (same result as the right-click build menu)
+        - Cancel path 1: Left-click a buildable spot to select it, then press Escape; selection should clear, nothing built
+        - Cancel path 2: Left-click a buildable spot, then right-click; selection should clear, nothing built (the right-click build menu still works as before)
+        - Cancel path 3: Left-click a buildable spot, then left-click a different spot or empty area; selection should clear (or move to the new spot if it's buildable), nothing built at the first spot
+    - Left-click somewhere that isn't a buildable target; should not select anything; the "To build pieces, right-click the build location" hint may appear (up to twice total)
+    - Forgotten Tribe: Left-click to place a ship that would remove a port; should still confirm with the dialog before building
+- Gameplay keyboard shortcuts:
+    - On your turn, with resources to build, verify each shortcut acts the same as its on-screen button (Ctrl on Linux/generic, Cmd on macOS, Alt on Windows):
+        - Ctrl/Cmd-S: Buy/place a Settlement; press again while placing to cancel
+        - Ctrl/Cmd-K: Buy/place a City
+        - Ctrl/Cmd-R: Roll; Ctrl/Cmd-D: Done/End turn (unchanged from previous versions)
+    - In a 4-player (or fewer) game: Ctrl/Cmd-B should Buy a Development Card
+    - In a 6-player game: Ctrl/Cmd-B should request Special Build (not buy a dev card)
+    - Each build shortcut should be a no-op when the action isn't currently legal (wrong game state or not enough resources)
+    - Shortcuts should not fire while typing in the chat box (they require the Ctrl/Cmd/Alt modifier)
+
 ### Undo Build/Move Pieces
 
 - Setup
@@ -507,6 +532,28 @@ Test:
 - Auto-reject bot trade offers:
     - 6-player Practice game: Test UI's trade behavior with and without preference
     - Re-launch client, new practice game, check setting is remembered
+    - Auto-reject countdown layout: With the preference enabled, offer a trade so the bot auto-reject countdown text appears
+        - Countdown text should be on its own line below the Accept/Reject/Counter buttons, never overlapping them
+        - Test at both `-Djsettlers.uiScale=1` and `-Djsettlers.uiScale=2`, and with the trade panel in its narrow (stacked-button) layout
+- Preferences dialog round-trip:
+    - In the client's main panel, click "Preferences..."; dialog should list Sound effects, Auto-reject bot trades, Remembered face icon, Hex graphics set, Force UI scale, Smooth board drawing (antialiasing), Board image scaling quality, Color-blind assist mode, and UI font size
+    - Change each preference to a non-default value and click OK
+    - Re-open Preferences; each changed value should still be shown (changes persisted)
+    - Re-launch client, open Preferences; values should still be the changed ones
+    - Open Preferences, change a value, but Cancel (or close the window); re-open should show the un-changed value
+- Color-blind assist mode:
+    - Open Preferences, set Color-blind assist mode to Deuteranopia, click OK, then re-launch client (mode takes effect after restart or hex-graphics-set reload, not live)
+    - Start a practice game; resource counters, trade dialogs, building costs, dice-number circles, and the pirate-path line should use the remapped palette and read as distinct colors
+    - Repeat for Protanopia and Tritanopia; each mode's colors should be distinguishable
+    - Set back to Off; colors should return to the standard palette
+    - Note: painted hex tile artwork (.gif) is unchanged by this mode; only the solid-color UI is remapped
+- Board rendering quality:
+    - In Preferences, toggle Smooth board drawing (antialiasing) and change Board image scaling quality (Nearest / Bilinear / Bicubic), click OK
+    - Open a new game window or resize the board (these take effect on rescale / newly opened windows); board should redraw with the chosen quality
+- Hex theme.properties fallback:
+    - Locate `resources/hexes/pastel/theme.properties` in the running client's resources (or in the source tree before building)
+    - Edit a color value (`key=RRGGBB`) and reload the hex graphics set or restart; affected element should show the new color
+    - Delete (or rename) the file and restart; board should fall back to the compiled-in default colors with no error
 - Sound: See section "Platform-specific"
 - Remember face icon:
     - For clean first run: Launch client with jvm property `-Djsettlers.debug.clear_prefs=faceIcon`, exit immediately
@@ -1113,6 +1160,28 @@ For details, search [Readme.developer.md](Readme.developer.md) for `gson.jar`
       - Startup should succeed
       - Log in as admin user `adm` or `name2`
       - Should be able to save, load, and resume games
+
+### Custom maps
+
+Setup: Needs `gson.jar` in same directory as server jar (same as the Savegame feature).
+For the file format and details see [Custom-Maps.md](Custom-Maps.md).
+
+- Server startup with a valid map
+    - Pick or make a directory for custom maps; copy `src/main/bin/custommaps/sample-island.map.json` into it
+    - Start server with property `-Djsettlers.custommaps.dir=` set to that directory
+    - Startup should succeed; console should log loading the map and registering its scenario (such as `SC_XSAMP`)
+- Server startup with a deliberately broken map
+    - Copy `sample-island.map.json` to a second file in that directory and edit it to be invalid (e.g. malformed JSON or an out-of-range hex)
+    - Restart the server
+    - Startup should still succeed; the bad file should be skipped with a logged warning, and the valid map should still load
+- Play a game on a custom map, with savegame round-trip
+    - Configure server with both `-Djsettlers.custommaps.dir=` (the maps dir) and `-Djsettlers.savegame.dir=` (a savegame dir), and the debug user enabled
+    - Connect a client, click New Game; the custom map should appear in the Scenario dropdown
+    - Create and start a game using the custom map; board should match the map's layout
+    - Play past initial placement into normal play
+    - As debug user, run `*SAVEGAME* custmap`; should succeed
+    - In another game window, run `*LOADGAME* custmap`, then `*RESUMEGAME*`
+    - Loaded game's board should match, and play should resume normally
 
 ### Command line and jsserver.properties
 
