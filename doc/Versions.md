@@ -103,6 +103,11 @@ JARs for recent JSettlers versions can be downloaded from
 	    - v1 is standard rules only on the sea board with the standard 10-VP win condition; a custom map changes only the board (land hexes, dice numbers, ports, land areas, optional robber/pirate start, optional shuffle flag), not the game rules
 	    - Invalid maps are skipped with a logged warning (not fatal); if two files' first 4 filename alphanumerics collide, the second is skipped
 	    - File-format reference, a sample walkthrough, naming/collision rules, and what is and isn't validated are in `doc/Custom-Maps.md`; shipped example is `src/main/bin/custommaps/sample-island.map.json`
+	- Optional WebSocket listener for the new web client, off by default
+	    - Enable with server property `jsettlers.websocket.port` (a port number); runs alongside the existing TCP listener, which is unchanged
+	    - Additive only: each WebSocket text frame carries exactly one `SOCMessage.toCmd()` string (no `writeUTF` length prefix; WebSocket provides its own framing), so the server speaks the same protocol over both transports. Connections integrate via new `WebSocketServerBridge`/`WebSocketConnection` in `soc.server.genericServer`
+	    - Requires the `Java-WebSocket` jar (and its `slf4j-api`) on the classpath, listed in the server jar's `Class-Path`; a WebSocket start failure (e.g. port in use) is logged and never stops the TCP server
+	    - See the new web client under `web/` and `web/docs/ARCHITECTURE.md`
 - Network/Message traffic:
 	- When client is this version or newer:
 	    - Client is sent every game's list of options; previous versions omitted options of any unjoinable game
@@ -138,6 +143,10 @@ JARs for recent JSettlers versions can be downloaded from
 	    - All `_CK_*` options and `_SC_CK` are inactive-hidden, never appearing in the New Game UI; they can only be exercised by activating them at server startup via `jsettlers.gameopts.activate=...`
 	    - The barbarian counter advances per rollDice() call when `_CK_BARB` is set; attack resolution is a log-only stub until later phases. The commodity (cloth/coin/paper 6th resource) refactor is the structural blocker requiring its own release
 	    - See `doc/Cities-and-Knights-Design.md` for the roadmap and representation decisions; proposed network messages are in the clearly-marked "PROPOSED (design stage, not implemented)" section of `doc/Message-Sequences-for-Game-Actions.md`
+	- Web client (in development): a TypeScript/React/SVG front end under `web/` that speaks the `SOCMessage` protocol to `SOCServer` over the new WebSocket listener (above)
+	    - A working vertical slice, not yet at parity with the Swing client: connect, lobby (create/sit/start vs bots), a playable sea-board game (placement/roll/build/trade/dev-cards/robber/discard/game-over), a Settings panel, and a standalone Map Editor with a real `CustomMapValidator` round-trip; sea board only, no scenario-specific UI or chat input
+	    - Has its own Vitest unit tests (protocol round-trips, board math, store reducers) and Playwright E2E specs that run against a live server with bots
+	    - See `web/README.md` (how to run/test it), `web/docs/ARCHITECTURE.md` (client/server design), and `web/docs/protocol.md` (ported-message reference)
 	- AskDialog, NotifyDialog can now render basic html docs (used by WhatsNewInfoDialog)
 	- To help unit tests, SOCGame.initAtServer now calls startGame_setupDevCards
 	- To help unit tests which create games:

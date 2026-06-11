@@ -379,3 +379,98 @@ These are stated plainly so nobody is surprised later.
   sequences, including the PROPOSED (not implemented) C&K section.
 - [doc/Versions.md](Versions.md) — changelog; the client/UX items above belong under the
   `2.7.00` notes.
+
+
+## 6. Web client migration (TypeScript/React over WebSocket)
+
+A separate, later strand of this initiative replaced *only* the Java Swing client with a
+new web client under `web/`. The Java server, game model, robots, scenarios, and the
+custom-map loader are unchanged and remain authoritative; the Swing client still works.
+The web client speaks the existing `soc.message.SOCMessage` protocol to `SOCServer` over a
+new **additive WebSocket listener**. As elsewhere in this document, claims below are
+verifiable in the repository, and where something is a vertical slice, partial, or deferred
+it is said plainly.
+
+This work landed in a series of phase commits on `main` (`15f3fec`, `9003fdf`, `90f0d90`,
+`6c5dcde`, `ab409b8`, `562430e`, `1b38538`, `5c2d712`), separate from the four-commit
+Swing/server initiative summarized in section 1.
+
+### 6.1 The seven phases
+
+| Phase | Scope |
+| ----- | ----- |
+| 1 | Web client foundation + Java WebSocket transport (handshake, protocol codec core, connect screen) |
+| 2 | Lobby & game setup: game list, New Game dialog with option/scenario discovery, create/sit/lock/start vs bots |
+| 3 | In-game core loop: decode `SOCBoardLayout2`, render the SVG sea board, drive initial placement and the dice roll |
+| 4 | Full interactions: trading (bank/port + player offers), dev cards, robber/pirate, discard, game-over; Settings panel |
+| 5 | Standalone web Map Editor with live validation and a real Java `CustomMapValidator` round-trip |
+| 6 | Visual polish: board art, animations, responsive chrome, themes/color-blind/sound/font settings |
+| 7 | Playwright E2E suite + documentation (this section, `web/README.md`, `web/docs/ARCHITECTURE.md`) |
+
+### 6.2 Architecture (verifiable)
+
+- **Transport (additive, server-side).** New `WebSocketConnection` and
+  `WebSocketServerBridge` in `soc.server.genericServer` (package-private access to the
+  server internals) bridge `org.java-websocket` sockets into the existing `Server`. The
+  defining decision: **each WebSocket text frame carries exactly one raw
+  `SOCMessage.toCmd()` string — no `writeUTF` length prefix** (WebSocket provides framing),
+  so the server speaks the same protocol over TCP and WebSocket. `SOCServer` starts the
+  listener only when `jsettlers.websocket.port` is set; a start failure is logged and never
+  stops the TCP server. `Server.java`/`Connection.java`/`NetConnection.java` are untouched.
+  - Key files: `src/main/java/soc/server/genericServer/WebSocketConnection.java`,
+    `…/WebSocketServerBridge.java`, the wiring + `PROP_JSETTLERS_WEBSOCKET_PORT` in
+    `src/main/java/soc/server/SOCServer.java`, and the `Java-WebSocket` dependency +
+    `runServer` task in `build.gradle`.
+- **Client (`web/`).** TypeScript (strict) · React 18 · Vite · SVG board · Zustand · CSS
+  custom-property theming. A pure-TS protocol codec (~67 `SOCMessage` modules under
+  `web/src/protocol/`, each documenting its Java source class and reproducing
+  `toCmd()`/`parseDataStr()` faithfully); a `GameConnection` WebSocket wrapper
+  (`web/src/net/`) that performs the version/feature handshake and dispatches decoded
+  messages; a `gameStore` (`web/src/store/`) that reduces messages into UI state and sends
+  player actions; an SVG sea-board renderer (`web/src/board/`) using the `SOCBoardLarge`
+  `0xRRCC` coordinates and pixel geometry ported from `SOCBoardPanel`.
+  - The design is documented in `web/docs/ARCHITECTURE.md`; the message-by-message wire
+    reference (with documented format subtleties) is in `web/docs/protocol.md`.
+
+### 6.3 What works and is Playwright-proven
+
+The Vitest unit suite (34 test files) covers the protocol codec — every ported message has
+an encode→decode→encode round-trip plus known-wire-string fixtures, many cross-checked
+byte-for-byte against the live Java server — the board coordinate math, and the store
+reducers/components.
+
+The Playwright E2E specs (`web/e2e/`) run against a **live Java server with bots** (started
+by `web/scripts/start-test-server.sh`: TCP 8881, WS 8888, 7 bots, `debug` user). They prove,
+end to end:
+
+- connect over WebSocket and reach the lobby (`connectivity.spec.ts`);
+- create a 4-player game, sit, start, and get three bots seated (`lobby.spec.ts`);
+- a sea-board (`SBL=t`) game: drive a full human initial placement (2 settlements + 2 roads)
+  and complete a normal dice roll (`game.spec.ts`);
+- a turn of interactions — 4:1 bank trade, buy a dev card, play Knight + move the robber,
+  using the `debug` user for deterministic setup (`interactions.spec.ts`);
+- the Map Editor: load the sample map, validate live, make a valid edit, export `.map.json`,
+  and have a duplicate-coordinate edit flagged invalid (`map-editor.spec.ts`).
+
+The map-editor export is additionally checked through the **real Java validator** via
+`web/scripts/validate-map.sh`, which runs `soc.server.CustomMapLoader`/`CustomMapValidator`
+— the same code the live server uses.
+
+### 6.4 Honest limitations / not yet at parity with the Swing client
+
+- **Sea board only.** The renderer targets `SOCBoardLarge`; the classic hexagonal 4-player
+  board's coordinate system is not rendered.
+- **No scenario-specific rules/UI.** Scenarios are discoverable and selectable in the New
+  Game dialog (so the server may apply them), but there is no client UI for scenario
+  mechanics (fog hexes, gift ports, special items, cloth, Cities & Knights).
+- **No human chat.** The in-game panel is a read-only log; the only outbound text path is the
+  `debug` command sender the tests use. No lobby/channel chat.
+- **No accounts/persistence, no reconnect-into-running-game, no board-reset flow, no
+  game-stats/timing dialogs, no 6-player special-build UI, no web-UI i18n, and only partial
+  keyboard support.** A single connection and single game at a time in the UI.
+- **E2E depends on a manually-started Java server** (Playwright serves only the web app) and
+  on macOS/Homebrew paths in the helper scripts (`/opt/homebrew/opt/openjdk@17`); the
+  defaults are overridable via flags/env.
+
+The Java Swing client remains the full-featured, supported client; this web client is the
+in-development alternative front end.
