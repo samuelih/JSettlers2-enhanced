@@ -1,0 +1,217 @@
+/**
+ * Java Settlers - An online multiplayer version of the game Settlers of Catan
+ * This file Copyright (C) 2026 Jeremy D Monin <jeremy@nand.net>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * The maintainer of this program can be reached at jsettlers@nand.net
+ **/
+package soc.client;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+
+/**
+ * Show what's new in JSettlers: brief release notes for current and recent releases,
+ * based on github releases and doc/Versions.md.
+ * @since 2.7.00
+ */
+@SuppressWarnings("serial")
+public class WhatsNewInfoDialog extends NotifyDialog
+{
+    // TODO allow text selecton
+    // TODO can we make URLs clickable?
+
+    /**
+     * Release notes directory path within our jar: {@code "/resources/releaseNotes"}.
+     */
+    public final static String RELNOTES_RSRC_DIR_PATH = "/resources/releaseNotes";
+
+    /**
+     * Creates and shows a new WhatsNewInfoDialog.
+     *<P>
+     * Assumes currently running on AWT event thread.
+     *
+     * @param cli  Player client; not null, {@link SOCPlayerClient#getMainDisplay() cli.getMainDisplay()} not null
+     * @throws NullPointerException  if cli is null
+     * @throws IllegalArgumentException  if {@link SOCPlayerClient#getMainDisplay()} is null
+     */
+    public static void createAndShow(SOCPlayerClient cli)
+        throws NullPointerException, IllegalArgumentException
+    {
+        new WhatsNewInfoDialog(cli).setVisible(true);  // constructor checks for null cli, mainDisplay
+    }
+
+    /**
+     * Creates a new WhatsNewInfoDialog.
+     *
+     * @param cli  Player client; not null, {@link SOCPlayerClient#getMainDisplay() cli.getMainDisplay()} not null
+     * @throws NullPointerException  if cli is null
+     * @throws IllegalArgumentException  if {@link SOCPlayerClient#getMainDisplay()} is null
+     */
+    private WhatsNewInfoDialog(SOCPlayerClient cli)
+        throws NullPointerException, IllegalArgumentException
+    {
+        super(cli.getMainDisplay(), null, buildHTML(cli), null, true);  // super checks for null mainDisplay
+        setModal(false);
+        setTitle(strings.get("dialog.whatsnew.title"));  // "What's New: Recent Versions of JSettlers"
+    }
+
+    /**
+     * Build the body text HTML; called by constructor.
+     * Embeds some newlines so our superclass sets up to show a multi-line string.
+     * 
+     * @param cli  Player client, to retrieve info; not null
+     * @return text to show
+     */
+    private static String buildHTML(final SOCPlayerClient cli)
+    {
+        StringBuilder sb = new StringBuilder("<html><body>\n<H3>");
+        sb.append(strings.get("dialog.whatsnew.title"));  // "What's New: Recent Versions of JSettlers"
+        sb.append("</H3>\n");
+
+        try
+        {
+            ReleaseNotesFromDirectory rv = new ReleaseNotesFromDirectory(RELNOTES_RSRC_DIR_PATH);
+
+            for (String fname : rv.notesHTML.descendingKeySet())
+            {
+                if (fname.charAt(0) != 'v')
+                    continue;
+                sb.append(rv.notesHTML.get(fname));
+            }
+            if (rv.notesHTML.containsKey("footer.html"))
+                sb.append(rv.notesHTML.get("footer.html"));
+
+        } catch (IOException e) {
+            sb.append("Unexpected error:<BR>Cannot read release notes within JAR:<BR>");
+            sb.append(e.toString());
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Reads all notes files in a given resource directory.
+     * Constructor collects them into {@link #notesHTML}.
+     */
+    public static class ReleaseNotesFromDirectory
+    {
+        /**
+         * Size (chars) of the buffer used while reading into notesHTML.
+         * This is public for use in a unit test.
+         */
+        public static final int BUFFER_SIZE = 2048;
+
+        /**
+         * HTML text resource contents read during constructor.
+         * Keys are {@code *.html} filenames in the constructor's dirPath: {@code "v2610.html"}, {@code "footer.html"}, etc.
+         * To iterate from newest to oldest versions, use {@link TreeMap#descendingKeySet()}.
+         * Values are the file contents, read as UTF-8.
+         */
+        public final TreeMap<String, String> notesHTML = new TreeMap<>();
+
+        /**
+         * Read resource contents into a new ReleaseNotesFromDirectory.
+         * Reads into {@link #notesHTML}; see that field for structure of loaded data.
+         * @param resDirPath  Resource directory path to read, within our jar or classpath
+         * @throws IOException if {@code resDirPath} not found, not a directory, or not readable
+         */
+        public ReleaseNotesFromDirectory(final String resDirPath)
+            throws IOException
+        {
+            // Scan that dir path for *.html filenames:
+            {
+                final URI dirUri;
+                try
+                {
+                    URL dirUrl = getClass().getResource(resDirPath);
+                    if (dirUrl == null)
+                        throw new FileNotFoundException("Path not found: " + resDirPath);
+                    dirUri = dirUrl.toURI();
+                } catch (URISyntaxException e) {
+                    throw new IOException("URISyntaxException for path", e);  // unlikely to occur
+                }
+
+                if ("jar".equals(dirUri.getScheme()))
+                {
+                    try (FileSystem fileSystem = FileSystems.newFileSystem(dirUri, Collections.emptyMap()))
+                    {
+                        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(fileSystem.getPath(resDirPath)))
+                        {
+                            for (Path dirEntry : dirStream)
+                            {
+                                String fname = dirEntry.getFileName().toString();
+                                if (fname.toLowerCase(Locale.US).endsWith(".html"))
+                                    notesHTML.put(fname, "");
+                            }
+                        }
+                        // if not a dir, throws NotDirectoryException with detail text containing resDirPath;
+                        // we don't need to catch and re-throw
+                    }
+                }
+                else if ("file".equals(dirUri.getScheme()))  // probably running in an IDE
+                {
+                    File dirFile = new File(dirUri);
+                    if (! dirFile.isDirectory())
+                        throw new IOException("Not a directory: " + resDirPath);
+
+                    for (String fname : dirFile.list())
+                        if (fname.toLowerCase(Locale.US).endsWith(".html"))
+                            notesHTML.put(fname, "");
+                }
+            }
+
+            // Now read their contents:
+            final char[] buffer = new char[BUFFER_SIZE];
+            final StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> entry : notesHTML.entrySet())
+            {
+                final String fname = entry.getKey();
+
+                try (InputStream ins = getClass().getResourceAsStream(resDirPath + "/" + fname))
+                {
+                    if (ins == null)
+                        entry.setValue("(cannot read " + fname + ")");
+                    else
+                        try (InputStreamReader insr = new InputStreamReader(ins, StandardCharsets.UTF_8))
+                        {
+                            sb.delete(0, sb.length());
+                            for (int numRead; (numRead = insr.read(buffer, 0, buffer.length)) > 0; )
+                                sb.append(buffer, 0, numRead);
+
+                            entry.setValue(sb.toString());
+                        }
+                }
+            }
+        }
+    }
+
+}

@@ -1,0 +1,49 @@
+<H4>2.5.00 (2021-12-30)</H4>
+<UL>
+<li> Gameplay:
+   <ul>
+        <li> Road Building: If player cancels placement or ends turn before placing the first free road or ship,
+	  the dev card is returned to their hand
+        <li> When a trade is offered to bots and humans, bots wait longer before responding.
+	  Was 3 seconds, is now 8, changeable with server property <tt>jsettlers.bot.human.pause</tt>
+	  (thank you Lee Passey)
+        <li> Recalc Longest Route when building coastal settlement to connect a player's roads to ships
+	  (thanks kotc for reporting issue #95)
+        <li> Pirate Islands scenario: Ship placement:
+	  Fix client bug where placing a coastal ship next to a road would prevent any further ship building,
+	  based on "no branches in route" rule
+   </ul>
+<li> I18N:
+   <ul>
+        <li> Added French translation (thank you Lee Passey)
+   </ul>
+<li> Client:
+   <ul>
+     <li> Game window:
+        <ul>
+        <li> Added hotkey Ctrl-B/Alt-B/Cmd-B to ask to Special Build in 6-player game
+        <li> Discards: List resources you discarded, not just total amount, in game action textarea
+        <li> Forgotten Tribe scenario: Much less flicker while placing gift ports
+        </ul>
+     <li> New Game dialog: 
+        <ul>
+        <li> If server has increased default VP to win, use that as minimum when picking a scenario
+        </ul> 
+     <li> If client starts a TCP server, keep it running;
+	previous versions timed out after being idle an hour (thanks kotc for reporting issue #81)
+     <li> Linux/Unix: Use sub-pixel font antialiasing if available (thanks kotc for issue #92)
+   </ul>
+<li> Bots/AI:
+   <ul>
+        <li> Shorten pause after bot requests a bank trade
+   </ul>
+<li> Server:
+   <ul>
+        <li> During game reset, don't send chat recap: Chat text is still in clients' game windows
+        <li> If default VP is set on command line or properties, will also be minimum VP for any scenario
+        <li> Other server changes: see
+	<a href="https://github.com/jdmonin/JSettlers2/blob/main/doc/Versions.md"><tt>Versions.md</tt></a>
+   </ul>
+  <LI> Other changes: see
+	<a href="https://github.com/jdmonin/JSettlers2/blob/main/doc/Versions.md"><tt>Versions.md</tt></a>
+</UL>

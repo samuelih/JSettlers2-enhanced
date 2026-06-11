@@ -1,0 +1,50 @@
+<H4>2.7.00</H4>
+<UL>
+<li> Gameplay:
+  <ul>
+  <li> Player can cancel Monopoly, Year of Plenty cards while choosing resources,
+	or Knight card while moving the robber or pirate
+    <ul>
+    <li> Dev card is returned to their hand
+    <li> That player's client must be v2.7.00 or newer
+    </ul>
+  <li> New optional house rule: Allow undo building and moving pieces (client v2.7.00 or newer)
+    <ul>
+    <li> Is on by default when client and server both support the option
+    <li> Builds/moves which reveal fog hexes can't be undone,
+	so players can't peek to choose the best hex
+    </ul>
+  </ul>
+<li> I18N:
+  <ul>
+  <li> Added German translation (thank you Eudoxia and Quasigroup)
+  <li> Updated Polish translation (thank you KotCzarny)
+  </ul>
+<li> Client:
+  <ul>
+  <li> Game window:
+    <ul>
+    <li> For visibility when a player builds, highlight most recently placed piece until end of their turn
+    <li> Bank/port trade: Bugfix: After making a trade, if player wants to undo that trade
+	but accidentally clicks "Bank/Port" instead of "Undo", couldn't then click Undo
+    <li> Road Building: Confirm when player skips (cancels) placing second free road or ship
+    <li> Statistics dialog shows player's resource rolls and trades
+    </ul>
+  <li> Main window:
+    <ul>
+    <li> Version info is underlined; click to show new "About JSettlers" dialog
+    <li> "What's New" info can be shown from About dialog
+    </ul>
+  </ul>
+<li> Server:
+  <ul>
+  <li> Bugfix: If player cancels Road Building with Cancel Ship button,
+	server now allows playing another card
+  <li> Send a message to idle clients every few minutes,
+	so their ISP or NAT doesn't disconnect them from games
+  <li> New <tt>*MUTE*</tt> and <tt>*UNMUTE*</tt> commands for game's creator or admin
+	to manage that game's chat with players and observers
+  </ul>
+<li> Other changes: see
+	<a href="https://github.com/jdmonin/JSettlers2/blob/release-2.7.00/doc/Versions.md"><tt>Versions.md</tt></a>
+</UL>
