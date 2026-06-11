@@ -3301,8 +3301,9 @@ public class SOCRobotBrain extends Thread
      * strategy here. If a new scenario can put the bot into {@link SOCGame#PLACING_INV_ITEM} with a
      * different item, the built-in bot has no strategy for it; rather than hang until the server
      * force-ends the turn, this method falls back gracefully via {@link #fallbackUnknownInvItemPlacement(SOCInventoryItem)}:
-     * it cancels the placement when the item allows it (returning to {@link SOCGame#PLAY1 PLAY1}
-     * so the bot can keep playing), otherwise it ends the turn cleanly. To add real placement logic
+     * it asks the server to cancel the placement (returning to {@link SOCGame#PLAY1 PLAY1}
+     * so the bot can keep playing); if the item's placement can't be canceled, the bot waits for
+     * the server's turn timer to force-end the turn. To add real placement logic
      * for a new scenario, add a branch here calling a new {@code planAndPlaceInvItemPlacement_*} helper
      * before that fallback is reached.
      *
@@ -3335,15 +3336,21 @@ public class SOCRobotBrain extends Thread
      * Graceful fallback when the bot is in {@link SOCGame#PLACING_INV_ITEM} for an item it has no
      * planning strategy for (a scenario added after this bot was written).
      * Rather than leave the bot idle until the server force-ends its turn, this keeps the game moving:
-     *<OL>
-     * <LI> If the item can be canceled ({@link SOCInventoryItem#canCancelPlay itm.canCancelPlay}),
-     *      send a {@link SOCCancelBuildRequest#INV_ITEM_PLACE_CANCEL} so the server returns the item
-     *      to inventory and sets state back to {@link SOCGame#PLAY1 PLAY1}; the bot then re-plans normally.
-     * <LI> Otherwise (or if no item is known) end the bot's turn cleanly, the same way other
-     *      unrecoverable mid-turn states do.
-     *</OL>
-     * Either branch sets {@link #waitingForGameState} so the run loop waits for the resulting
-     * game-state message instead of taking further actions this pass.
+     * Sends a {@link SOCCancelBuildRequest#INV_ITEM_PLACE_CANCEL} so the server returns the item
+     * to inventory and sets state back to {@link SOCGame#PLAY1 PLAY1}; the bot then re-plans normally.
+     * Sets {@link #waitingForGameState} so the run loop waits for the resulting game-state message
+     * instead of taking further actions this pass.
+     *<P>
+     * The cancel is attempted even if ! {@link SOCInventoryItem#canCancelPlay itm.canCancelPlay}:
+     * the server checks that flag itself, and if it refuses, replies with a decline (whose handler
+     * {@link #handleDECLINEPLAYERREQUEST(SOCDeclinePlayerRequest)} resets the bot's expect flags);
+     * the bot then waits quietly until the server's turn timer force-ends the turn, which returns
+     * the item via {@link SOCGame#cancelPlaceInventoryItem(boolean) cancelPlaceInventoryItem(true)}.
+     * The bot can't end the turn itself here: {@link SOCGame#canEndTurn(int)} is false in
+     * {@code PLACING_INV_ITEM}, so the server would reject an end-turn request.
+     *<P>
+     * If {@code itm} is {@code null}, does nothing; the server force-ends the turn as above.
+     *<P>
      * Called only from {@link #planAndPlaceInvItem()}; see its required call conditions.
      *
      * @param itm  The item the bot was asked to place, or {@code null} if unknown
@@ -3351,23 +3358,20 @@ public class SOCRobotBrain extends Thread
      */
     protected void fallbackUnknownInvItemPlacement(final SOCInventoryItem itm)
     {
-        if ((itm != null) && itm.canCancelPlay)
+        if (itm == null)
         {
-            // Cancel placement: server returns item to inventory and sets state back to PLAY1,
-            // then the run loop can re-plan. Mirrors the cancel-and-wait pattern used elsewhere
-            // (see cancelWrongPiecePlacement).
-            waitingForGameState = true;
-            expectPLAY1 = true;
-            counter = 0;
-            rejectedPlayInvItem = itm;  // don't re-plan this same item again this turn
-            client.cancelBuildRequest(game, SOCCancelBuildRequest.INV_ITEM_PLACE_CANCEL);
-        } else {
-            // Can't cancel this item's placement; end our turn cleanly so the server doesn't
-            // have to wait and force-end it. Reset method sets waitingForGameState, which will
-            // bypass any further actions in the run() loop body.
-            resetFieldsAtEndTurn();
-            client.endTurn(game);
+            return;  // <--- Early return: no item known to cancel; server will force-end the turn ---
         }
+
+        // Cancel placement: server returns item to inventory and sets state back to PLAY1,
+        // then the run loop can re-plan. Mirrors the cancel-and-wait pattern used elsewhere
+        // (see cancelWrongPiecePlacement). If the server refuses (item not cancelable), its
+        // decline reply resets our expect flags and the turn is eventually force-ended.
+        waitingForGameState = true;
+        expectPLAY1 = true;
+        counter = 0;
+        rejectedPlayInvItem = itm;  // don't re-plan this same item again this turn
+        client.cancelBuildRequest(game, SOCCancelBuildRequest.INV_ITEM_PLACE_CANCEL);
     }
 
     /**

@@ -46,8 +46,9 @@ import soc.server.CustomMapLoader.PortJson;
  *     and on a valid (odd) hex row
  *<LI> no duplicate land hex coordinates
  *<LI> dice numbers in 2..12 excluding 7; deserts and water have no dice number
- *<LI> ports: recognized type, recognized facing, edge within board range, facing geometrically valid for the
- *     edge, and the port faces a declared land hex (reuses the same facing-vs-edge geometry as built-in scenarios)
+ *<LI> ports: recognized type, recognized facing, edge within board range, no duplicate port edges,
+ *     facing geometrically valid for the edge, and the port faces a declared non-water land hex
+ *     (reuses the same facing-vs-edge geometry as built-in scenarios)
  *<LI> land-area ranges (if given) sum to the number of land hexes; land-area numbers are positive and unique
  *<LI> robber/pirate start hexes (if given) name a declared land hex
  *</UL>
@@ -126,6 +127,8 @@ public class CustomMapValidator
         final int[] landHexCoord = new int[nHex];
         final List<Integer> numberList = new ArrayList<Integer>();
         final Set<Integer> seenCoords = new HashSet<Integer>();
+        final Set<Integer> seenNonWaterCoords = new HashSet<Integer>();
+            // subset of seenCoords for checkPortFacesLand: ports must face an actual land hex, not declared water
 
         for (int i = 0; i < nHex; ++i)
         {
@@ -141,6 +144,8 @@ public class CustomMapValidator
                 throw new CustomMapException
                     ("duplicate hex coordinate 0x" + Integer.toHexString(coord)
                      + " at landHexes[" + i + "]");
+            if (type != SOCBoard.WATER_HEX)
+                seenNonWaterCoords.add(Integer.valueOf(coord));
 
             landHexType[i] = type;
             landHexCoord[i] = coord;
@@ -237,6 +242,7 @@ public class CustomMapValidator
             final int nPort = raw.ports.length;
             portType = new int[nPort];
             portEdgeFacing = new int[2 * nPort];
+            final Set<Integer> seenEdges = new HashSet<Integer>();
             for (int i = 0; i < nPort; ++i)
             {
                 final PortJson p = raw.ports[i];
@@ -246,9 +252,12 @@ public class CustomMapValidator
                 final int ptype = parsePortType(p.type, i);
                 final int edge = parseCoord(p.edge, "ports[" + i + "].edge");
                 checkEdgeCoordInRange(edge, "ports[" + i + "].edge");
+                if (! seenEdges.add(Integer.valueOf(edge)))
+                    throw new CustomMapException
+                        ("duplicate port edge 0x" + Integer.toHexString(edge) + " at ports[" + i + "]");
                 final int facing = parseFacing(p.facing, i);
                 checkPortFacingGeometry(edge, facing, i);
-                checkPortFacesLand(edge, facing, seenCoords, i);
+                checkPortFacesLand(edge, facing, seenNonWaterCoords, i);
 
                 portType[i] = ptype;
                 portEdgeFacing[2 * i] = edge;
@@ -481,19 +490,19 @@ public class CustomMapValidator
      * with a non-water type.
      * @param edge  Edge coordinate 0xRRCC
      * @param facing  FACING_ constant (already validated by {@link #checkPortFacingGeometry(int, int, int)})
-     * @param declaredCoords  Set of all declared land hex coordinates
+     * @param declaredNonWaterCoords  Set of declared land hex coordinates whose type isn't water
      * @param idx  ports index, for the error message
-     * @throws CustomMapException if the faced hex isn't a declared land hex
+     * @throws CustomMapException if the faced hex isn't a declared non-water land hex
      */
     private static void checkPortFacesLand
-        (final int edge, final int facing, final Set<Integer> declaredCoords, final int idx)
+        (final int edge, final int facing, final Set<Integer> declaredNonWaterCoords, final int idx)
         throws CustomMapException
     {
         final int landHex = adjacentHexToEdge(edge, facing);
-        if ((landHex == 0) || ! declaredCoords.contains(Integer.valueOf(landHex)))
+        if ((landHex == 0) || ! declaredNonWaterCoords.contains(Integer.valueOf(landHex)))
             throw new CustomMapException
                 ("ports[" + idx + "] edge 0x" + Integer.toHexString(edge)
-                 + " facing " + facing + " doesn't face a declared land hex"
+                 + " facing " + facing + " doesn't face a declared non-water land hex"
                  + " (computed hex 0x" + Integer.toHexString(landHex) + ")");
     }
 

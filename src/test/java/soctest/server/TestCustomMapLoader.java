@@ -333,7 +333,43 @@ public class TestCustomMapLoader
             ("{ \"name\": \"x\", \"playerCounts\": [4], \"landHexes\": [\n"
              + "  { \"type\": \"clay\", \"coord\": \"0x0309\", \"diceNum\": 5 } ],\n"
              + "  \"ports\": [ { \"type\": \"misc\", \"edge\": \"0x0807\", \"facing\": \"SE\" } ] }",
-             "doesn't face a declared land hex");
+             "doesn't face a declared non-water land hex");
+    }
+
+    /**
+     * Port that faces a declared hex whose type is water fails:
+     * the actual board layout would place WATER_HEX there, and game creation would
+     * throw from {@code SOCBoardAtServer.makeNewBoard_checkPortLocationsConsistent}.
+     * @since 2.7.00
+     */
+    @Test
+    public void testPortFacesDeclaredWaterHex()
+        throws IOException
+    {
+        // edge 0x0807 facing SE points at hex 0x0908, declared here but typed water
+        expectValidationFailure
+            ("{ \"name\": \"x\", \"playerCounts\": [4], \"landHexes\": [\n"
+             + "  { \"type\": \"clay\", \"coord\": \"0x0309\", \"diceNum\": 5 },\n"
+             + "  { \"type\": \"water\", \"coord\": \"0x0908\" } ],\n"
+             + "  \"ports\": [ { \"type\": \"misc\", \"edge\": \"0x0807\", \"facing\": \"SE\" } ] }",
+             "doesn't face a declared non-water land hex");
+    }
+
+    /**
+     * Two ports declared at the same edge coordinate fails:
+     * the second would silently overwrite the first in {@code nodeIDtoPortType} at board setup.
+     * @since 2.7.00
+     */
+    @Test
+    public void testDuplicatePortEdge()
+        throws IOException
+    {
+        expectValidationFailure
+            ("{ \"name\": \"x\", \"playerCounts\": [4], \"landHexes\": [\n"
+             + "  { \"type\": \"clay\", \"coord\": \"0x0908\", \"diceNum\": 5 } ],\n"
+             + "  \"ports\": [ { \"type\": \"misc\", \"edge\": \"0x0807\", \"facing\": \"SE\" },\n"
+             + "               { \"type\": \"wood\", \"edge\": \"0x0807\", \"facing\": \"SE\" } ] }",
+             "duplicate port edge");
     }
 
     /** Robber hex that isn't a declared land hex fails. */

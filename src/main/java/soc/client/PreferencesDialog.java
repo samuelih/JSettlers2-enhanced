@@ -61,7 +61,8 @@ import soc.util.SOCStringManager;
  *<P>
  * Some preferences (board rendering quality, UI font size, UI scale) take effect only for
  * newly created windows or after a restart; this dialog persists them but doesn't re-render
- * existing windows.
+ * existing windows. The hex graphics set takes effect immediately, reloading the board
+ * graphics of any open games via {@link SOCPlayerClient#reloadBoardGraphics()}.
  *
  * @since 2.7.00
  */
@@ -73,6 +74,13 @@ public class PreferencesDialog extends JDialog
      * i18n text strings; uses same locale as {@link SOCStringManager#getClientManager()}.
      */
     private static final SOCStringManager strings = SOCStringManager.getClientManager();
+
+    /**
+     * Main display, for {@link MainDisplay#getClient()} when a changed preference
+     * (such as the hex graphics set) must take effect immediately.
+     * @since 2.7.00
+     */
+    private final MainDisplay mainDisplay;
 
     /**
      * Display scaling factor (1 if not high-DPI), used for padding/insets.
@@ -125,6 +133,7 @@ public class PreferencesDialog extends JDialog
         if (md == null)
             throw new IllegalArgumentException("md");
 
+        mainDisplay = md;
         displayScale = md.getDisplayScaleFactor();
         descriptors = UserPreferences.getRegisteredPreferences();
         editors = new ArrayList<JComponent>(descriptors.size());
@@ -352,7 +361,13 @@ public class PreferencesDialog extends JDialog
                     {
                         final String newChoice = pd.choices[selIdx];
                         if (! newChoice.equals(pd.getCurrentChoice()))
+                        {
                             pd.putCurrentChoice(newChoice);
+
+                            if (PreferenceDescriptor.KEY_HEX_GRAPHICS_SET.equals(pd.key))
+                                mainDisplay.getClient().reloadBoardGraphics();
+                                    // refresh all current PIs, like NewGameOptionsFrame does
+                        }
                     }
                 }
                 break;

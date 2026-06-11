@@ -7387,6 +7387,16 @@ import javax.swing.KeyStroke;
                     }
                 }
             }
+            else if ((mode == NONE) && (leftClickBuildTarget != 0)
+                && ((evt.getButton() & MouseEvent.BUTTON1) != 0))
+            {
+                // Left-clicked a non-hoverable spot (board margin, between hexes, etc)
+                // with a target pending: cancel back to normal, same as the
+                // clicked-elsewhere branch above when the hover tip is visible.
+                clearLeftClickBuildTarget();
+                evt.consume();
+                return;  // <--- Canceled pending left-click build target ---
+            }
 
             if ((hilight != 0) && (player != null) && (x == ptrOldX) && (y == ptrOldY))
             {
