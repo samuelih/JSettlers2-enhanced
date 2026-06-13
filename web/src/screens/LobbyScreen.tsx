@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Button, Panel, Spinner, useToast } from '../components';
 import { NewGameDialog, type NewGameScenario } from '../components/newgame';
-import type { GameOptionDescriptor } from '../protocol';
+import type { GameOptionDescriptor, ScenarioDetails } from '../protocol';
 import {
+  STANDARD_SCENARIO_KEYS,
   createGame,
   joinGame as joinGameAction,
   requestGameOptions,
@@ -31,6 +32,101 @@ function dialogOptions(
         o.optType !== 'unknown',
     )
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+}
+
+const BASE_EXPANSION: NewGameScenario = {
+  key: '',
+  desc: 'Standard Catan',
+  group: 'Base game',
+  meta: 'Base game',
+  details: 'Classic land board with the standard rule set.',
+};
+
+const EXPANSION_GROUP_ORDER: Record<string, number> = {
+  'Base game': 0,
+  Seafarers: 1,
+  'Cities & Knights': 2,
+  'Custom maps': 3,
+  Scenarios: 4,
+};
+
+/** Classify a server scenario into a New Game expansion group. */
+function scenarioGroup(sc: ScenarioDetails): string {
+  if (sc.key.startsWith('SC_X')) {
+    return 'Custom maps';
+  }
+  if (sc.key === 'SC_CK' || sc.opts.includes('_CK_')) {
+    return 'Cities & Knights';
+  }
+  if (sc.opts.includes('SBL=t')) {
+    return 'Seafarers';
+  }
+  return 'Scenarios';
+}
+
+/** Build concise metadata for the selected-expansion summary. */
+function scenarioMeta(sc: ScenarioDetails, group: string): string {
+  return sc.key.startsWith('SC_X') ? `${group} · ${sc.key}` : group;
+}
+
+/** Pick a compact description for the selected-expansion summary. */
+function scenarioDetails(sc: ScenarioDetails, group: string): string {
+  if (sc.longDesc != null && sc.longDesc !== '') {
+    return sc.longDesc;
+  }
+  if (group === 'Cities & Knights') {
+    return 'Adds commodities, city improvements, progress cards, knights, and barbarian attacks.';
+  }
+  if (group === 'Seafarers') {
+    return 'Adds the sea board, ships, islands, and scenario-specific victory goals.';
+  }
+  if (group === 'Custom maps') {
+    return 'Server-provided custom map scenario.';
+  }
+  return 'Scenario-specific setup and rules.';
+}
+
+/** Stable sort for built-in scenarios first, then server/custom scenarios by title. */
+function compareScenarios(a: ScenarioDetails, b: ScenarioDetails): number {
+  const aGroup = scenarioGroup(a);
+  const bGroup = scenarioGroup(b);
+  const groupDiff =
+    (EXPANSION_GROUP_ORDER[aGroup] ?? 99) - (EXPANSION_GROUP_ORDER[bGroup] ?? 99);
+  if (groupDiff !== 0) {
+    return groupDiff; // <--- Early return: group order decides first ---
+  }
+
+  const aBuiltIn = STANDARD_SCENARIO_KEYS.indexOf(a.key);
+  const bBuiltIn = STANDARD_SCENARIO_KEYS.indexOf(b.key);
+  if (aBuiltIn !== bBuiltIn) {
+    if (aBuiltIn === -1) {
+      return 1;
+    }
+    if (bBuiltIn === -1) {
+      return -1;
+    }
+    return aBuiltIn - bBuiltIn;
+  }
+
+  return a.title.localeCompare(b.title);
+}
+
+/** Convert known server scenarios into New Game expansion choices. */
+function expansionChoices(scenarios: Record<string, ScenarioDetails>): NewGameScenario[] {
+  const known = Object.values(scenarios).sort(compareScenarios);
+  return [
+    BASE_EXPANSION,
+    ...known.map((sc) => {
+      const group = scenarioGroup(sc);
+      return {
+        key: sc.key,
+        desc: sc.title,
+        group,
+        details: scenarioDetails(sc, group),
+        meta: scenarioMeta(sc, group),
+      };
+    }),
+  ];
 }
 
 /**
@@ -77,13 +173,10 @@ export function LobbyScreen(): JSX.Element {
         : 'unknown';
 
   const optionList = useMemo(() => dialogOptions(knownOptions), [knownOptions]);
-  const scenarioList = useMemo<NewGameScenario[]>(() => {
-    const list: NewGameScenario[] = [{ key: '', desc: 'No scenario' }];
-    for (const sc of Object.values(scenarios)) {
-      list.push({ key: sc.key, desc: sc.title });
-    }
-    return list;
-  }, [scenarios]);
+  const scenarioList = useMemo<NewGameScenario[]>(
+    () => expansionChoices(scenarios),
+    [scenarios],
+  );
 
   const openDialog = (): void => {
     // Lazily fetch option descriptors the first time the dialog opens.
@@ -191,7 +284,7 @@ export function LobbyScreen(): JSX.Element {
           open={dialogOpen}
           options={optionList}
           optionsLoading={optionsRequested && !optionsLoaded}
-          scenarios={scenarioList.length > 1 ? scenarioList : undefined}
+          scenarios={scenarioList}
           onCreate={handleCreate}
           onCancel={() => setDialogOpen(false)}
         />

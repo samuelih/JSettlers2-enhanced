@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { GameOptionDescriptor } from '../../protocol/gameOptions';
 import { Button } from '../Button';
@@ -13,6 +13,9 @@ const PROMINENT_KEYS: readonly string[] = ['PL', 'VP'];
 export interface NewGameScenario {
   key: string;
   desc: string;
+  group?: string;
+  details?: string | null;
+  meta?: string;
 }
 
 export interface NewGameDialogProps {
@@ -86,6 +89,29 @@ export function NewGameDialog({
   const valueFor = (opt: GameOptionDescriptor): GameOptionDescriptor =>
     values[opt.key] ?? opt;
 
+  useEffect(() => {
+    if (scenarios == null || scenarios.length === 0) {
+      return; // <--- Early return: no expansion choices available ---
+    }
+    if (!scenarios.some((sc) => sc.key === scenarioKey)) {
+      setScenarioKey(scenarios[0].key);
+    }
+  }, [scenarioKey, scenarios]);
+
+  const scenarioGroups = useMemo(() => {
+    const groups = new Map<string, NewGameScenario[]>();
+    for (const sc of scenarios ?? []) {
+      const group = sc.group ?? 'Scenarios';
+      groups.set(group, [...(groups.get(group) ?? []), sc]);
+    }
+    return Array.from(groups, ([group, items]) => ({ group, items }));
+  }, [scenarios]);
+
+  const selectedScenario = useMemo(
+    () => scenarios?.find((sc) => sc.key === scenarioKey),
+    [scenarioKey, scenarios],
+  );
+
   const handleOptionChange = (updated: GameOptionDescriptor): void => {
     setValues((prev) => ({ ...prev, [updated.key]: updated }));
   };
@@ -149,21 +175,38 @@ export function NewGameDialog({
         </label>
 
         {scenarios != null && scenarios.length > 0 && (
-          <label className={styles.field}>
-            <span className={styles.label}>Scenario</span>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="newgame-expansion">
+              Expansion / scenario
+            </label>
             <select
+              id="newgame-expansion"
               className={styles.select}
               value={scenarioKey}
               onChange={(e) => setScenarioKey(e.target.value)}
               data-testid="newgame-scenario"
             >
-              {scenarios.map((sc) => (
-                <option key={sc.key} value={sc.key}>
-                  {sc.key === '' ? sc.desc : `${sc.desc} (${sc.key})`}
-                </option>
+              {scenarioGroups.map(({ group, items }) => (
+                <optgroup key={group} label={group}>
+                  {items.map((sc) => (
+                    <option key={sc.key} value={sc.key}>
+                      {sc.desc}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
-          </label>
+            {selectedScenario != null && (
+              <div className={styles.scenarioDetails} data-testid="newgame-scenario-details">
+                {selectedScenario.meta != null && (
+                  <span className={styles.scenarioMeta}>{selectedScenario.meta}</span>
+                )}
+                {selectedScenario.details != null && selectedScenario.details !== '' && (
+                  <p>{selectedScenario.details}</p>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         {!optionsLoading && prominent.length > 0 && (

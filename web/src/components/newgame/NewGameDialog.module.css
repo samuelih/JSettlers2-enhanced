@@ -31,6 +31,30 @@
   outline-offset: 1px;
 }
 
+.scenarioDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  max-height: 7.5rem;
+  overflow-y: auto;
+}
+
+.scenarioDetails p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.scenarioMeta {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
 /* Prominent block for the common options (PL, VP). */
 .prominent {
   display: flex;

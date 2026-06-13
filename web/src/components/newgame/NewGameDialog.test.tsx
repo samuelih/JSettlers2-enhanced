@@ -119,8 +119,27 @@ describe('NewGameDialog', () => {
     const onCreate = vi.fn();
     const user = userEvent.setup();
     const scenarios = [
-      { key: 'SC_4ISL', desc: 'The Four Islands' },
-      { key: 'SC_FOG', desc: 'Fog Islands' },
+      {
+        key: '',
+        desc: 'Standard Catan',
+        group: 'Base game',
+        details: 'Classic land board.',
+        meta: 'Base game',
+      },
+      {
+        key: 'SC_4ISL',
+        desc: 'The Four Islands',
+        group: 'Seafarers',
+        details: 'Start on one or two islands.',
+        meta: 'Seafarers',
+      },
+      {
+        key: 'SC_FOG',
+        desc: 'Fog Islands',
+        group: 'Seafarers',
+        details: 'Some hexes are initially hidden by fog.',
+        meta: 'Seafarers',
+      },
     ];
     render(
       <NewGameDialog
@@ -132,8 +151,14 @@ describe('NewGameDialog', () => {
     );
 
     const select = screen.getByTestId('newgame-scenario');
-    expect(select).toHaveValue('SC_4ISL');
+    expect(select).toHaveValue('');
+    expect(screen.getByTestId('newgame-scenario-details')).toHaveTextContent(
+      'Classic land board.',
+    );
     await user.selectOptions(select, 'SC_FOG');
+    expect(screen.getByTestId('newgame-scenario-details')).toHaveTextContent(
+      'Some hexes are initially hidden by fog.',
+    );
 
     await user.type(screen.getByTestId('newgame-name'), 'g');
     await user.click(screen.getByTestId('newgame-create'));

@@ -5,6 +5,7 @@
 // re-fire. Without this the user sees a silent dead end.
 
 import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ToastProvider } from '../components';
@@ -87,5 +88,60 @@ describe('LobbyScreen game-list loading state', () => {
     });
     expect(screen.queryByTestId('game-list-loading')).not.toBeInTheDocument();
     expect(screen.getByTestId('game-list')).toBeInTheDocument();
+  });
+});
+
+describe('LobbyScreen expansion choices', () => {
+  it('shows grouped expansion choices in stable order', async () => {
+    const user = userEvent.setup();
+    act(() => {
+      const s = useGameStore.getState();
+      s.setGames([]);
+      s.upsertScenario({
+        key: 'SC_XSAMP',
+        minVersion: 2000,
+        lastModVersion: 2700,
+        opts: 'SBL=t,VP=t10',
+        title: 'Sample Island',
+        longDesc: 'A custom test map.',
+      });
+      s.upsertScenario({
+        key: 'SC_CK',
+        minVersion: 2000,
+        lastModVersion: 2700,
+        opts: '_SC_CK=t,_CK_IMP=t,SBL=t,VP=t13',
+        title: 'Cities & Knights',
+        longDesc: 'Build improvements and defend against barbarians.',
+      });
+      s.upsertScenario({
+        key: 'SC_FOG',
+        minVersion: 2000,
+        lastModVersion: 2000,
+        opts: '_SC_FOG=t,SBL=t,VP=t12',
+        title: 'Fog Islands',
+        longDesc: 'Reveal hidden hexes while expanding by ship.',
+      });
+    });
+    renderLobby();
+
+    await user.click(screen.getByTestId('new-game-button'));
+
+    const select = screen.getByTestId('newgame-scenario');
+    expect(
+      Array.from(select.querySelectorAll('option')).map((option) => option.textContent),
+    ).toEqual([
+      'Standard Catan',
+      'Fog Islands',
+      'Cities & Knights',
+      'Sample Island',
+    ]);
+
+    await user.selectOptions(select, 'SC_XSAMP');
+    expect(screen.getByTestId('newgame-scenario-details')).toHaveTextContent(
+      'Custom maps · SC_XSAMP',
+    );
+    expect(screen.getByTestId('newgame-scenario-details')).toHaveTextContent(
+      'A custom test map.',
+    );
   });
 });
