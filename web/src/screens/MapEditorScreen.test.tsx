@@ -53,6 +53,44 @@ describe('MapEditorScreen', () => {
     expect(hex).toHaveAttribute('data-hextype', 'clay');
   });
 
+  it('loads a template and can undo back to the prior draft', () => {
+    fireEvent.click(screen.getByTestId('editor-template-classic'));
+
+    expect((screen.getByTestId('editor-name') as HTMLInputElement).value).toBe('Classic Island');
+    expect(screen.getByTestId('editor-valid')).toBeInTheDocument();
+    expect(screen.getByTestId('editor-undo')).not.toBeDisabled();
+
+    fireEvent.click(screen.getByTestId('editor-undo'));
+    expect((screen.getByTestId('editor-name') as HTMLInputElement).value).toBe('');
+  });
+
+  it('edits the selected hex through the inspector', () => {
+    fireEvent.click(screen.getByTestId('editor-hex-0x0309').querySelector('polygon') as SVGPolygonElement);
+
+    expect(screen.getByTestId('editor-inspector')).toHaveTextContent('0x0309');
+    fireEvent.change(screen.getByTestId('editor-inspector-hex-type'), { target: { value: 'wood' } });
+    fireEvent.change(screen.getByTestId('editor-inspector-dice'), { target: { value: '6' } });
+
+    expect(screen.getByTestId('editor-hex-0x0309')).toHaveAttribute('data-hextype', 'wood');
+    expect(screen.getByTestId('editor-hex-0x0309')).toHaveAttribute('data-dicenum', '6');
+  });
+
+  it('clicks a validation issue to focus the offending field', () => {
+    fireEvent.click(screen.getByTestId('editor-template-classic'));
+    fireEvent.change(screen.getByTestId('editor-name'), { target: { value: '' } });
+
+    const errorIssue = screen.getByTestId('editor-issue-error');
+    fireEvent.click(errorIssue.querySelector('button') as HTMLButtonElement);
+
+    expect(document.activeElement).toBe(screen.getByTestId('editor-name'));
+  });
+
+  it('zooms the editor canvas from the workflow bar', () => {
+    expect(screen.getByTestId('editor-zoom-readout')).toHaveTextContent('100%');
+    fireEvent.click(screen.getByTestId('editor-zoom-in'));
+    expect(screen.getByTestId('editor-zoom-readout')).toHaveTextContent('112%');
+  });
+
   it('surfaces an error when mutated to an invalid state', () => {
     fireEvent.click(screen.getByTestId('editor-load-sample'));
     expect(screen.getByTestId('editor-valid')).toBeInTheDocument();

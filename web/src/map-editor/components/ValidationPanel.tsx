@@ -6,6 +6,7 @@ import styles from '../../screens/MapEditorScreen.module.css';
 
 export interface ValidationPanelProps {
   issues: ValidationIssue[];
+  onIssueClick?: (issueIndex: number) => void;
 }
 
 /**
@@ -15,7 +16,7 @@ export interface ValidationPanelProps {
  * `CustomMapValidator` would reject the map; warnings are editor heuristics the
  * server does not enforce.
  */
-export function ValidationPanel({ issues }: ValidationPanelProps): JSX.Element {
+export function ValidationPanel({ issues, onIssueClick }: ValidationPanelProps): JSX.Element {
   const errors = issues.filter((i) => i.severity === 'error');
   const warnings = issues.filter((i) => i.severity === 'warning');
   const ordered = [...errors, ...warnings];
@@ -48,16 +49,22 @@ export function ValidationPanel({ issues }: ValidationPanelProps): JSX.Element {
               data-severity={issue.severity}
               className={`${styles.issue} ${issue.severity === 'error' ? styles.issueError : styles.issueWarning}`}
             >
-              <span className={styles.issueBadge}>{issue.severity}</span>
-              <span>
-                {issue.message}
-                {issue.field !== undefined && (
-                  <>
-                    {' '}
-                    <span className={styles.issueField}>[{issue.field}]</span>
-                  </>
-                )}
-              </span>
+              <button
+                type="button"
+                className={styles.issueButton}
+                onClick={() => onIssueClick?.(issues.indexOf(issue))}
+              >
+                <span className={styles.issueBadge}>{issue.severity}</span>
+                <span>
+                  {issue.message}
+                  {issue.field !== undefined && (
+                    <>
+                      {' '}
+                      <span className={styles.issueField}>[{issue.field}]</span>
+                    </>
+                  )}
+                </span>
+              </button>
             </li>
           ))}
         </ul>

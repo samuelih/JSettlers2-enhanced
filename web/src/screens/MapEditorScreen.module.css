@@ -222,6 +222,17 @@
   font: inherit;
 }
 
+.selectCompact {
+  min-width: 9rem;
+  padding: 0.32rem 0.45rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+}
+
 .textarea {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
@@ -340,6 +351,34 @@
   overflow: hidden;
 }
 
+.workflowBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface-alt) 82%, transparent), transparent),
+    var(--color-surface);
+}
+
+.commandGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.zoomReadout {
+  min-width: 3.4rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}
+
 .boardActions {
   display: inline-flex;
   align-items: center;
@@ -382,6 +421,14 @@
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--color-surface-alt) 56%, transparent), transparent 35%),
     var(--color-surface);
+}
+
+.canvasViewportPanning {
+  cursor: grab;
+}
+
+.canvasViewportPanning:active {
+  cursor: grabbing;
 }
 
 .sizeTitle {
@@ -457,7 +504,7 @@
 
 .canvas {
   display: block;
-  width: max(100%, clamp(48rem, 68vw, 76rem));
+  width: max(100%, var(--editor-canvas-width, clamp(48rem, 68vw, 76rem)));
   max-width: none;
   height: auto;
   background:
@@ -466,6 +513,12 @@
   border-radius: var(--radius-md);
   user-select: none;
   touch-action: none;
+}
+
+.canvas[data-preview='true'] {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.18), transparent 38%),
+    linear-gradient(135deg, var(--color-sea-blue-light, #69abd6), var(--color-sea-blue-dark, #1f5d88));
 }
 
 .cellEmpty {
@@ -481,6 +534,34 @@
   stroke-width: 1.35;
   stroke-linejoin: round;
   cursor: pointer;
+}
+
+.cellSelected {
+  stroke: var(--color-focus-ring);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--color-focus-ring) 60%, transparent));
+}
+
+.cellHighlighted {
+  stroke: var(--color-warning);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--color-warning) 70%, transparent));
+}
+
+.cellIssue {
+  stroke: var(--color-danger);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-danger) 75%, transparent));
+}
+
+.probabilityHeat {
+  fill: var(--color-danger);
+  mix-blend-mode: multiply;
+}
+
+.areaOverlay {
+  fill: color-mix(in srgb, var(--color-accent) 28%, transparent);
+  stroke: color-mix(in srgb, var(--color-accent) 72%, transparent);
+  stroke-width: 1.1;
 }
 
 .cellGrain {
@@ -590,6 +671,18 @@
   cursor: pointer;
 }
 
+.portSelected {
+  stroke: var(--color-focus-ring);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--color-focus-ring) 60%, transparent));
+}
+
+.portHighlighted {
+  stroke: var(--color-danger);
+  stroke-width: 4;
+  opacity: 1;
+}
+
 .portText {
   fill: var(--port-text, #4a3f24);
   text-anchor: middle;
@@ -635,6 +728,64 @@
   pointer-events: none;
 }
 
+/* ---- Templates / Inspector ------------------------------------------- */
+.templateGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+.templateButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  min-height: 3.2rem;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.templateButton:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-alt);
+}
+
+.templateButton[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+}
+
+.templateButton strong {
+  font-size: var(--font-size-sm);
+}
+
+.templateButton span,
+.emptyInspector,
+.inspectorMeta {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.inspectorStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.inspectorMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
 /* ---- Readiness panel --------------------------------------------------- */
 .readinessFacts {
   display: grid;
@@ -661,6 +812,38 @@
 }
 
 .factPill span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.readinessScore {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.scoreDial {
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent);
+  background: var(--color-accent-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
@@ -728,13 +911,30 @@
 }
 
 .issue {
-  display: flex;
-  gap: var(--space-2);
-  align-items: flex-start;
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   border: 1px solid var(--color-border);
+}
+
+.issueButton {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.issueButton:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .issueError {

@@ -77,3 +77,13 @@ export {
 } from './editorGrid';
 export type { GridHexCell, GridEdgeCell, EditorBoardSize } from './editorGrid';
 export { SAMPLE_MAP_JSON } from './sampleMapData';
+export type { EditorTemplate, EditorOverlay, IssueTarget, MapBalanceMetrics } from './editorEnhancements';
+export {
+  EDITOR_TEMPLATES,
+  autoBalanceDice,
+  replaceTerrain,
+  fillWaterRing,
+  analyzeMapBalance,
+  targetForIssue,
+  dicePips,
+} from './editorEnhancements';

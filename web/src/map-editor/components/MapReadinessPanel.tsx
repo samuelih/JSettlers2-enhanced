@@ -3,11 +3,13 @@ import type { JSX } from 'react';
 import { Panel } from '../../components';
 import { type CustomMap } from '../mapSchema';
 import { type ValidationIssue } from '../validation';
+import { analyzeMapBalance, type MapBalanceMetrics } from '../editorEnhancements';
 import styles from '../../screens/MapEditorScreen.module.css';
 
 export interface MapReadinessPanelProps {
   map: CustomMap;
   issues: ValidationIssue[];
+  metrics?: MapBalanceMetrics;
 }
 
 type ReadinessState = 'good' | 'warn' | 'error';
@@ -19,12 +21,21 @@ interface ReadinessItem {
 }
 
 /** Compact game-coverage dashboard for the custom-map authoring workflow. */
-export function MapReadinessPanel({ map, issues }: MapReadinessPanelProps): JSX.Element {
+export function MapReadinessPanel({ map, issues, metrics }: MapReadinessPanelProps): JSX.Element {
+  const balance = metrics ?? analyzeMapBalance(map, issues);
   const items = buildReadinessItems(map, issues);
   const facts = buildFacts(map);
 
   return (
     <Panel title="Map Readiness" data-testid="editor-readiness">
+      <div className={styles.readinessScore} data-testid="editor-readiness-score">
+        <strong className={styles.scoreDial}>{balance.readinessScore}%</strong>
+        <ul className={styles.recommendations}>
+          {balance.recommendations.slice(0, 3).map((rec) => (
+            <li key={rec}>{rec}</li>
+          ))}
+        </ul>
+      </div>
       <div className={styles.readinessFacts} data-testid="editor-readiness-facts">
         {facts.map((fact) => (
           <span key={fact.label} className={styles.factPill}>

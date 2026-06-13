@@ -27,6 +27,7 @@ import { type HexKind } from '../../board/types';
 import { BoardDefs } from '../../board/pieces/BoardDefs';
 import { ResourceMotif } from '../../board/pieces/ResourceMotif';
 import { TerrainTexture, terrainTextureFor } from '../../board/pieces/TerrainTexture';
+import { type EditorOverlay, dicePips } from '../editorEnhancements';
 import styles from '../../screens/MapEditorScreen.module.css';
 
 /** Which interaction the canvas is in: placing hexes/dice/areas/ports/markers. */
@@ -49,6 +50,18 @@ export interface EditorCanvasProps {
   tool: EditorTool;
   /** Show every 0xRRCC coordinate label on the grid. */
   showCoordinates?: boolean;
+  /** Visual overlay mode for authoring diagnostics. */
+  overlay?: EditorOverlay;
+  /** Hide empty authoring cells and chrome-like editor affordances. */
+  previewMode?: boolean;
+  /** Currently selected hex coordinate, if any. */
+  selectedCoord?: number | null;
+  /** Currently selected port edge, if any. */
+  selectedEdge?: number | null;
+  /** Hex coordinate to highlight from validation/navigation. */
+  highlightCoord?: number | null;
+  /** Port edge to highlight from validation/navigation. */
+  highlightEdge?: number | null;
   /**
    * Click on a hex cell (empty or occupied). `coord` is the integer 0xRRCC.
    * `alt` is true for alt-click / right-click (clear / cycle).
@@ -65,6 +78,9 @@ function HexCell({
   diceNum,
   landArea,
   showCoordinates,
+  overlay,
+  selected,
+  highlighted,
   onHexClick,
 }: {
   cell: GridHexCell;
@@ -72,6 +88,9 @@ function HexCell({
   diceNum: number;
   landArea?: number;
   showCoordinates: boolean;
+  overlay: EditorOverlay;
+  selected: boolean;
+  highlighted: boolean;
   onHexClick: EditorCanvasProps['onHexClick'];
 }): JSX.Element {
   const { x: cx, y: cy } = cell.center;
@@ -81,11 +100,17 @@ function HexCell({
   const cellClass = placed
     ? `${styles.cell} ${CELL_CLASS[type] ?? ''}`
     : `${styles.cell} ${styles.cellWater} ${styles.cellEmpty}`;
+  const stateClass = [
+    selected ? styles.cellSelected : '',
+    highlighted ? styles.cellHighlighted : '',
+    overlay === 'issues' && highlighted ? styles.cellIssue : '',
+  ].filter(Boolean).join(' ');
   const showDice = diceNum >= 2 && diceNum <= 12 && diceNum !== 7;
   const hot = diceNum === 6 || diceNum === 8;
   const tokenR = HALFDELTA_X * 0.42;
   const coordStr = encodeCoord(cell.coord);
   const hasTexture = terrainTextureFor(kind) !== null;
+  const pips = dicePips(diceNum);
 
   const handle = (ev: React.MouseEvent): void => {
     ev.preventDefault();
@@ -100,12 +125,28 @@ function HexCell({
       data-dicenum={diceNum}
     >
       <polygon
-        className={cellClass}
+        className={`${cellClass}${stateClass ? ` ${stateClass}` : ''}`}
         points={points}
         onClick={handle}
         onContextMenu={handle}
         aria-label={`Hex ${coordStr}${placed ? ` (${type})` : ' (empty)'}`}
       />
+      {placed && overlay === 'probability' && pips > 0 && (
+        <polygon
+          className={styles.probabilityHeat}
+          points={hexPolygonPoints(cx, cy, 0.9)}
+          style={{ opacity: Math.min(0.74, 0.16 + pips * 0.1) }}
+          pointerEvents="none"
+        />
+      )}
+      {placed && overlay === 'areas' && landArea !== undefined && landArea > 0 && (
+        <polygon
+          className={styles.areaOverlay}
+          points={hexPolygonPoints(cx, cy, 0.91)}
+          data-area={landArea}
+          pointerEvents="none"
+        />
+      )}
       {hasTexture ? (
         <g
           className={styles.cellTextureClip}
@@ -182,6 +223,12 @@ export function EditorCanvas({
   map,
   tool,
   showCoordinates = true,
+  overlay = 'none',
+  previewMode = false,
+  selectedCoord = null,
+  selectedEdge = null,
+  highlightCoord = null,
+  highlightEdge = null,
   onHexClick,
   onPortClick,
 }: EditorCanvasProps): JSX.Element {
@@ -245,6 +292,8 @@ export function EditorCanvas({
       role="application"
       aria-label="Map editor canvas"
       preserveAspectRatio="xMidYMid meet"
+      data-preview={previewMode ? 'true' : 'false'}
+      data-overlay={overlay}
     >
       <BoardDefs />
 
@@ -252,6 +301,9 @@ export function EditorCanvas({
       <g data-testid="editor-hex-cells">
         {cells.map((cell) => {
           const placed = placedByCoord.get(cell.coord) ?? null;
+          if (previewMode && placed === null) {
+            return null;
+          }
           return (
             <HexCell
               key={cell.coord}
@@ -259,7 +311,10 @@ export function EditorCanvas({
               type={placed ? placed.type : null}
               diceNum={placed ? placed.diceNum : 0}
               landArea={placed?.landArea}
-              showCoordinates={showCoordinates}
+              showCoordinates={showCoordinates && !previewMode}
+              overlay={overlay}
+              selected={selectedCoord === cell.coord}
+              highlighted={highlightCoord === cell.coord}
               onHexClick={onHexClick}
             />
           );
@@ -268,12 +323,12 @@ export function EditorCanvas({
 
       {/* Port edge slots (only while the port tool is active) + placed ports. */}
       <g data-testid="editor-port-slots">
-        {showPortSlots &&
+        {showPortSlots && !previewMode &&
           portEdges.map((e) => (
             <line
               key={`slot-${e.coord}`}
               data-testid={`editor-port-slot-${encodeCoord(e.coord)}`}
-              className={styles.portEdge}
+              className={`${styles.portEdge}${highlightEdge === e.coord ? ` ${styles.portHighlighted}` : ''}`}
               x1={e.x1}
               y1={e.y1}
               x2={e.x2}
@@ -293,7 +348,11 @@ export function EditorCanvas({
           return (
             <g key={`port-${edge}`} data-testid={`editor-port-${encodeCoord(edge)}`}>
               <circle
-                className={styles.portMarker}
+                className={[
+                  styles.portMarker,
+                  selectedEdge === edge ? styles.portSelected : '',
+                  highlightEdge === edge ? styles.portHighlighted : '',
+                ].filter(Boolean).join(' ')}
                 cx={px.x}
                 cy={px.y}
                 r={HALFDELTA_X * 0.4}
