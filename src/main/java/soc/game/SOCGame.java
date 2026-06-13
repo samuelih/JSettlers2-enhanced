@@ -3694,6 +3694,28 @@ public class SOCGame implements Serializable, Cloneable
         final int[] commod = new int[1 + SOCPlayer.CK_PAPER];
         final int robberHex = board.getRobberHex();
 
+        ckGetCommoditiesGainedFromRollNumber(player, roll, resources, commod, robberHex);
+
+        final int pairedRoll = getDice2And12PairedRoll(roll);
+        if (pairedRoll != 0)
+            ckGetCommoditiesGainedFromRollNumber(player, pairedRoll, resources, commod, robberHex);
+
+        return commod;
+    }
+
+    /**
+     * Add Cities &amp; Knights commodities from one effective dice number.
+     * @param player  the player
+     * @param roll  the effective dice number to produce from
+     * @param resources  the player's rolled resources, already computed; updated in place
+     * @param commod  commodity amounts gained, indexed by {@link SOCPlayer#CK_CLOTH} - {@link SOCPlayer#CK_PAPER}
+     * @param robberHex  Robber's position, from {@link SOCBoard#getRobberHex()}
+     * @since 2.7.00
+     */
+    private void ckGetCommoditiesGainedFromRollNumber
+        (final SOCPlayer player, final int roll, final SOCResourceSet resources,
+         final int[] commod, final int robberHex)
+    {
         for (final SOCCity city : player.getCities())
         {
             for (final Integer hexInt : board.getAdjacentHexesToNode(city.getCoordinates()))
@@ -3725,8 +3747,6 @@ public class SOCGame implements Serializable, Cloneable
                 }
             }
         }
-
-        return commod;
     }
 
     /**
@@ -7872,7 +7892,33 @@ public class SOCGame implements Serializable, Cloneable
          */
         getResourcesGainedFromRollPieces(roll, resources, robberHex, player.getCities(), 2);
 
+        final int pairedRoll = getDice2And12PairedRoll(roll);
+        if (pairedRoll != 0)
+        {
+            getResourcesGainedFromRollPieces(pairedRoll, resources, robberHex, player.getSettlements(), 1);
+            getResourcesGainedFromRollPieces(pairedRoll, resources, robberHex, player.getCities(), 2);
+        }
+
         return resources;
+    }
+
+    /**
+     * Get the paired 2/12 production roll if that game option applies.
+     * @param roll  the dice roll
+     * @return 12 when {@code roll} is 2, 2 when {@code roll} is 12, or 0 if none
+     * @since 2.7.00
+     */
+    private int getDice2And12PairedRoll(final int roll)
+    {
+        if (! isGameOptionSet(SOCGameOptionSet.K_DICE_2_12))
+            return 0;
+
+        if (roll == 2)
+            return 12;
+        else if (roll == 12)
+            return 2;
+        else
+            return 0;
     }
 
     /**

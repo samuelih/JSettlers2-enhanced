@@ -96,6 +96,13 @@ public class SOCGameOptionSet
 
     // Some game option keynames, for convenient reference in code and javadocs:
 
+    /**
+     * Boolean game option {@code "D212"}: Rolling 2 also produces resources for 12,
+     * and rolling 12 also produces resources for 2.
+     * @since 2.7.00
+     */
+    public static final String K_DICE_2_12 = "D212";
+
     // -- Game option keynames for scenario flags --
     // Not all scenario keynames have scenario events, some are just properties of the game.
 
@@ -347,6 +354,7 @@ public class SOCGameOptionSet
      *<LI> RD  Robber can't return to the desert
      *<LI> N7  Roll no 7s during first # rounds
      *<LI> N7C Roll no 7s until a city is built
+     *<LI> D212 2 and 12 produce together
      *<LI> BC  Break up clumps of # or more same-type ports/hexes
      *<LI> NT  No trading allowed
      *<LI> VP  Victory points (10-15)
@@ -571,6 +579,8 @@ public class SOCGameOptionSet
         // N7C's keyname puts it after N7 in the NewGameOptionsFrame list
         opts.add(new SOCGameOption
             ("N7C", -1, 1119, false, FLAG_DROP_IF_UNUSED, "Roll no 7s until a city is built"));
+        opts.add(new SOCGameOption
+            (K_DICE_2_12, 2700, 2700, false, FLAG_DROP_IF_UNUSED, "2 and 12 produce together"));
         opts.add(new SOCGameOption
             ("BC", -1, 1107, true, 4, 3, 9, 0, "Break up clumps of # or more same-type hexes/ports"));
         opts.add(new SOCGameOption

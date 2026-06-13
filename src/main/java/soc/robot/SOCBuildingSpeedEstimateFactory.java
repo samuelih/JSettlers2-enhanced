@@ -19,6 +19,7 @@
  **/
 package soc.robot;
 
+import soc.game.SOCGameOptionSet;
 import soc.game.SOCPlayer;
 import soc.game.SOCPlayerNumbers;
 import soc.game.SOCResourceConstants;
@@ -39,12 +40,20 @@ public class SOCBuildingSpeedEstimateFactory
 {
 
     /**
+     * True if game option {@link SOCGameOptionSet#K_DICE_2_12} is active.
+     * @since 2.7.00
+     */
+    private final boolean dice2And12ProduceTogether;
+
+    /**
      * Construct a basic {@link SOCBuildingSpeedEstimateFactory}, optionally for use by {@code brain}.
      * @param brain  Brain which will use this factory, or {@code null}.
-     *     Default implementation ignores {@code brain} parameter; it's provided in case a subclass needs it.
+     *     If present, reads game options from its game.
      */
     public SOCBuildingSpeedEstimateFactory(final SOCRobotBrain brain)
     {
+        dice2And12ProduceTogether =
+            (brain != null) && brain.getGame().isGameOptionSet(SOCGameOptionSet.K_DICE_2_12);
     }
 
     /**
@@ -56,7 +65,7 @@ public class SOCBuildingSpeedEstimateFactory
      */
     public SOCBuildingSpeedEstimate getEstimator(final SOCPlayerNumbers numbers)
     {
-        return new SOCBuildingSpeedEstimate(numbers);
+        return new SOCBuildingSpeedEstimate(numbers, dice2And12ProduceTogether);
     }
 
     /**
@@ -67,7 +76,7 @@ public class SOCBuildingSpeedEstimateFactory
      */
     public SOCBuildingSpeedEstimate getEstimator()
     {
-        return new SOCBuildingSpeedEstimate();
+        return new SOCBuildingSpeedEstimate(dice2And12ProduceTogether);
     }
 
     /**

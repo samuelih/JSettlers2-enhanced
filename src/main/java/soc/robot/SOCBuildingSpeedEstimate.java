@@ -83,6 +83,12 @@ public class SOCBuildingSpeedEstimate
     private SOCResourceSet[] resourcesForRoll;
 
     /**
+     * True if game option {@link SOCGameOptionSet#K_DICE_2_12} is active.
+     * @since 2.7.00
+     */
+    private final boolean dice2And12ProduceTogether;
+
+    /**
      * Create a new SOCBuildingSpeedEstimate, calculating
      * the rollsPerResource and resourcesPerRoll based on
      * the player's dice numbers (settlement/city hexes).
@@ -91,6 +97,21 @@ public class SOCBuildingSpeedEstimate
      */
     public SOCBuildingSpeedEstimate(SOCPlayerNumbers numbers)
     {
+        this(numbers, false);
+    }
+
+    /**
+     * Create a new SOCBuildingSpeedEstimate, calculating
+     * the rollsPerResource and resourcesPerRoll based on
+     * the player's dice numbers (settlement/city hexes).
+     *
+     * @param numbers  the numbers that the player's pieces are touching
+     * @param dice2And12ProduceTogether  true if rolling 2 also produces 12, and vice versa
+     * @since 2.7.00
+     */
+    public SOCBuildingSpeedEstimate(SOCPlayerNumbers numbers, final boolean dice2And12ProduceTogether)
+    {
+        this.dice2And12ProduceTogether = dice2And12ProduceTogether;
         estimatesFromNothing = new int[MAXPLUSONE];
         estimatesFromNow = new int[MAXPLUSONE];
         rollsPerResource = new int[SOCResourceConstants.WOOD + 1];
@@ -106,6 +127,20 @@ public class SOCBuildingSpeedEstimate
      */
     public SOCBuildingSpeedEstimate()
     {
+        this(false);
+    }
+
+    /**
+     * Create a new SOCBuildingSpeedEstimate, not yet calculating
+     * estimates.  To consider the player's dice numbers (settlement/city hexes),
+     * you'll need to call {@link #recalculateEstimates(SOCPlayerNumbers, int)}.
+     *
+     * @param dice2And12ProduceTogether  true if rolling 2 also produces 12, and vice versa
+     * @since 2.7.00
+     */
+    public SOCBuildingSpeedEstimate(final boolean dice2And12ProduceTogether)
+    {
+        this.dice2And12ProduceTogether = dice2And12ProduceTogether;
         estimatesFromNothing = new int[MAXPLUSONE];
         estimatesFromNow = new int[MAXPLUSONE];
         rollsPerResource = new int[SOCResourceConstants.WOOD + 1];
@@ -390,7 +425,7 @@ public class SOCBuildingSpeedEstimate
             while (numbersEnum.hasMoreElements())
             {
                 Integer number = numbersEnum.nextElement();
-                totalProbability += SOCNumberProbabilities.FLOAT_VALUES[number.intValue()];
+                totalProbability += getRollProbabilityFloat(number.intValue(), dice2And12ProduceTogether);
             }
 
             //D.ebugPrintln("totalProbability: " + totalProbability);
@@ -425,35 +460,110 @@ public class SOCBuildingSpeedEstimate
 
         for (int diceResult = 2; diceResult <= 12; diceResult++)
         {
-            Vector<Integer> resources = (robberHex != -1)
-                ? numbers.getResourcesForNumber(diceResult, robberHex)
-                : numbers.getResourcesForNumber(diceResult);
+            SOCResourceSet resourceSet = resourcesForRoll[diceResult];
 
-            if (resources != null)
+            if (resourceSet == null)
             {
-                SOCResourceSet resourceSet = resourcesForRoll[diceResult];
-
-                if (resourceSet == null)
-                {
-                    resourceSet = new SOCResourceSet();
-                    resourcesForRoll[diceResult] = resourceSet;
-                }
-                else
-                {
-                    resourceSet.clear();
-                }
-
-                Enumeration<Integer> resourcesEnum = resources.elements();
-
-                while (resourcesEnum.hasMoreElements())
-                {
-                    Integer resourceInt = resourcesEnum.nextElement();
-                    resourceSet.add(1, resourceInt.intValue());
-                }
-
-                //D.ebugPrintln("### resources for "+diceResult+" = "+resourceSet);
+                resourceSet = new SOCResourceSet();
+                resourcesForRoll[diceResult] = resourceSet;
             }
+            else
+            {
+                resourceSet.clear();
+            }
+
+            addResourcesForNumberToSet(numbers, robberHex, diceResult, resourceSet);
+
+            final int pairedRoll = getDice2And12PairedRoll(diceResult, dice2And12ProduceTogether);
+            if (pairedRoll != 0)
+                addResourcesForNumberToSet(numbers, robberHex, pairedRoll, resourceSet);
+
+            //D.ebugPrintln("### resources for "+diceResult+" = "+resourceSet);
         }
+    }
+
+    /**
+     * Add resources for one effective dice number to a roll's resource set.
+     * @param numbers  the numbers that the player is touching
+     * @param robberHex  Robber location from {@link SOCBoard#getRobberHex()},
+     *                     or -1 to ignore the robber
+     * @param diceResult  dice number whose resources are being added
+     * @param resourceSet  resource set to update
+     * @since 2.7.00
+     */
+    private static void addResourcesForNumberToSet
+        (final SOCPlayerNumbers numbers, final int robberHex, final int diceResult, final SOCResourceSet resourceSet)
+    {
+        Vector<Integer> resources = (robberHex != -1)
+            ? numbers.getResourcesForNumber(diceResult, robberHex)
+            : numbers.getResourcesForNumber(diceResult);
+
+        if (resources == null)
+            return;
+
+        Enumeration<Integer> resourcesEnum = resources.elements();
+
+        while (resourcesEnum.hasMoreElements())
+        {
+            Integer resourceInt = resourcesEnum.nextElement();
+            resourceSet.add(1, resourceInt.intValue());
+        }
+    }
+
+    /**
+     * Get the effective integer dice probability when paired 2/12 production may apply.
+     * @param diceNumber  dice number to rate
+     * @param dice2And12ProduceTogether  true if rolling 2 also produces 12, and vice versa
+     * @return dice probability from {@link SOCNumberProbabilities#INT_VALUES}, plus its paired 2/12
+     *     probability if active
+     * @since 2.7.00
+     */
+    public static int getRollProbabilityInt(final int diceNumber, final boolean dice2And12ProduceTogether)
+    {
+        int probability = SOCNumberProbabilities.INT_VALUES[diceNumber];
+        final int pairedRoll = getDice2And12PairedRoll(diceNumber, dice2And12ProduceTogether);
+        if (pairedRoll != 0)
+            probability += SOCNumberProbabilities.INT_VALUES[pairedRoll];
+
+        return probability;
+    }
+
+    /**
+     * Get the effective floating-point dice probability when paired 2/12 production may apply.
+     * @param diceNumber  dice number to rate
+     * @param dice2And12ProduceTogether  true if rolling 2 also produces 12, and vice versa
+     * @return dice probability from {@link SOCNumberProbabilities#FLOAT_VALUES}, plus its paired 2/12
+     *     probability if active
+     * @since 2.7.00
+     */
+    public static float getRollProbabilityFloat(final int diceNumber, final boolean dice2And12ProduceTogether)
+    {
+        float probability = SOCNumberProbabilities.FLOAT_VALUES[diceNumber];
+        final int pairedRoll = getDice2And12PairedRoll(diceNumber, dice2And12ProduceTogether);
+        if (pairedRoll != 0)
+            probability += SOCNumberProbabilities.FLOAT_VALUES[pairedRoll];
+
+        return probability;
+    }
+
+    /**
+     * Get the paired 2/12 production roll if that game option applies.
+     * @param roll  the dice roll
+     * @param dice2And12ProduceTogether  true if rolling 2 also produces 12, and vice versa
+     * @return 12 when {@code roll} is 2, 2 when {@code roll} is 12, or 0 if none
+     * @since 2.7.00
+     */
+    private static int getDice2And12PairedRoll(final int roll, final boolean dice2And12ProduceTogether)
+    {
+        if (! dice2And12ProduceTogether)
+            return 0;
+
+        if (roll == 2)
+            return 12;
+        else if (roll == 12)
+            return 2;
+        else
+            return 0;
     }
 
     /**

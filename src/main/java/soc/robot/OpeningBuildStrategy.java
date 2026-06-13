@@ -108,6 +108,23 @@ public class OpeningBuildStrategy {
     }
 
     /**
+     * Get dice-number weights for opening-placement scoring in this game.
+     * @return effective probabilities, with 2 and 12 paired if that game option is active
+     * @since 2.7.00
+     */
+    private int[] getEffectiveNumberProbabilities()
+    {
+        if (! game.isGameOptionSet(SOCGameOptionSet.K_DICE_2_12))
+            return SOCNumberProbabilities.INT_VALUES;
+
+        final int[] probs = SOCNumberProbabilities.INT_VALUES.clone();
+        probs[2] = SOCBuildingSpeedEstimate.getRollProbabilityInt(2, true);
+        probs[12] = SOCBuildingSpeedEstimate.getRollProbabilityInt(12, true);
+
+        return probs;
+    }
+
+    /**
      * Callback from {@link SOCRobotBrain#cancelWrongPiecePlacement(soc.message.SOCCancelBuildRequest)}
      * In case this OBS wants to take any other action to prevent re-sending the cancelled piece.
      * Game state will still be the state in which this piece's placement was attempted:
@@ -154,7 +171,7 @@ public class OpeningBuildStrategy {
         int bestProbTotal;
         boolean[] ports = new boolean[SOCBoard.WOOD_PORT + 1];
         SOCBuildingSpeedEstimate estimate = bseFactory.getEstimator();
-        final int[] prob = SOCNumberProbabilities.INT_VALUES;
+        final int[] prob = getEffectiveNumberProbabilities();
 
         bestProbTotal = 0;
 
@@ -433,7 +450,7 @@ public class OpeningBuildStrategy {
         SOCBuildingSpeedEstimate estimate = bseFactory.getEstimator();
         int probTotal;
         int bestProbTotal;
-        final int[] prob = SOCNumberProbabilities.INT_VALUES;
+        final int[] prob = getEffectiveNumberProbabilities();
         final int firstNode = firstSettlement;
 
         bestProbTotal = 0;
@@ -922,7 +939,7 @@ public class OpeningBuildStrategy {
         if (resourceEstimates == null)
         {
             final SOCBoard board = game.getBoard();
-            final int[] numberWeights = SOCNumberProbabilities.INT_VALUES;
+            final int[] numberWeights = getEffectiveNumberProbabilities();
 
             resourceEstimates = new int[SOCResourceConstants.UNKNOWN];  // uses 1 to 5 (CLAY to WOOD)
             resourceEstimates[0] = 0;
@@ -1053,7 +1070,7 @@ public class OpeningBuildStrategy {
      */
     protected void bestSpotForNumbers(Hashtable<Integer,Integer> nodes, SOCPlayer player, int weight)
     {
-        final int[] numRating = SOCNumberProbabilities.INT_VALUES;
+        final int[] numRating = getEffectiveNumberProbabilities();
         final SOCPlayerNumbers playerNumbers = (player != null) ? player.getNumbers() : null;
         final SOCBoard board = game.getBoard();
 

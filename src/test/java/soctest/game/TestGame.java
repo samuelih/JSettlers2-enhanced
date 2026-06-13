@@ -21,10 +21,17 @@
 package soctest.game;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
+import soc.game.SOCBoard;
 import soc.game.SOCGame;
+import soc.game.SOCGameOption;
+import soc.game.SOCGameOptionSet;
 import soc.game.SOCPlayer;
+import soc.game.SOCResourceConstants;
+import soc.game.SOCResourceSet;
+import soc.game.SOCSettlement;
 import soctest.server.savegame.TestLoadgame;  // for javadocs only
 
 import org.junit.Test;
@@ -76,6 +83,146 @@ public class TestGame
 
         ga.setCurrentDice(5);
         assertTrue(ga.hasRolledSeven());
+    }
+
+    /**
+     * Test game option {@link SOCGameOptionSet#K_DICE_2_12}.
+     * @since 2.7.00
+     */
+    @Test
+    public void testDice2And12ProduceTogetherOption()
+    {
+        assertDice2And12PairedRoll(false, 2, 12);
+        assertDice2And12PairedRoll(false, 12, 2);
+        assertDice2And12PairedRoll(true, 2, 12);
+        assertDice2And12PairedRoll(true, 12, 2);
+    }
+
+    /**
+     * Assert whether a roll produces resources from the paired 2/12 number.
+     * @param optionEnabled  true to enable {@link SOCGameOptionSet#K_DICE_2_12}
+     * @param roll  dice roll to check
+     * @param pairedRoll  paired number whose hex should produce if option is enabled
+     * @since 2.7.00
+     */
+    private static void assertDice2And12PairedRoll
+        (final boolean optionEnabled, final int roll, final int pairedRoll)
+    {
+        final SOCGame ga = buildDice2And12Game(optionEnabled, "testD212_" + optionEnabled + "_" + roll);
+        final SOCBoard board = ga.getBoard();
+        final int hexCoord = findResourceHexForRoll(board, pairedRoll);
+        final int nodeCoord = findNodeForHexAvoidingRoll(board, hexCoord, roll);
+        final int resourceType = resourceTypeForHexType(board.getHexTypeFromCoord(hexCoord));
+        final SOCPlayer pl = ga.getPlayer(0);
+
+        ga.putPiece(new SOCSettlement(pl, nodeCoord, board));
+
+        final SOCResourceSet gained = ga.getResourcesGainedFromRoll(pl, roll);
+        final int expected = optionEnabled ? 1 : 0;
+        assertEquals("paired " + pairedRoll + " resource count", expected, gained.getAmount(resourceType));
+        assertEquals("paired " + pairedRoll + " total resource count", expected, gained.getTotal());
+    }
+
+    /**
+     * Build a one-player game for paired 2/12 production tests.
+     * @param optionEnabled  true to enable {@link SOCGameOptionSet#K_DICE_2_12}
+     * @param name  game name
+     * @return started game
+     * @since 2.7.00
+     */
+    private static SOCGame buildDice2And12Game(final boolean optionEnabled, final String name)
+    {
+        final SOCGame ga;
+        if (optionEnabled)
+        {
+            final SOCGameOptionSet knownOpts = SOCGameOptionSet.getAllKnownOptions();
+            final SOCGameOptionSet gaOpts =
+                SOCGameOption.parseOptionsToSet(SOCGameOptionSet.K_DICE_2_12 + "=t", knownOpts);
+            ga = new SOCGame(name, gaOpts, knownOpts);
+        } else {
+            ga = new SOCGame(name);
+        }
+
+        ga.addPlayer("p0", 0);
+        ga.startGame();
+
+        return ga;
+    }
+
+    /**
+     * Find a normal resource hex with a dice number.
+     * @param board  game board
+     * @param roll  dice number to find
+     * @return hex coordinate
+     * @since 2.7.00
+     */
+    private static int findResourceHexForRoll(final SOCBoard board, final int roll)
+    {
+        for (final int hexCoord : board.getLandHexCoords())
+            if ((board.getNumberOnHexFromCoord(hexCoord) == roll)
+                && (resourceTypeForHexType(board.getHexTypeFromCoord(hexCoord)) != 0))
+                return hexCoord;
+
+        fail("No normal resource hex found for roll " + roll);
+        return 0;  // <--- Early return: unreachable after fail(), but required by compiler ---
+    }
+
+    /**
+     * Find a node touching {@code hexCoord} but not any hex with {@code avoidedRoll}.
+     * @param board  game board
+     * @param hexCoord  target hex coordinate
+     * @param avoidedRoll  dice number not to touch
+     * @return node coordinate
+     * @since 2.7.00
+     */
+    private static int findNodeForHexAvoidingRoll(final SOCBoard board, final int hexCoord, final int avoidedRoll)
+    {
+        for (final Integer nodeObj : board.getAdjacentNodesToHex(hexCoord))
+        {
+            final int nodeCoord = nodeObj.intValue();
+            final List<Integer> adjacentHexes = board.getAdjacentHexesToNode(nodeCoord);
+            boolean touchesAvoidedRoll = false;
+
+            for (final Integer adjHexObj : adjacentHexes)
+            {
+                if (board.getNumberOnHexFromCoord(adjHexObj.intValue()) == avoidedRoll)
+                {
+                    touchesAvoidedRoll = true;
+                    break;
+                }
+            }
+
+            if (! touchesAvoidedRoll)
+                return nodeCoord;
+        }
+
+        fail("No node for hex " + Integer.toHexString(hexCoord) + " avoids roll " + avoidedRoll);
+        return 0;  // <--- Early return: unreachable after fail(), but required by compiler ---
+    }
+
+    /**
+     * Convert a board hex type to its resource type.
+     * @param hexType  board hex type
+     * @return matching resource type, or 0 for non-resource hexes
+     * @since 2.7.00
+     */
+    private static int resourceTypeForHexType(final int hexType)
+    {
+        switch (hexType)
+        {
+        case SOCBoard.CLAY_HEX:
+            return SOCResourceConstants.CLAY;
+        case SOCBoard.ORE_HEX:
+            return SOCResourceConstants.ORE;
+        case SOCBoard.SHEEP_HEX:
+            return SOCResourceConstants.SHEEP;
+        case SOCBoard.WHEAT_HEX:
+            return SOCResourceConstants.WHEAT;
+        case SOCBoard.WOOD_HEX:
+            return SOCResourceConstants.WOOD;
+        default:
+            return 0;
+        }
     }
 
     /**
