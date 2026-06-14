@@ -1,0 +1,209 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Robot / AI Players · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item active" href="../robot-ai-players/robot-ai-players.arch.html"><span class="nm">Robot / AI Players</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.api-boundary.html"><span class="nm">Robot / AI Players API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-client-networking-socrobotclient.design.html"><span class="nm">Robot client networking (SOCRobotClient)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-decision-loop-socrobotbrain.design.html"><span class="nm">Robot decision loop (SOCRobotBrain)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-robustness-for-unknown-inventory-items.design.html"><span class="nm">Robot robustness for unknown inventory items</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/third-party-bot-extension-framework-sample3p.design.html"><span class="nm">Third-party bot extension framework (sample3p)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.gateway.html"><span class="nm">Robot / AI Players Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.testplan.html"><span class="nm">Robot / AI Players Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Robot / AI Players</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-arch">ARCH</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:40%"></i></span>
+      <span class="conf-val">0.40</span></span></div>
+        <h1 class="doc-title">Robot / AI Players</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Robot / AI Players</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Dissertation origin, first-class bots</strong> — Per doc/Readme.developer.md and <a href="http://CLAUDE.md">CLAUDE.md</a>, the robot subsystem descends from Robert S. Thomas’ intelligent-agents dissertation and is treated as first-class rather than an afterthought — which is why decision-making is richly decomposed (brain, decision-maker, per-player trackers, negotiator, strategy objects) instead of a single inline heuristic.</li>
+<li><strong>Bots exist for game liveness</strong> — Per the epic charter, built-in bots run inside the server JVM and fill empty seats so games can start and continue without enough human players; the subsystem’s reason to exist is keeping games playable, not standalone AI research output.</li>
+<li><strong>Protocol parity over a privileged in-process API</strong> — Bots deliberately reuse the identical human-client SOCMessage string protocol (writeUTF/readUTF) instead of a dedicated bot RPC channel (doc/Readme.developer.md), so non-Java and third-party bots interoperate on the same wire contract — this is why connection (SOCRobotClient) is separated from decision-making (SOCRobotBrain).</li>
+<li><strong>Replaceable strategy objects as the extension seam</strong> — Decision logic is factored into strategy objects behind brain factory methods (setStrategyFields()) and exposed via virtual hooks, so a third party extends behavior by subclassing client/brain (soc.robot.sample3p) rather than editing core constants.</li>
+</ul>
+<h2>Overview</h2>
+<p>Robot decision loop (SOCRobotBrain): a dedicated Thread per seated game whose run() loop blocks on a CappedQueue&lt;SOCMessage&gt; fed by the network client plus a once-per-second SOCRobotPinger TIMINGPING. Each message is folded into a local SOCGame mirror, ourTurn is recomputed, and an expect*/waitingFor* flag state machine drives turn behavior; on its turn the brain executes a buildingPlan (SOCBuildPlanStack) from the decision-maker, paces itself adaptively, and caps denied actions per turn with bounded retry counters. Strategy/negotiator/decision-maker collaborators are installed via setStrategyFields() factory methods. Robot client networking (SOCRobotClient): constructed with a ServerConnectInfo value object and credentials; init() opens a TCP Socket or same-JVM StringConnection, starts the reader thread, and sends SOCVersion + SOCImARobot (nickname, robotCookie, rbclass). Because the bot speaks the same human-client SOCMessage protocol, the server needs no dedicated bot RPC. Connection handling is kept separate from per-game decision-making (the brain); built-in bots are pinned to the server version so most sync messages are skipped, and extension points are virtual hooks rather than edited constants. Third-party bot extension framework (sample3p): documented (unverified in code context) extension surface where a custom bot subclasses the same robot client/brain — Sample3PClient, Sample3PBrain, SampleDiscardStrategy — and may carry data through the reserved _EXT_BOT game-option namespace, rather than implementing a new interface. Robot robustness for unknown inventory items: living entirely inside SOCRobotBrain, when the game reaches inventory-item placement (expectPLACING_INV_ITEM) the brain tries planAndPlaceInvItem (with scenario handlers like planAndPlaceInvItemPlacement_SC_FTRI for known types) and, for an unrecognized item, takes a generic fallbackUnknownInvItemPlacement cancel path tracked by a single rejectedPlayInvItem per turn — preserving liveness via bounded retries and the per-second watchdog and routing the cancel through the normal SOCMessage protocol.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCRobotClient (connection layer)</strong>: Constructs from a ServerConnectInfo + credentials and on init() opens either a TCP Socket (hostname/port) or a same-JVM StringConnection (stringSocketName), then sends SOCVersion followed by SOCImARobot carrying nickname, robotCookie, and rbclass. Demultiplexes inbound SOCMessages to one SOCRobotBrain per seated game and writes the brain’s outbound actions back to the server. Extends SOCDisplaylessPlayerClient so it shares the headless client machinery.</li>
+<li><strong>SOCRobotBrain (per-game decision loop)</strong>: run() blocks on a CappedQueue&lt;SOCMessage&gt; fed by the client plus a once-per-second TIMINGPING from SOCRobotPinger. For each message it folds protocol updates into a local SOCGame mirror, recomputes ourTurn from the current player number, and drives a state machine of expect*/waitingFor* flag fields. On its turn it executes a buildingPlan (SOCBuildPlanStack) produced by the decision-maker, applies adaptive pause speed, enforces liveness with bounded per-turn retry counters and the per-second counter watchdog, and provides a generic fallbackUnknownInvItemPlacement cancel path (guarded by rejectedPlayInvItem / expectPLACING_INV_ITEM) for inventory items it has no placement strategy for. Wires in its collaborators via setStrategyFields() factory methods.</li>
+<li><strong>SOCRobotDM (decision-maker / build planner)</strong>: Generates the building/strategy plan consumed by SOCRobotBrain, drawing heavily on SOCPlayerTracker for board/opponent state and on SOCGame/SOCPlayer for current resources and pieces. Optionally emits decision traces to a DebugRecorder for analysis.</li>
+<li><strong>SOCPlayerTracker (board / opponent tracking)</strong>: Tracks possible and built pieces per SOCPlayer to feed plan scoring in SOCRobotDM.</li>
+<li><strong>SOCRobotNegotiator (trade evaluation)</strong>: Assesses trade offers against the bot’s current building plan and resource needs and decides accept/reject/counter behavior.</li>
+<li><strong>Robot strategy objects</strong>: Encapsulate individual decision policies behind brain factory hooks (setStrategyFields()) so behavior can be overridden without editing the brain’s main loop.</li>
+<li><strong>sample3p third-party bot extension framework</strong>: Provides Sample3PClient / Sample3PBrain (and a sample discard strategy) as the starting point for writing a custom bot by subclassing the same client/brain rather than implementing a new interface.</li>
+</ul>
+<h2>Boundaries</h2>
+<ul>
+<li><strong>SOCRobotClient (connection layer)</strong> boundary: Owns the bot’s network lifecycle and identity: establishing the connection, performing the robot handshake, running the reader thread, and routing per-game messages to the correct brain. Stops at decision-making — it does not plan or choose game actions.</li>
+<li><strong>SOCRobotBrain (per-game decision loop)</strong> boundary: Owns one game’s decision-making as a dedicated Thread — one brain instance per game the bot is seated in. The boundary is the gameEventQ blocking queue on the inbound side and emitted SOCMessage actions on the outbound side; it does not touch sockets directly (that is SOCRobotClient’s job).</li>
+<li><strong>SOCRobotDM (decision-maker / build planner)</strong> boundary: Owns the ‘what should we build next’ computation. The boundary is plan production: it reads game state and player trackers and returns a building plan to the brain; it never sends protocol messages or manages turn state itself.</li>
+<li><strong>SOCPlayerTracker (board / opponent tracking)</strong> boundary: Owns the bot’s modeled view of each player’s development on the board — potential settlements/roads, longest-road and win estimates — kept per player. Consumed by the decision-maker; it is a read-model over the game state, not an actor that mutates the game.</li>
+<li><strong>SOCRobotNegotiator (trade evaluation)</strong> boundary: Owns evaluation of incoming trade offers and formulation of counter-offers, separate from building strategy. Invoked by the brain when trade-related protocol messages arrive.</li>
+<li><strong>Robot strategy objects</strong> boundary: A family of replaceable strategy components (discard, opening placement, robber/monopoly and related decisions) installed into the brain via factory methods. The boundary is the strategy interface the brain calls; concrete behavior is swappable per bot.</li>
+<li><strong>sample3p third-party bot extension framework</strong> boundary: The documented extension surface for third-party bots: trivial subclasses of the robot client and brain that demonstrate the minimal override points, plus the reserved _EXT_BOT game-option namespace for passing bot-specific data.</li>
+</ul>
+<h2>Integration Points</h2>
+<ul>
+<li><strong>Robot ⇄ Server SOCMessage channel</strong>: Bots connect to the authoritative SOCServer exactly like human clients, speaking the identical SOCMessage string protocol. SOCRobotClient performs the version + SOCImARobot handshake (nickname, robotCookie, rbclass) and thereafter exchanges all game traffic over this channel; SOCRobotBrain consumes inbound messages from gameEventQ and emits action messages back through the client. — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+<li><strong>Local game-state mirror</strong>: SOCRobotBrain folds inbound protocol updates into a local SOCGame/SOCPlayer mirror so it can reason about state — recomputing ourTurn, applying piece placements, player-element and dice-result changes, and accepted trades. — see <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a></li>
+<li><strong>Planning over the game model</strong>: SOCRobotDM and SOCPlayerTracker read the game model to score and produce building plans — querying player resources, pieces, and board potential. — see <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a></li>
+<li><strong>Decision trace recording</strong>: The decision-maker optionally emits planning traces to a DebugRecorder utility for offline analysis of bot decisions.</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Architecture</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    Robot_strategy_objects["Robot strategy objects"]
+    SOCPlayerTracker__board___opponent_tracking_["SOCPlayerTracker (board / opponent tracking)"]
+    SOCRobotBrain__per_game_decision_loop_["SOCRobotBrain (per-game decision loop)"]
+    SOCRobotClient__connection_layer_["SOCRobotClient (connection layer)"]
+    SOCRobotDM__decision_maker___build_planner_["SOCRobotDM (decision-maker / build planner)"]
+    SOCRobotNegotiator__trade_evaluation_["SOCRobotNegotiator (trade evaluation)"]
+    sample3p_third_party_bot_extension_framework["sample3p third-party bot extension framework"]
+
+    ext_SOCServer___SOCMessage_protocol__Server___Message_Protocol_["SOCServer / SOCMessage protocol (Server & Message Protocol)"]:::default
+    ext_soc_util_DebugRecorder["soc.util.DebugRecorder"]:::default
+
+    Robot_strategy_objects -->|"calls (19)"| SOCPlayerTracker__board___opponent_tracking_
+    Robot_strategy_objects -->|"calls (1)"| SOCRobotClient__connection_layer_
+    Robot_strategy_objects -->|"calls (4)"| SOCRobotDM__decision_maker___build_planner_
+    Robot_strategy_objects -->|"calls (15)"| SOCRobotNegotiator__trade_evaluation_
+    SOCPlayerTracker__board___opponent_tracking_ -->|"calls (2)"| Robot_strategy_objects
+    SOCRobotClient__connection_layer_ -->|"calls (12)"| Robot_strategy_objects
+    SOCRobotClient__connection_layer_ -.->|"SOCMessage strings over TCP Socket or..."| ext_SOCServer___SOCMessage_protocol__Server___Message_Protocol_
+    SOCRobotDM__decision_maker___build_planner_ -->|"calls (12)"| Robot_strategy_objects
+    SOCRobotDM__decision_maker___build_planner_ -->|"calls (36)"| SOCPlayerTracker__board___opponent_tracking_
+    SOCRobotDM__decision_maker___build_planner_ -->|"in-process Java calls"| SOCRobotBrain__per_game_decision_loop_
+    SOCRobotDM__decision_maker___build_planner_ -.->|"in-process Java calls"| ext_soc_util_DebugRecorder
+    SOCRobotNegotiator__trade_evaluation_ -->|"calls (5)"| Robot_strategy_objects
+    SOCRobotNegotiator__trade_evaluation_ -->|"calls (2)"| SOCPlayerTracker__board___opponent_tracking_
+    SOCRobotNegotiator__trade_evaluation_ -->|"calls (2)"| SOCRobotDM__decision_maker___build_planner_
+    sample3p_third_party_bot_extension_framework -->|"imports (3), calls (1), inherits (1)"| Robot_strategy_objects
+    sample3p_third_party_bot_extension_framework -->|"imports (2), inherits (1)"| SOCRobotClient__connection_layer_
+    sample3p_third_party_bot_extension_framework -->|"imports (1)"| SOCRobotNegotiator__trade_evaluation_
+
+
+
+
+
+
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCRobotBrain (per-game decision loop)</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCRobotClient (connection layer)</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCRobotDM (decision-maker / build planner)</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCPlayerTracker (board / opponent tracking)</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCRobotNegotiator (trade evaluation)</code></li>
+<li><code class="code-ref" title="source file in your repository">sample3p third-party bot extension framework</code></li>
+<li><code class="code-ref" title="source file in your repository">Decision trace recording integration</code></li>
+<li><code class="code-ref" title="source file in your repository">Robot ⇄ Server SOCMessage channel</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCRobotBrain (per-game decision loop)</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCRobotClient (connection layer)</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotClient.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCRobotDM (decision-maker / build planner)</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotDM.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCPlayerTracker (board / opponent tracking)</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCPlayerTracker.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCRobotNegotiator (trade evaluation)</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotNegotiator.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: sample3p third-party bot extension framework</td>
+<td></td>
+<td>src/main/java/soc/robot/sample3p</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Decision trace recording integration</td>
+<td></td>
+<td>src/main/java/soc/util/DebugRecorder.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="135.7"/>
+        </svg>
+        <div class="ring-num">0.40</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

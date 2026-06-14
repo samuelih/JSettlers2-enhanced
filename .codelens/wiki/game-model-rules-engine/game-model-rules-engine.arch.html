@@ -1,0 +1,206 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Game Model &amp; Rules Engine · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item active" href="../game-model-rules-engine/game-model-rules-engine.arch.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../game-model-rules-engine/cities-knights-scenario-sc-ck.design.html"><span class="nm">Cities &amp; Knights Scenario (SC_CK)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/core-game-state-board-model.design.html"><span class="nm">Core Game State &amp; Board Model</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/custom-map-loading-validation.design.html"><span class="nm">Custom Map Loading &amp; Validation</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.api-boundary.html"><span class="nm">Game Model &amp; Rules Engine API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/game-options-scenarios.design.html"><span class="nm">Game Options &amp; Scenarios</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.gateway.html"><span class="nm">Game Model &amp; Rules Engine Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.testplan.html"><span class="nm">Game Model &amp; Rules Engine Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Game Model &amp; Rules Engine</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-arch">ARCH</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:80%"></i></span>
+      <span class="conf-val">0.80</span></span></div>
+        <h1 class="doc-title">Game Model &amp; Rules Engine</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Game Model &amp; Rules Engine</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Authoritative-server, partial-client split</strong> — Per doc/Readme.developer.md, complete game state is deliberately held at the server in SOCGame while clients hold only partial state (other players’ resources and dev-card types may be unknown) — this keeps the server the single source of truth and lets non-Java clients/bots interoperate by mirroring deltas rather than computing authoritative state.</li>
+<li><strong>Rules-as-data extensibility</strong> — Game rules, house rules, and scenarios are modeled as a convention-driven SOCGameOption/SOCScenario data registry keyed by short name strings rather than as code branches, so new rules and scenarios are added as catalog entries with keyname-encoded semantics — the central extensibility mechanism the epic is built around.</li>
+<li><strong>Ship-inactive scenario groundwork</strong> — Cities &amp; Knights ships as inactive-hidden <code>_SC_CK</code> + <code>_CK_*</code> groundwork inside the mainline model rather than on a separate feature branch, letting incomplete scenario rules live in the shipped code while staying inert in normal play until explicitly activated.</li>
+</ul>
+<h2>Overview</h2>
+<p>Core Game State &amp; Board Model: SOCGame is the single authoritative holder of complete game state at the server; logic advances there and the server pushes deltas (SOCGameState, SOCSetPlayedDevCard, etc.) so each client’s local SOCGame carries only partial state. A SOCGame owns one SOCBoard built via SOCBoard.BoardFactory.createBoard with game options driving construction; the board holds no back-reference to game or players, the sea board is a separate SOCBoardLarge subclass, thread-safety is an explicit monitor, and game state is modeled as documented integer constants. Game Options &amp; Scenarios: Rules, house rules, and scenarios are expressed as data, not branching code — SOCGameOptionSet.getAllKnownOptions() builds the authoritative SOCGameOption catalog and SOCScenario.initAllScenarios() the scenario catalog, each scenario carrying an scOpts string that decomposes into option key/value pairs. Option semantics are encoded in the keyname (<code>_SC_</code>, leading-underscore internal, <code>_3</code> third-party, <code>_EXT_</code> reserved); both options and scenarios extend SOCVersionedItem for client/server version negotiation, and an optFlags bitfield gives graduated drop/visibility/compat semantics. Cities &amp; Knights Scenario (SC_CK): Decomposed into the <code>_SC_CK</code> scenario flag plus five <code>_CK_*</code> capability options registered through getAllKnownOptions(), shipped inactive-hidden so normal play never selects them and the rules stay inert until activated. City-improvement and knight tracks are modeled as SOCSpecialItem instances (not new SOCMessage types), the three commodities are held outside SOCResourceSet and charged in playerPickItem, multi-item special-item typeKeys compose as optionName + “/” + shortKey, and all authoritative C&amp;K state lives in SOCGame at the server. Custom Map Loading &amp; Validation: At server startup (after SOCServer verifies GSON on the classpath), loadAndRegisterAll scans jsettlers.custommaps.dir for *.map.json; loadAndRegisterOne reads UTF-8, GSON-deserializes a CustomMapJson, and derives an 8-char SC_X scenario key from the filename. CustomMapValidator.validateAndParse converts the raw DTO into a ParsedCustomMap of parallel integer arrays (validating hex types, dice numbers, land areas) shaped to the makeNewBoard_placeHexes contract. Validation/parsing is split from I/O and registration, a bad map file never aborts startup, and maps register as SOCScenarios under the reserved SC_X prefix rather than introducing a new board type.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCGame (Authoritative Game State)</strong>: Single source of truth for a game in progress: advances game state, validates and applies player actions, and produces the deltas the server pushes to clients. Composes SOCPlayer and SOCBoard rather than letting them reference back up to it.</li>
+<li><strong>SOCPlayer (Per-Player State)</strong>: Models an individual player’s holdings and legal-placement bookkeeping within a single game; mutated by SOCGame as actions are applied and queried when computing legal moves and victory points.</li>
+<li><strong>SOCBoard / SOCBoardLarge (Board Topology Model)</strong>: Provides authoritative board geometry and layout queries consumed by SOCGame and SOCPlayer; constructed through SOCBoard.BoardFactory.createBoard with game options driving which layout is built.</li>
+<li><strong>Game Options &amp; Scenario Registry</strong>: Defines which rules and scenarios exist and how they decompose into option key/value pairs (scOpts strings); drives board construction and rule gating without branching code. Queried by the server during game creation and version negotiation.</li>
+<li><strong>Cities &amp; Knights Scenario (SC_CK)</strong>: Encodes C&amp;K rules (commodities, improvement tracks, knights, barbarians, metropolis) as data + special items within SOCGame, gated entirely on the <code>_CK_*</code>/<code>_SC_CK</code> options so the rules stay inert until activated.</li>
+<li><strong>Custom Map Loading &amp; Validation</strong>: Reads, GSON-deserializes, validates (structure/safety, not playability), and registers custom maps as SOCScenarios without ever aborting server startup on a bad file.</li>
+</ul>
+<h2>Boundaries</h2>
+<ul>
+<li><strong>SOCGame (Authoritative Game State)</strong> boundary: Owns the complete, authoritative game state and turn/state-machine logic at the server; clients hold only a partial mirror. Holds the player roster, current-player and game-state integer constants, the dice/robber lifecycle, and (when activated) Cities &amp; Knights state. Owns exactly one SOCBoard per game.</li>
+<li><strong>SOCPlayer (Per-Player State)</strong> boundary: Owns one player’s seat-scoped state — resources, pieces, inventory/dev cards, settlement and road placements, and per-player scenario counters. Reads board geometry via SOCBoard/SOCBoardLarge; does not own board topology.</li>
+<li><strong>SOCBoard / SOCBoardLarge (Board Topology Model)</strong> boundary: Owns the hex/edge/node coordinate system and board layout (hex types, dice numbers, ports, land areas). SOCBoardLarge is a distinct subclass carrying the sea board and every scenario layout rather than parameterizing SOCBoard. Holds no back-reference to its owning game or players.</li>
+<li><strong>Game Options &amp; Scenario Registry</strong> boundary: Owns the convention-driven data catalog of rules, house rules, and scenarios: SOCGameOption (one rule/flag) registered via SOCGameOptionSet.getAllKnownOptions(), and SOCScenario.initAllScenarios() building the scenario catalog. Keyname conventions (<code>_SC_</code> scenario, leading-underscore internal, <code>_3</code> third-party, <code>_EXT_</code> reserved) encode semantics; both extend the shared SOCVersionedItem base for client/server version negotiation.</li>
+<li><strong>Cities &amp; Knights Scenario (SC_CK)</strong> boundary: Owns the shipped-but-inactive Cities &amp; Knights groundwork: the <code>_SC_CK</code> scenario flag plus five <code>_CK_*</code> capability options, with city-improvement and knight tracks modeled as SOCSpecialItem instances and the three commodities held outside SOCResourceSet. Registered inactive-hidden so normal play never selects it.</li>
+<li><strong>Custom Map Loading &amp; Validation</strong> boundary: Owns server-side ingestion of user-defined board layouts: CustomMapLoader scans <code>jsettlers.custommaps.dir</code> for <code>*.map.json</code> and registers each under the reserved <code>SC_X</code> scenario prefix; CustomMapValidator converts the raw GSON DTO into a ParsedCustomMap of parallel integer arrays shaped to the makeNewBoard_placeHexes contract. Lives in soc.server, integrating with this epic’s scenario registry.</li>
+</ul>
+<h2>Integration Points</h2>
+<ul>
+<li><strong>Server game logic drives the game model</strong>: SOCGameMessageHandler and SOCGameHandler translate in-game player-action messages into calls on SOCGame and SOCPlayer, then broadcast resulting state deltas. This is the primary inbound edge into the game model from the server runtime. — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+<li><strong>Server queries the option/scenario registry at game creation</strong>: SOCServer consults SOCGameOptionSet to validate and resolve game options when creating games and negotiating client/server versions; custom-map registration also feeds new SOCScenarios into this catalog. — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+<li><strong>Clients and robots mirror partial game state</strong>: The desktop client (SOCBoardPanel, SOCPlayerInterface, MessageHandler), the displayless base client, and robot brains each hold a local SOCGame/SOCPlayer mirror updated from server deltas; they read the model to render and to make decisions but are not authoritative. — see <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a></li>
+<li><strong>Custom-map ingestion registers into the scenario registry</strong>: CustomMapLoader (in soc.server) registers validated ParsedCustomMap layouts as SOCScenarios under the reserved SC_X prefix, extending this epic’s scenario catalog at server startup.</li>
+<li><strong>Saved-game persistence reads/writes the game model</strong>: SavedGameModel maps SOCGame/SOCPlayer state to and from a JSON snapshot for the <em>SAVEGAME</em>/<em>LOADGAME</em> debug feature, reading authoritative state and reconstructing it on load. — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Architecture</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+
+    Cities___Knights_Scenario__SC_CK_["Cities & Knights Scenario (SC_CK)"]
+    Custom_Map_Loading___Validation["Custom Map Loading & Validation"]
+    Game_Options___Scenario_Registry["Game Options & Scenario Registry"]
+    SOCBoard___SOCBoardLarge__Board_Topology_Model_["SOCBoard / SOCBoardLarge (Board Topology Model)"]
+    SOCGame__Authoritative_Game_State_["SOCGame (Authoritative Game State)"]
+    SOCPlayer__Per_Player_State_["SOCPlayer (Per-Player State)"]
+
+    Cities___Knights_Scenario__SC_CK_ -->|"imports (1), calls (19)"| Game_Options___Scenario_Registry
+    Cities___Knights_Scenario__SC_CK_ -->|"calls (2)"| SOCBoard___SOCBoardLarge__Board_Topology_Model_
+    Cities___Knights_Scenario__SC_CK_ -->|"imports (1), calls (37)"| SOCGame__Authoritative_Game_State_
+    Cities___Knights_Scenario__SC_CK_ -->|"imports (1), calls (33)"| SOCPlayer__Per_Player_State_
+    Custom_Map_Loading___Validation -->|"calls (2)"| Cities___Knights_Scenario__SC_CK_
+    Custom_Map_Loading___Validation -->|"in-process Java calls"| Game_Options___Scenario_Registry
+    Custom_Map_Loading___Validation -->|"imports (1)"| SOCBoard___SOCBoardLarge__Board_Topology_Model_
+    Game_Options___Scenario_Registry -->|"calls (1)"| Cities___Knights_Scenario__SC_CK_
+    SOCBoard___SOCBoardLarge__Board_Topology_Model_ -->|"calls (3)"| Cities___Knights_Scenario__SC_CK_
+    SOCBoard___SOCBoardLarge__Board_Topology_Model_ -->|"calls (1)"| SOCPlayer__Per_Player_State_
+    SOCGame__Authoritative_Game_State_ -->|"calls (10)"| Cities___Knights_Scenario__SC_CK_
+    SOCGame__Authoritative_Game_State_ -->|"in-process Java calls / GSON JSON — calls (28)"| SOCBoard___SOCBoardLarge__Board_Topology_Model_
+    SOCGame__Authoritative_Game_State_ -->|"calls (165)"| SOCPlayer__Per_Player_State_
+    SOCPlayer__Per_Player_State_ -->|"calls (3)"| Cities___Knights_Scenario__SC_CK_
+    SOCPlayer__Per_Player_State_ -->|"calls (50)"| SOCBoard___SOCBoardLarge__Board_Topology_Model_
+    SOCPlayer__Per_Player_State_ -->|"calls (37)"| SOCGame__Authoritative_Game_State_
+
+
+
+
+
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCGame (authoritative game state)</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCPlayer (per-player state)</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCBoard topology model</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCBoardLarge (sea board / scenario board)</code></li>
+<li><code class="code-ref" title="source file in your repository">Game options registry</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCGameOption</code></li>
+<li><code class="code-ref" title="source file in your repository">Custom map loader</code></li>
+<li><code class="code-ref" title="source file in your repository">Cities &amp; Knights tests exercising SC_CK</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCGame (authoritative game state)</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java:1637-1732</td>
+<td style="text-align:right">0.95</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCPlayer (per-player state)</td>
+<td></td>
+<td>src/main/java/soc/game/SOCPlayer.java:944-1027</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCBoard topology model</td>
+<td></td>
+<td>src/main/java/soc/game/SOCBoard.java:753-786</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCBoardLarge (sea board / scenario board)</td>
+<td></td>
+<td>src/main/java/soc/game/SOCBoardLarge.java:686-724</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Game options registry</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGameOptionSet.java:546-910</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCGameOption</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGameOption.java:976-985</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Custom map loader</td>
+<td></td>
+<td>src/main/java/soc/server/CustomMapLoader.java:59-519</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Cities &amp; Knights tests exercising SC_CK</td>
+<td></td>
+<td>src/test/java/soctest/game/TestCitiesAndKnights.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../optional-database/optional-database.arch.html">Optional Database</a>, <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="45.2"/>
+        </svg>
+        <div class="ring-num">0.80</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

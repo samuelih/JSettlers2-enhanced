@@ -654,6 +654,24 @@ public class SOCPlayerInterface extends JFrame
     private volatile javax.swing.Timer frameResizeDoneTimer;
 
     /**
+     * Maximum number of game text lines kept for the event timeline window.
+     * @since 2.7.00
+     */
+    /*package*/ static final int EVENT_TIMELINE_MAX_LINES = 500;
+
+    /**
+     * Recent game-action text lines, independent of {@link #textDisplay}'s shorter snipping limit.
+     * @since 2.7.00
+     */
+    private final List<String> eventTimelineLines = new ArrayList<String>();
+
+    /**
+     * Optional non-modal window showing {@link #eventTimelineLines}.
+     * @since 2.7.00
+     */
+    private SOCGameEventTimelineFrame eventTimelineFrame;
+
+    /**
      * number of columns in the text output area
      */
     protected int ncols;
@@ -1168,7 +1186,7 @@ public class SOCPlayerInterface extends JFrame
         add(textDisplay);
         if (is6player)
             textDisplay.addMouseListener(this);
-        textComponentAddClipboardContextMenu(textDisplay);
+        textComponentAddClipboardContextMenu(textDisplay, true);
 
         chatDisplay = new SnippingTextArea("", 40, 80, TextArea.SCROLLBARS_VERTICAL_ONLY, 100);
         chatDisplay.setFont(sans10Font);
@@ -1181,7 +1199,7 @@ public class SOCPlayerInterface extends JFrame
         if (is6player)
             chatDisplay.addMouseListener(this);
         add(chatDisplay);
-        textComponentAddClipboardContextMenu(chatDisplay);
+        textComponentAddClipboardContextMenu(chatDisplay, false);
 
         textInput = new JTextField();
         if (SOCPlayerClient.IS_PLATFORM_MAC_OSX)
@@ -1309,6 +1327,7 @@ public class SOCPlayerInterface extends JFrame
      *<P>
      * As of v2.7.00 also adds gameplay build hotkeys: Settlement (Ctrl/Cmd-S),
      * City (Ctrl/Cmd-K), and (in games with no Special Building Phase) Buy Dev Card (Ctrl/Cmd-B).
+     * Also adds the Event Timeline window hotkey (Ctrl/Cmd-T).
      * Roll (Ctrl/Cmd-R) and Done/End-turn (Ctrl/Cmd-D) are added separately in {@link SOCHandPanel}.
      * All hotkeys require the Ctrl/Cmd modifier, so they never fire while typing in the chat input.
      * @since 2.3.00
@@ -1329,6 +1348,7 @@ public class SOCPlayerInterface extends JFrame
         am.put("hotkey_buildcity", new PIHotkeyActionListener(PIHotkeyActionListener.BUILD_CITY));
         if (game.maxPlayers <= 4)
             am.put("hotkey_buydevcard", new PIHotkeyActionListener(PIHotkeyActionListener.BUY_DEV_CARD));
+        am.put("hotkey_eventtimeline", new PIHotkeyActionListener(PIHotkeyActionListener.SHOW_EVENT_TIMELINE));
 
         final InputMap im = buildingPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         addHotkeysInputMap_one(im, KeyEvent.VK_A, "hotkey_accept", null);
@@ -1341,6 +1361,7 @@ public class SOCPlayerInterface extends JFrame
         if (game.maxPlayers <= 4)
             // Ctrl/Cmd-B is reserved for Ask Special Build in 6-player games (added above when maxPlayers > 4)
             addHotkeysInputMap_one(im, KeyEvent.VK_B, "hotkey_buydevcard", null);
+        addHotkeysInputMap_one(im, KeyEvent.VK_T, "hotkey_eventtimeline", null);
 
         textInput.getActionMap().put("hotkey_selectAllOrTradeAccept", new AbstractAction()
         {
@@ -1375,9 +1396,10 @@ public class SOCPlayerInterface extends JFrame
      * Other platforms can use this one, they have no such standard menu.
      *
      * @param tfield Textfield to add to, like {@link #chatDisplay} or {@link #textDisplay}
+     * @param includeTimeline  If true, include a menu item to open the event timeline
      * @since 2.3.00
      */
-    private static void textComponentAddClipboardContextMenu(final TextComponent tfield)
+    private void textComponentAddClipboardContextMenu(final TextComponent tfield, final boolean includeTimeline)
     {
         final PopupMenu menu = new PopupMenu();
 
@@ -1407,6 +1429,21 @@ public class SOCPlayerInterface extends JFrame
             }
         });
         menu.add(mi);
+
+        if (includeTimeline)
+        {
+            menu.addSeparator();
+
+            mi = new MenuItem(strings.get("interface.timeline.open"));  // "Open Event Timeline"
+            mi.addActionListener(new ActionListener()
+            {
+                public void actionPerformed(ActionEvent ae)
+                {
+                    showEventTimeline();
+                }
+            });
+            menu.add(mi);
+        }
 
         tfield.add(menu);
         tfield.addMouseListener(new MouseAdapter()
@@ -1455,6 +1492,75 @@ public class SOCPlayerInterface extends JFrame
     public SOCGameStatistics getGameStats()
     {
         return gameStats;
+    }
+
+    /**
+     * Show or bring forward the game event timeline window.
+     * @since 2.7.00
+     */
+    public void showEventTimeline()
+    {
+        if (eventTimelineFrame == null)
+            eventTimelineFrame = new SOCGameEventTimelineFrame(this);
+
+        eventTimelineFrame.updateGameTitle(game.getName());
+        eventTimelineFrame.setEvents(new ArrayList<String>(eventTimelineLines));
+        eventTimelineFrame.setVisible(true);
+        eventTimelineFrame.toFront();
+    }
+
+    /**
+     * Callback from {@link SOCGameEventTimelineFrame} when its window closes.
+     * @param frame  Timeline window that closed
+     * @since 2.7.00
+     */
+    void eventTimelineWindowClosed(final SOCGameEventTimelineFrame frame)
+    {
+        if (eventTimelineFrame == frame)
+            eventTimelineFrame = null;
+    }
+
+    /**
+     * Clear the event timeline history, for example after board reset creates a fresh game UI.
+     * @since 2.7.00
+     */
+    private void clearEventTimeline()
+    {
+        eventTimelineLines.clear();
+        if (eventTimelineFrame != null)
+            eventTimelineFrame.setEvents(eventTimelineLines);
+    }
+
+    /**
+     * Append one already-trimmed game text line to the main game text display and event timeline.
+     * @param line  Text line, without a trailing newline
+     * @since 2.7.00
+     */
+    private void appendGameTextLine(final String line)
+    {
+        textDisplay.append(line + "\n");  // TextArea will soft-wrap within the line
+
+        eventTimelineLines.add(line);
+        while (eventTimelineLines.size() > EVENT_TIMELINE_MAX_LINES)
+            eventTimelineLines.remove(0);
+
+        if (eventTimelineFrame != null)
+            eventTimelineFrame.appendEvent(line);
+    }
+
+    /**
+     * Append one or more game text lines to the main game text display and event timeline.
+     * @param text  Text, optionally containing embedded newlines
+     * @since 2.7.00
+     */
+    private void appendGameText(final String text)
+    {
+        StringTokenizer st = new StringTokenizer(text, "\n", false);
+        while (st.hasMoreElements())
+        {
+            final String tk = st.nextToken().trim();
+            appendGameTextLine(tk);
+        }
     }
 
     /**
@@ -1789,8 +1895,9 @@ public class SOCPlayerInterface extends JFrame
             if (clientHand != null)
                 clientHand.updateAtOurGameState();
         } catch (IllegalStateException e) {
-            textDisplay.append
-              ("*** Can't setDebugFreePlacement(" + setOn+ ") for " + game.getName() + " in state " + game.getGameState() + "\n");
+            appendGameTextLine
+              ("*** Can't setDebugFreePlacement(" + setOn + ") for " + game.getName()
+               + " in state " + game.getGameState());
         }
     }
 
@@ -2283,13 +2390,13 @@ public class SOCPlayerInterface extends JFrame
 
         if (client.getServerVersion(game) < 1100)
         {
-            textDisplay.append("*** " + strings.get("reset.server.support.too.old") + "\n");
+            appendGameTextLine("*** " + strings.get("reset.server.support.too.old"));
                 // "This server does not support board reset, server is too old."
             return;
         }
         if (game.getResetVoteActive())
         {
-            textDisplay.append("*** " + strings.get("reset.voting.already.active") + "\n");
+            appendGameTextLine("*** " + strings.get("reset.voting.already.active"));
                 // "Voting is already active. Try again when voting completes."
             return;
         }
@@ -2297,7 +2404,7 @@ public class SOCPlayerInterface extends JFrame
         if (! pl.hasAskedBoardReset())
             client.getGameMessageSender().resetBoardRequest(game);
         else
-            textDisplay.append("*** " + strings.get("reset.you.may.ask.once") + "\n");
+            appendGameTextLine("*** " + strings.get("reset.you.may.ask.once"));
                 // "You may ask only once per turn to reset the board."
     }
 
@@ -2326,7 +2433,7 @@ public class SOCPlayerInterface extends JFrame
      */
     public void resetBoardRejected()
     {
-        textDisplay.append("*** " + strings.get("reset.was.rejected") + "\n");  // "The board reset was rejected."
+        appendGameTextLine("*** " + strings.get("reset.was.rejected"));  // "The board reset was rejected."
         for (int i = 0; i < hands.length; ++i)
         {
             // Clear all displayed votes
@@ -2473,7 +2580,7 @@ public class SOCPlayerInterface extends JFrame
     public void printKeyed(final String key)
         throws MissingResourceException
     {
-        textDisplay.append("* " + strings.get(key) + "\n");  // TextArea will soft-wrap within the line
+        appendGameTextLine("* " + strings.get(key));
     }
 
     /**
@@ -2490,7 +2597,7 @@ public class SOCPlayerInterface extends JFrame
     public void printKeyed(final String key, final Object ... params)
         throws MissingResourceException
     {
-        textDisplay.append("* " + strings.get(key, params) + "\n");  // TextArea will soft-wrap within the line
+        appendGameTextLine("* " + strings.get(key, params));
     }
 
     /**
@@ -2509,7 +2616,7 @@ public class SOCPlayerInterface extends JFrame
     public void printKeyedSpecial(final String key, final Object ... params)
         throws MissingResourceException, IllegalArgumentException
     {
-        textDisplay.append("* " + strings.getSpecial(game, key, params) + "\n");  // TextArea will soft-wrap within line
+        appendGameTextLine("* " + strings.getSpecial(game, key, params));
     }
 
     /**
@@ -2543,12 +2650,7 @@ public class SOCPlayerInterface extends JFrame
         if (addStarPrefix && (s.charAt(0) != '*'))
             s = "* " + s;
 
-        StringTokenizer st = new StringTokenizer(s, "\n", false);
-        while (st.hasMoreElements())
-        {
-            String tk = st.nextToken().trim();
-            textDisplay.append(tk + "\n");  // TextArea will soft-wrap within the line
-        }
+        appendGameText(s);
     }
 
     /**
@@ -2606,12 +2708,12 @@ public class SOCPlayerInterface extends JFrame
 
         if (wasDeleted)
         {
-            textDisplay.append("*** " + strings.get("interface.error.game.has_been_deleted") + " ***\n");
+            appendGameTextLine("*** " + strings.get("interface.error.game.has_been_deleted") + " ***");
                 // "Game has been deleted."
         } else {
-            textDisplay.append("* " + strings.get("interface.error.lost.conn") + "\n");
+            appendGameTextLine("* " + strings.get("interface.error.lost.conn"));
                 // "Lost connection to the server."
-            textDisplay.append("*** " + strings.get("interface.error.game.stopped") + " ***\n");
+            appendGameTextLine("*** " + strings.get("interface.error.game.stopped") + " ***");
                 // "Game stopped."
         }
 
@@ -3883,11 +3985,14 @@ public class SOCPlayerInterface extends JFrame
 
         getContentPane().removeAll();  // old sub-components
         initUIElements(false);  // new sub-components
+        clearEventTimeline();
 
         // Clear from possible "game over" titlebar
         setTitle(strings.get("interface.title.game", game.getName()) +
                  (game.isPractice ? "" : " [" + getClientNickname() + "]"));
                 // "Settlers of Catan Game: {0}"
+        if (eventTimelineFrame != null)
+            eventTimelineFrame.updateGameTitle(game.getName());
         boardPanel.debugShowPotentials = boardDebugShow;
 
         getContentPane().revalidate();
@@ -3903,10 +4008,9 @@ public class SOCPlayerInterface extends JFrame
             + strings.get( ((oldGameState != SOCGame.OVER)
               ? "reset.board.was.reset"     // "The board was reset by {0}."
               : "reset.new.game.started"),  // "New game started by {0}.
-              requesterName)
-            + "\n";
-        textDisplay.append(resetMsg);
-        chatDisplay.append(resetMsg);
+              requesterName);
+        appendGameTextLine(resetMsg);
+        chatDisplay.append(resetMsg + "\n");
         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
         // Further messages from server will fill in the rest.
@@ -5883,6 +5987,13 @@ public class SOCPlayerInterface extends JFrame
             if (pi.buildingPanel != null)
                 pi.buildingPanel.gameWindowClosed();
 
+            // Close event timeline frame if showing
+            if (pi.eventTimelineFrame != null)
+            {
+                pi.eventTimelineFrame.dispose();
+                pi.eventTimelineFrame = null;
+            }
+
             // Remember last-chosen face icon
             if (UserPreferences.getPref(SOCPlayerClient.PREF_FACE_ICON, 0) > 0)
                 UserPreferences.putPref(SOCPlayerClient.PREF_FACE_ICON, pi.client.lastFaceChange);
@@ -6045,6 +6156,7 @@ public class SOCPlayerInterface extends JFrame
      * As of v2.7.00 also handles gameplay build hotkeys ({@link #BUILD_SETTLEMENT}, {@link #BUILD_CITY},
      * {@link #BUY_DEV_CARD}), which route through {@link SOCBuildingPanel#clickBuildingButton(SOCGame, String, boolean)}
      * just like the building-panel buttons; that method ignores them unless the build/buy is currently allowed.
+     * Also handles the Event Timeline hotkey ({@link #SHOW_EVENT_TIMELINE}).
      *<P>
      * Before v2.5.00 this class was {@code TradeHotkeyActionListener}.
      * @since 2.3.00
@@ -6076,6 +6188,12 @@ public class SOCPlayerInterface extends JFrame
          * @since 2.7.00
          */
         public static final int BUY_DEV_CARD = 7;
+
+        /**
+         * Show the event timeline window.
+         * @since 2.7.00
+         */
+        public static final int SHOW_EVENT_TIMELINE = 8;
 
         /**
          * {@link #ACCEPT}, {@link #ASK_SPECIAL_BUILD}, etc.
@@ -6122,6 +6240,9 @@ public class SOCPlayerInterface extends JFrame
                     break;
                 case BUY_DEV_CARD:
                     buildingPanel.clickBuildingButton(game, SOCBuildingPanel.CARD, false);
+                    break;
+                case SHOW_EVENT_TIMELINE:
+                    showEventTimeline();
                     break;
                 }
 

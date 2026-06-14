@@ -1,0 +1,213 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TypeScript SOCMessage Protocol Layer · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a><div class="nav-sub"><a class="nav-item" href="../web-protocol-map-editor/web-protocol-map-editor.arch.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../web-protocol-map-editor/custom-map-editor-canvas-palette.design.html"><span class="nm">Custom Map Editor Canvas &amp; Palette</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-protocol-map-editor/map-schema-custom-map-json-model.design.html"><span class="nm">Map Schema &amp; Custom-Map JSON Model</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../web-protocol-map-editor/typescript-socmessage-protocol-layer.design.html"><span class="nm">TypeScript SOCMessage Protocol Layer</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-protocol-map-editor/contracts/web-protocol-map-editor.gateway.html"><span class="nm">Web Protocol &amp; Map Editor Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../web-protocol-map-editor/contracts/web-protocol-map-editor.testplan.html"><span class="nm">Web Protocol &amp; Map Editor Test Plan</span><span class="tt tt-testplan">test</span></a></div></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Web Protocol &amp; Map Editor</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:70%"></i></span>
+      <span class="conf-val">0.70</span></span></div>
+        <h1 class="doc-title">TypeScript SOCMessage Protocol Layer</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>TypeScript SOCMessage Protocol Layer</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Browser-client interop over WebSocket</strong> — constants.ts’s header states these values exist ‘so the TypeScript client can interoperate over WebSocket’ with the Java SOCServer, each frame carrying one <code>toCmd()</code> string (per web/docs/MIGRATION_SPEC.md section 2). The protocol layer is the foundation of the web port: it lets a fresh React/TypeScript client reuse the existing Java server unchanged rather than re-implementing game logic.</li>
+<li><strong>Cross-language source-of-truth discipline</strong> — The code repeatedly anchors itself to the Java source (‘Keep these values in sync with src/main/java/soc/message/SOCMessage.java’, ‘Verified against SOCGameOption.java’), and even corrects a misnamed codepoint in the Java comment. The distinctive rationale here is that Java remains the protocol’s authority and the TypeScript port is a tracked mirror, not an independent definition.</li>
+</ul>
+<h2>Overview</h2>
+<p>This module re-implements the Java SOCMessage string wire protocol in TypeScript so the browser client speaks the exact SEP-delimited unicode-string format the Java <code>SOCServer</code> uses, one <code>toCmd()</code> string per WebSocket text frame. Outbound, <code>encode(msg)</code> is a thin wrapper returning <code>msg.toCmd()</code>. Inbound, <code>decode(raw)</code> reads the integer type id up to the first <code>SEP</code>, validates it the way Java’s <code>Integer.parseInt</code> would, looks the id up in the module-level <code>parserRegistry</code>, and hands the remaining data portion to the matched parser — returning <code>null</code> for an unknown id or any parser error, just as Java’s <code>toMsg</code> ignores unrecognized types. Per-type parsers self-register at import time via <code>registerParser</code>, and <code>constants.ts</code> supplies the shared numeric ordinals all message modules reference.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCMessage.ts</strong> (referenced; defined externally)</li>
+<li><strong>constants.ts</strong> (referenced; defined externally)</li>
+<li><strong>index.ts</strong> (referenced; defined externally)</li>
+<li><strong>parserRegistry</strong> (referenced; defined externally)</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>constants.ts</strong> (outbound) — via <code>import { SEP } from './constants'</code> in SOCMessage.ts (evidence: web/src/protocol/SOCMessage.ts top-level import; diagram_dependency edge SOCMessage.ts --imports–&gt; constants.ts)</li>
+<li><strong>Ported message modules (web/src/protocol/messages/*.ts)</strong> (inbound) — via each module calls <code>registerParser(type, parser)</code> on import; index.ts re-exports them to trigger that side-effect (evidence: web/src/protocol/index.ts — ‘Each self-registers its parser on import’ re-export block)</li>
+<li><strong>Java SOCServer</strong> (bidirectional) — via SEP-delimited <code>toCmd()</code> strings over WebSocket text frames (web/docs/MIGRATION_SPEC.md section 2) (evidence: web/src/protocol/constants.ts header comment ‘so the TypeScript client can interoperate over WebSocket’)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Port the Java string wire format verbatim instead of inventing a binary or JSON protocol</strong>: The browser client must interoperate with the unmodified Java <code>SOCServer</code>; constants.ts states the values ‘mirror the exact wire-format tokens and message-type IDs used by the Java SOCServer so the TypeScript client can interoperate over WebSocket’ with one <code>toCmd()</code> string per frame. Keeping byte-for-byte parity is the whole point — encode is therefore just a <code>toCmd()</code> pass-through with no transformation.</li>
+<li><strong>Self-registering parser registry keyed by type id, rather than a central switch statement</strong>: Mirrors Java’s <code>SOCMessage.toMsg</code> switch while keeping each message module self-contained: a module registers its own parser on import, and <code>decode</code> only knows the <code>Map</code>. The cost is reliance on import side-effects — <code>index.ts</code> must re-export every message module so its <code>registerParser()</code> runs; this is documented as a deliberate contract in index.ts’s header comment.</li>
+<li><strong><code>decode</code> returns <code>null</code> (never throws) on unknown or malformed input</strong>: Faithful to Java’s <code>toMsg</code>, which wraps parsing in try/catch and silently ignores unknown types. The parser call is wrapped in try/catch and an absent registry entry returns <code>null</code>, so a single bad frame can’t crash the client’s receive loop.</li>
+<li><strong>Reject type tokens with a regex guard instead of trusting JS <code>Number.parseInt</code></strong>: JS <code>Number.parseInt</code> is lenient (‘1083abc’ → 1083) whereas Java <code>Integer.parseInt</code> rejects any non-integer token. The <code>/^[+-]?\d+$/</code> guard reproduces Java’s stricter acceptance so the two implementations agree on exactly which frames are valid — a cross-language fidelity concern, not a style choice.</li>
+<li><strong><code>const</code> objects with derived literal-union types instead of TypeScript <code>enum</code>s</strong>: Lets message modules reference shared numeric ordinals (e.g. <code>MessageType.VERSION</code>) rather than magic numbers, while the <code>(typeof X)[keyof typeof X]</code> pattern yields a precise union type. Plain const objects also keep the values byte-identical to the Java ordinals and avoid <code>enum</code> runtime quirks. Comments flag where ordinals differ from the wire encoding (e.g. <code>SeatLockState</code> ordinals vs. the <code>SeatLockWire</code> ‘true’/‘false’/‘clear’ strings).</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[UNVERIFIED]</strong> <code>registerParser</code> MUST throw on a duplicate registration for the same message-type id. — web/src/protocol/SOCMessage.ts::registerParser — <code>if (parserRegistry.has(type)) { throw new Error(...) }</code> (cross-document reconciliation: not verified against <code>web/src/protocol/SOCMessage.ts</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> <code>decode</code> MUST reject any type token that Java’s <code>Integer.parseInt</code> would reject (optional leading +/- then digits only) before dispatching. — web/src/protocol/SOCMessage.ts::decode — <code>if (!/^[+-]?\d+$/.test(typeStr)) return null;</code> (cross-document reconciliation: not verified against <code>web/src/protocol/SOCMessage.ts</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> <code>decode</code> MUST return <code>null</code> (not throw) for an unknown type id or a parser error, matching Java <code>toMsg</code>’s ignore-on-failure behavior. — web/src/protocol/SOCMessage.ts::decode — <code>parser === undefined</code> returns null; parser call wrapped in <code>try { ... } catch { return null; }</code> (cross-document reconciliation: not verified against <code>web/src/protocol/SOCMessage.ts</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[SOFT]</strong> Protocol constant values SHOULD stay in sync with <code>src/main/java/soc/message/SOCMessage.java</code> and <code>SOCGameOption.java</code>. — web/src/protocol/constants.ts header comment ‘Keep these values in sync with src/main/java/soc/message/SOCMessage.java’</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — A malformed or unknown wire frame must not crash the receive path; decode degrades to <code>null</code> via try/catch and registry-miss handling. — web/src/protocol/SOCMessage.ts::decode</li>
+<li><strong>error-handling</strong> — Accidental duplicate parser registration is surfaced immediately as a thrown Error rather than silently overwriting an existing parser. — web/src/protocol/SOCMessage.ts::registerParser</li>
+<li><strong>interoperability</strong> — Type-id parsing must match Java <code>Integer.parseInt</code> semantics so client and server agree on which frames are valid; enforced by the <code>/^[+-]?\d+$/</code> token guard. — web/src/protocol/SOCMessage.ts::decode</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Shows the defensive parse-and-validate that keeps decode aligned with Java’s stricter integer parsing.</em>
+<em>Source: <code>web/src/protocol/SOCMessage.ts::decode</code></em></p>
+<pre><code>const type = Number.parseInt(typeStr, 10);
+  if (!Number.isInteger(type)) {
+    return null;
+  }
+</code></pre>
+<p><em>Illustrates the fail-fast guard against accidental double-registration in the self-registering dispatch design.</em>
+<em>Source: <code>web/src/protocol/SOCMessage.ts::registerParser</code></em></p>
+<pre><code>if (parserRegistry.has(type)) {
+    throw new Error(`Duplicate parser registration for message type ${type}`);
+  }
+  parserRegistry.set(type, parser);
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+
+    web_src_components_ck_______protocol_index_ts["index.ts"]
+    web_src_protocol_SOCMessage_ts["SOCMessage.ts"]
+    web_src_protocol_constants_ts["constants.ts"]
+
+    web_src_protocol_SOCMessage_ts -->|"imports"| web_src_protocol_constants_ts
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">encode serializes via toCmd</code></li>
+<li><code class="code-ref" title="source file in your repository">decode reads type id from first SEP token, validates as integer, and dispatches to registered parser</code></li>
+<li><code class="code-ref" title="source file in your repository">registerParser self-registration, throws on duplicate</code></li>
+<li><code class="code-ref" title="source file in your repository">_clearParsersForTest resets registry between tests (not in package index)</code></li>
+<li><code class="code-ref" title="source file in your repository">MessageParser type alias and SOCMessage interface</code></li>
+<li><code class="code-ref" title="source file in your repository">Message-type and protocol constants mirror Java enumerations</code></li>
+<li><code class="code-ref" title="source file in your repository">OptionType / OptionFlag tables verified against SOCGameOption.java</code></li>
+<li><code class="code-ref" title="source file in your repository">Public protocol surface and side-effecting parser registration</code></li>
+<li><code class="code-ref" title="source file in your repository">Web package build/runtime config (TypeScript strict, vite, vitest, ws)</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">typescript-socmessage-protocol-layer.feature.md</span>
+Scope architecture: <a href="web-protocol-map-editor.arch.html">web-protocol-map-editor.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: encode serializes via toCmd</td>
+<td>Base SOCMessage type, parser registry, and encode/decode helpers.</td>
+<td>web/src/protocol/SOCMessage.ts:64-66</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: decode reads type id from first SEP token, validates as integer, and dispatches to registered parser</td>
+<td>Base SOCMessage type, parser registry, and encode/decode helpers.</td>
+<td>web/src/protocol/SOCMessage.ts:79-112</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: registerParser self-registration, throws on duplicate</td>
+<td>Base SOCMessage type, parser registry, and encode/decode helpers.</td>
+<td>web/src/protocol/SOCMessage.ts:50-55</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: _clearParsersForTest resets registry between tests (not in package index)</td>
+<td>Base SOCMessage type, parser registry, and encode/decode helpers.</td>
+<td>web/src/protocol/SOCMessage.ts:118-120</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: MessageParser type alias and SOCMessage interface</td>
+<td>Base SOCMessage type, parser registry, and encode/decode helpers.</td>
+<td>web/src/protocol/SOCMessage.ts:34-34</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Message-type and protocol constants mirror Java enumerations</td>
+<td>Protocol constants ported from soc.message.SOCMessage (Java).</td>
+<td>web/src/protocol/constants.ts:39-196</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: OptionType / OptionFlag tables verified against SOCGameOption.java</td>
+<td>Protocol constants ported from soc.message.SOCMessage (Java).</td>
+<td>web/src/protocol/constants.ts:321-338</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Public protocol surface and side-effecting parser registration</td>
+<td>Public surface of the protocol core.</td>
+<td>web/src/protocol/index.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Web package build/runtime config (TypeScript strict, vite, vitest, ws)</td>
+<td></td>
+<td>web/package.json</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a>, <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="67.9"/>
+        </svg>
+        <div class="ring-num">0.70</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

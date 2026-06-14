@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { ToastProvider } from '../components';
+import { SeatLockState, SOCSetSeatLock } from '../protocol';
 import { useGameStore } from '../store/gameStore';
 import { GameRoom } from './GameRoom';
 
@@ -63,5 +64,33 @@ describe('GameRoom start pending state', () => {
       expect(screen.getByTestId('start-game')).toBeEnabled();
     });
     expect(screen.getByTestId('start-game')).toHaveTextContent('Start game');
+  });
+});
+
+describe('GameRoom accessible controls', () => {
+  it('labels empty-seat actions by seat number before the player sits', () => {
+    const s = useGameStore.getState();
+    s.resetLobby();
+    s.setNickname('WebPlayer');
+    s.joinGameAuth(GAME);
+
+    renderRoom();
+
+    expect(screen.getByRole('button', { name: 'Sit in seat 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lock seat 1' })).toBeInTheDocument();
+    expect(screen.getByTestId('start-game')).toHaveAccessibleDescription(
+      'Sit down at a seat to start the game.',
+    );
+  });
+
+  it('labels room-level and locked-seat actions clearly', () => {
+    useGameStore
+      .getState()
+      .applySeatLock(SOCSetSeatLock.forSeat(GAME, 1, SeatLockState.LOCKED));
+
+    renderRoom();
+
+    expect(screen.getByRole('button', { name: 'Leave game room' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Unlock seat 2' })).toBeInTheDocument();
   });
 });

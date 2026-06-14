@@ -114,7 +114,8 @@ function HexCell({
 
   const handle = (ev: React.MouseEvent): void => {
     ev.preventDefault();
-    onHexClick(cell.coord, ev.altKey || ev.metaKey || ev.shiftKey);
+    const clear = ev.type === 'contextmenu' || ev.button === 2 || ev.altKey || ev.metaKey || ev.shiftKey;
+    onHexClick(cell.coord, clear);
   };
 
   return (

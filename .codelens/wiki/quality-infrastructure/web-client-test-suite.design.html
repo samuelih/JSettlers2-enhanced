@@ -1,0 +1,216 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web Client Test Suite · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../quality-infrastructure/quality-infrastructure.arch.html"><span class="nm">Quality Infrastructure</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../quality-infrastructure/functional-test-suite-extratest.design.html"><span class="nm">Functional Test Suite (extraTest)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/java-unit-test-suite.design.html"><span class="nm">Java Unit Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/protocol-message-sequence-consistency-tests.design.html"><span class="nm">Protocol Message-Sequence Consistency Tests</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.api-boundary.html"><span class="nm">Quality Infrastructure API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../quality-infrastructure/web-client-test-suite.design.html"><span class="nm">Web Client Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.gateway.html"><span class="nm">Quality Infrastructure Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.testplan.html"><span class="nm">Quality Infrastructure Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Quality Infrastructure</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:45%"></i></span>
+      <span class="conf-val">0.45</span></span></div>
+        <h1 class="doc-title">Web Client Test Suite</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Web Client Test Suite</h1>
+<h2>Overview</h2>
+<p>The web client test suite is the unit-level quality layer for the TypeScript/React front end, colocated as *.test.tsx beside the screens and components it exercises and run by Vitest in a jsdom environment (devDependencies: vitest, jsdom, @testing-library/react). Rather than asserting against component internals, each test renders the real component and drives it the way a user would: it locates elements by stable data-testid handles via Testing Library’s screen.getByTestId, dispatches DOM events through fireEvent (change, click, contextMenu), and then asserts on rendered attributes (data-hextype, data-board-height) and on the presence/absence of state badges (editor-valid, editor-issue-error). For the map editor this exercises the full wiring between MapEditorScreen, the map-editor data layer (editorActions mutators, validate, serializeMapJson/parseMapJson), and the SVG canvas — including the paste-and-import path through the importJson helper, undo/redo history, board-frame resizing, smart-port fill, and an export round-trip that confirms a loaded sample serializes back to itself plus explicit fitted board size. The ‘test’ npm script (vitest run) runs this layer; a separate ‘test:e2e’ script (playwright test) covers the cross-process protocol behavior not reachable from jsdom.</p>
+<ul>
+<li><a class="inv-cite" href="../invariants/INV-CL-008.invariant.html">INV-CL-008</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-009.invariant.html">INV-CL-009</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-010.invariant.html">INV-CL-010</a></li>
+</ul>
+<h2>Components</h2>
+<ul>
+<li><strong>MapEditorScreen.test.tsx</strong> (referenced; defined externally)</li>
+<li><strong>importJson</strong></li>
+<li><strong>Dialog.test.tsx</strong> (referenced; defined externally)</li>
+<li><strong>Web test scripts</strong> (referenced; defined externally)</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>MapEditorScreen</strong> (outbound) — via import { MapEditorScreen } from ‘./MapEditorScreen’ (evidence: web/src/screens/MapEditorScreen.test.tsx imports and renders the component under test)</li>
+<li><strong>map-editor data layer (parseMapJson / serializeMapJson)</strong> (outbound) — via import { parseMapJson, serializeMapJson } from ‘…/map-editor’ (evidence: web/src/screens/MapEditorScreen.test.tsx uses these to build invalid input and assert round-trip equality)</li>
+<li><strong>map-editor/testFixtures (sampleMapText)</strong> (outbound) — via import { sampleMapText } from ‘…/map-editor/testFixtures’ (evidence: web/src/screens/MapEditorScreen.test.tsx seeds import/round-trip cases from the shared fixture)</li>
+<li><strong>Vitest test runner</strong> (inbound) — via web/package.json scripts: ‘test’ (vitest run), ‘test:watch’ (vitest) (evidence: web/package.json devDependencies vitest; scripts.test)</li>
+<li><strong>Playwright e2e suite</strong> (outbound) — via web/package.json script ‘test:e2e’ (playwright test) (evidence: web/package.json devDependencies @playwright/test; scripts[‘test:e2e’])</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Test through the user-facing surface (test-ids + DOM events), not component internals</strong>: Tests render the real MapEditorScreen and interact via screen.getByTestId + fireEvent rather than invoking editorActions or React state directly. This asserts the integrated wiring (screen ↔ mutators ↔ validation ↔ (de)serialization) and survives internal refactors as long as the test-id surface holds, at the cost of coupling tests to those stable handles. The test file’s own header documents this intent: it ‘drives the UI exactly as a user would’.</li>
+<li><strong>Colocate unit tests with the code they exercise (*.test.tsx beside *.tsx)</strong>: MapEditorScreen.test.tsx and Dialog.test.tsx sit next to their subjects rather than in a separate test tree, keeping a component and its test discoverable together; Vitest’s default include globs pick them up under the single ‘test’ script.</li>
+<li><strong>Disable autosave under test via an environment guard</strong>: MapEditorScreen gates localStorage autosave behind AUTOSAVE_ENABLED = import.meta.env.MODE !== ‘test’, so each rendered test starts from a clean draft instead of inheriting persisted state from a prior case — keeping tests deterministic and order-independent without per-test storage teardown.</li>
+<li><strong>Exercise the shared validator path by importing deliberately-invalid JSON instead of forcing invalid UI input</strong>: The dice picker only offers legal values, so a dice-range error can’t be produced by clicking. The suite instead parses the sample, sets diceNum = 7, and re-imports via importJson — driving the same validation path the Java server’s CustomMapValidator enforces, and asserting the editor mirrors that server-authoritative rule (out of range; must be 2…12 except 7).</li>
+<li><strong>Split unit (Vitest/jsdom) from end-to-end (Playwright) into separate scripts</strong>: ‘test’ runs Vitest for fast in-process component assertions; ‘test:e2e’ runs Playwright for browser/cross-process coverage (e.g. the map-editor round-trip against the real Java validator and protocol behavior). Keeping them separate lets the fast suite gate iteration while the heavier e2e layer runs deliberately.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[UNVERIFIED]</strong> Unit tests MUST drive the component through its rendered test-id / DOM-event surface (getByTestId + fireEvent), not by calling its internal mutators or state setters directly. — web/src/screens/MapEditorScreen.test.tsx (importJson + all it() blocks use screen.getByTestId / fireEvent) (cross-document reconciliation: not verified against <code>web/src/screens/MapEditorScreen.test.tsx</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[HARD]</strong> Autosave to localStorage MUST be disabled when running under test so cases start from a clean draft. — web/src/screens/MapEditorScreen.tsx: AUTOSAVE_ENABLED = import.meta.env.MODE !== ‘test’ guards the autosave useEffect</li>
+<li><strong>[UNVERIFIED]</strong> Exported map JSON MUST round-trip: a loaded sample re-serializes to itself plus the editor’s explicit fitted board size. — web/src/screens/MapEditorScreen.test.tsx (‘exports JSON that round-trips back to the sample map’ asserts parseMapJson(exported) equals sample + boardHeight/boardWidth) (cross-document reconciliation: not verified against <code>web/src/screens/MapEditorScreen.test.tsx</code>; recorded as design intent, not current code fact.)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — Tests must be deterministic and order-independent — achieved by disabling localStorage autosave under MODE===‘test’ so no rendered case inherits persisted draft state from a prior one. — web/src/screens/MapEditorScreen.tsx: AUTOSAVE_ENABLED guard; web/src/screens/MapEditorScreen.test.tsx beforeEach(render)</li>
+<li><strong>error-handling</strong> — The suite asserts the validation surface explicitly — both that valid maps show editor-valid and that invalid mutations (blank name, out-of-range dice) surface editor-issue-error with the expected message text. — web/src/screens/MapEditorScreen.test.tsx (‘surfaces an error when mutated to an invalid state’, ‘surfaces a dice-range error when a bad dice number is imported’)</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Shows the suite’s user-driven idiom: locate by test-id, dispatch DOM events, no direct access to component internals.</em>
+<em>Source: <code>web/src/screens/MapEditorScreen.test.tsx::importJson</code></em></p>
+<pre><code>function importJson(text: string): void {
+  const ta = screen.getByTestId('editor-import') as HTMLTextAreaElement;
+  fireEvent.change(ta, { target: { value: text } });
+  fireEvent.click(screen.getByTestId('editor-import-apply'));
+}
+</code></pre>
+<p><em>Reaches an otherwise-unreachable invalid state via import to assert the editor mirrors the server-authoritative dice-range rule.</em>
+<em>Source: <code>web/src/screens/MapEditorScreen.test.tsx</code></em></p>
+<pre><code>const bad = parseMapJson(sampleMapText);
+bad.landHexes[0].diceNum = 7;
+importJson(serializeMapJson(bad));
+
+expect(screen.queryByTestId('editor-valid')).not.toBeInTheDocument();
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    web_src_screens_MapEditorScreen_test_tsx["MapEditorScreen.test.tsx"]
+    web_src_screens_MapEditorScreen_tsx["MapEditorScreen.tsx"]
+
+    web_src_screens_MapEditorScreen_test_tsx -->|"imports"| web_src_screens_MapEditorScreen_tsx
+
+    ext_web_src_screens____components_index_ts["index.ts"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____components_index_ts
+    ext_web_src_screens____map_editor_components_EditorCanvas_tsx["EditorCanvas.tsx"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____map_editor_components_EditorCanvas_tsx
+    ext_web_src_screens____map_editor_components_EditorPalette_tsx["EditorPalette.tsx"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____map_editor_components_EditorPalette_tsx
+    ext_web_src_screens____map_editor_components_ImportExportPanel_tsx["ImportExportPanel.tsx"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____map_editor_components_ImportExportPanel_tsx
+    ext_web_src_screens____map_editor_components_MapReadinessPanel_tsx["MapReadinessPanel.tsx"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____map_editor_components_MapReadinessPanel_tsx
+    ext_web_src_screens____map_editor_components_ValidationPanel_tsx["ValidationPanel.tsx"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____map_editor_components_ValidationPanel_tsx
+    ext_web_src_screens____map_editor_editorActions_ts["editorActions.ts"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____map_editor_editorActions_ts
+    ext_web_src_screens____map_editor_index_ts["index.ts"]:::default
+    web_src_screens_MapEditorScreen_test_tsx -.->|"imports"| ext_web_src_screens____map_editor_index_ts
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____map_editor_index_ts
+    ext_web_src_screens____map_editor_sampleMapData_ts["sampleMapData.ts"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____map_editor_sampleMapData_ts
+    ext_web_src_screens____map_editor_testFixtures_ts["testFixtures.ts"]:::default
+    web_src_screens_MapEditorScreen_test_tsx -.->|"imports"| ext_web_src_screens____map_editor_testFixtures_ts
+    ext_web_src_screens____store_uiStore_ts["uiStore.ts"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens____store_uiStore_ts
+    ext_web_src_screens_MapEditorScreen_module_css["MapEditorScreen.module.css"]:::default
+    web_src_screens_MapEditorScreen_tsx -.->|"imports"| ext_web_src_screens_MapEditorScreen_module_css
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Map editor screen unit test</code></li>
+<li><code class="code-ref" title="source file in your repository">importJson test helper (paste + apply import flow)</code></li>
+<li><code class="code-ref" title="source file in your repository">MapEditorScreen component under test</code></li>
+<li><code class="code-ref" title="source file in your repository">Web component unit test (Dialog)</code></li>
+<li><code class="code-ref" title="source file in your repository">Web test scripts</code></li>
+<li><code class="code-ref" title="source file in your repository">Autosave disabled under test guard</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">web-client-test-suite.feature.md</span>
+Scope architecture: <a href="quality-infrastructure.arch.html">quality-infrastructure.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Map editor screen unit test</td>
+<td>Component test for the map editor screen (Phase 5).</td>
+<td>web/src/screens/MapEditorScreen.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: importJson test helper (paste + apply import flow)</td>
+<td>/** Paste text into the import textarea and click “Import pasted JSON”. */</td>
+<td>web/src/screens/MapEditorScreen.test.tsx:20-24</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: MapEditorScreen component under test</td>
+<td></td>
+<td>web/src/screens/MapEditorScreen.tsx:95-533</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Web component unit test (Dialog)</td>
+<td></td>
+<td>web/src/components/Dialog.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Web test scripts</td>
+<td></td>
+<td>web/package.json</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<h2>Unverified Areas</h2>
+<p>Parts of this document have limited verifiable source evidence — treat normative claims as unverified until confirmed. See <a href="../documentation-conventions.html#unverified-areas">documentation conventions</a>.</p>
+<p>Related scopes: <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a>, <a href="../web-protocol-map-editor/web-protocol-map-editor.arch.html">Web Protocol &amp; Map Editor</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="124.4"/>
+        </svg>
+        <div class="ring-num">0.45</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+      <div class="rail-card"><h4>Cited invariants</h4><div class="rail-list"><a href="../invariants/INV-CL-008.invariant.html"><span class="b">INV-CL-008</span><span>single writer viewport scroll…</span></a><a href="../invariants/INV-CL-009.invariant.html"><span class="b">INV-CL-009</span><span>single writer viewport scroll…</span></a><a href="../invariants/INV-CL-010.invariant.html"><span class="b">INV-CL-010</span><span>single writer panref current</span></a></div></div>
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -1,0 +1,410 @@
+---
+id: board-rendering-visual-themes.design
+type: DESIGN
+tenant-id: 019ec5a4-5e07-7341-98b8-45f59e05fe07
+scope: sgd:codelens/64c51e15-af55-50cd-8d03-12b24fb09071/desktop-swing-client
+owner: codelens-agent
+last-verified: 2026-06-14
+visibility: subtree
+freshness-window-days: 14
+invariants: []
+references:
+  - _scope.md
+  - desktop-swing-client.arch.md
+  - ../game-model-rules-engine/game-model-rules-engine.arch.md
+  - ../robot-ai-players/robot-ai-players.arch.md
+  - ../server-message-protocol/server-message-protocol.arch.md
+stateful-fields:
+  - id: body
+    name: Document body
+    status: Draft
+codelens:
+  diklUsed: false
+  projectId: 64c51e15-af55-50cd-8d03-12b24fb09071
+  campaignId: codelens-b7eef336
+  lifecycle: hypothesis
+  confidence: 0.500
+  sourceHash: sha256:d705ac3bb619b7f947eee0a4da08e48d26063cf57c15157a6c8a4f8eb0fb3fc9
+  lastValidatedCommit: 3a054b7699dc15d756802f5b6449718fe50a2343
+  deterministicReferences: true
+---
+
+# Board Rendering & Visual Themes
+
+## Overview
+SOCBoardPanel is a package-private Swing component that visualizes the authoritative game state held server-side and mirrored locally in SOCGame plus its SOCBoard / SOCBoardLarge model. It draws in two layers: static terrain (hexes and ports) is rasterized once by drawBoardEmpty into a reusable buffer image, and drawBoard then composites the robber and placed pieces (SOCRoad, SOCCity, SOCSettlement, SOCShip, SOCFortress, SOCVillage) over that buffer on each repaint. The panel keeps its drawing math in an internal unscaled, un-rotated coordinate system and converts to on-screen pixels through scaleToActual/scaleFromActual (and rotate variants), rotating the 6-player non-sea board 90° clockwise. Mouse motion drives hover tooltips and ghosted build previews; right-click routes through BoardPopupMenu to emit SOCMessage build/cancel requests to the server. ColorSquare lives alongside as an independent colored-box component reused throughout the UI, and contributes color constants the board panel reads for fallbacks. Visual appearance is themed at two points: ColorSquare remaps its resource palette for color-blind modes at class load, and SOCBoardPanel resolves per-graphics-set border/water/pirate-path colors from theme.properties with hardcoded fallbacks.
+
+## Components
+- **SOCBoardPanel**: Reads authoritative game state from SOCGame/SOCBoard/SOCBoardLarge and renders hexes, ports, the robber, and placed pieces; owns scaling/rotation transforms, mouse hit-testing, and right-click build interaction.
+- **ColorSquare**: Paints a solid-color box optionally carrying a number, checkmark, or text; auto-builds a resource tooltip when its background is a defined resource color; supplies the solid-color UI primitives used across the client and (via copied color values) the board panel.
+- **ColorSquare color-blind palette subsystem** (referenced; defined externally): At class load, swaps the resource/hex color fields (CLAY/ORE/SHEEP/WHEAT/WOOD/DESERT/GOLD/WATER) for a deuteranopia/protanopia/tritanopia palette based on user preference, refreshing RESOURCE_COLORS.
+- **SOCBoardPanel theme-color subsystem** (referenced; defined externally): Resolves active hex-border, water-border, and pirate-path colors from each graphics set's theme.properties, falling back to hardcoded default tables.
+- **BoardPopupMenu**: Right-click menu for build/cancel/move/undo and pirate-fortress attack; turns board clicks into server requests.
+- **BoardToolTip**: Computes and paints hover text for hexes, pieces, ports, and scenario marker diamonds over the board.
+- **BoardPanelSendBuildTask**: Deferred, once-only send of a build request from the current player, guarding against duplicate sends.
+
+## Connections
+- **SOCBoard / SOCBoardLarge (soc.game)** (outbound) — via import + model reads for hex/edge/node geometry and layout (evidence: SOCBoardPanel imports soc.game.SOCBoard, soc.game.SOCBoardLarge)
+- **SOCGame / SOCPlayer (soc.game)** (outbound) — via import + reads of game state and current player for rendering and build mode (evidence: SOCBoardPanel imports soc.game.SOCGame, soc.game.SOCPlayer; setPlayer / getPlayerNumber)
+- **Playing pieces (SOCRoad, SOCCity, SOCSettlement, SOCShip, SOCFortress, SOCVillage)** (outbound) — via import + draw* methods rendering each piece type (evidence: SOCBoardPanel imports soc.game.SOCRoad/SOCCity/SOCSettlement/SOCShip/SOCFortress/SOCVillage; drawRoadOrShip/drawCity/drawFortress/drawVillage)
+- **Server (via SOCMessage)** (outbound) — via soc.message.SOCSimpleRequest / soc.message.SOCCancelBuildRequest sent from BoardPopupMenu / send-build task (evidence: SOCBoardPanel imports soc.message.SOCSimpleRequest and soc.message.SOCCancelBuildRequest)
+- **SOCStringManager (soc.util)** (outbound) — via i18n tooltip/superimposed-text lookup via strings.get(...) (evidence: SOCBoardPanel and ColorSquare hold SOCStringManager.getClientManager())
+- **SOCPlayerInterface (soc.client)** (inbound) — via sets board background color and supplies the custom LayoutManager that sizes the panel (evidence: SOCBoardPanel javadoc: 'board background color is set in SOCPlayerInterface'; 'SOCPlayerInterface's custom LayoutManager')
+- **ColorSquare (soc.client)** (outbound) — via reads ColorSquare color constants (e.g. ColorSquare.WATER) for hex/path fallbacks (evidence: SOCBoardPanel HEX_GRAPHICS_SET_SC_PIRI_PATH_COLORS uses ColorSquare.WATER)
+
+## Design Decisions
+- **Two-layer board rendering: cache the empty board, composite pieces over it**: Hexes and ports change rarely, so drawBoardEmpty renders them once into a buffer image and drawBoard overlays the robber and placed pieces each repaint, avoiding re-rasterizing static terrain on every frame.
+- **Single internal unscaled, un-rotated coordinate system with transforms at the boundary**: Hex coordinate arrays and hit-testing math stay in unscaled internal pixels; scaleToActual/scaleFromActual and the rotate variants convert to scaled/rotated on-screen coordinates, and the 6-player non-sea board is rotated 90° clockwise — keeping piece geometry definitions in one space.
+- **Apply the color-blind palette once at class load via a static initializer**: Resource colors are compared by reference (c == CLAY) elsewhere in the client, so the remap must happen before any ColorSquare exists to keep those comparisons valid; the deliberate consequence is that changing the preference only takes effect after a client restart.
+- **Per-graphics-set theme.properties re-skinning with hardcoded fallbacks**: Active border/water/pirate-path color holders default to clones of the hardcoded color tables and are overridden per key from each set's theme.properties, allowing a graphics set to re-skin board colors without code edits while guaranteeing a valid default.
+- **Cache rendering-hint preferences instead of reading them per frame**: Antialiasing and interpolation user preferences are read into cached fields by refreshRenderingHintPrefs (invoked from rescaleBoard) and consumed by setRenderingHints, so per-frame preference lookups are avoided.
+- **Provide larger squares via a ColorSquareLarger subclass rather than changing WIDTH/HEIGHT**: The WIDTH and HEIGHT constants also size many other UI elements, so making a bigger square a subclass was preferred over mutating shared constants.
+- **Do not implicitly set minimum size from setSize**: If setSize/setBounds also set the minimum, a layout manager could collapse the square to 0 width/height; minimum is set explicitly so the square never disappears.
+- **Bitmap textures only for hex terrain; everything else drawn as vector primitives**: Only hex textures and dice-number graphics load from the images directory; pieces, ports, arrows, and markers are polygons/lines/text, which scale and recolor cleanly.
+
+## Constraints
+- **[UNVERIFIED]** ColorSquare.setBorderColor MUST be called with a non-null Color; a null argument is rejected. — src/main/java/soc/client/ColorSquare.java::setBorderColor throws IllegalArgumentException when c == null (cross-document reconciliation: not verified against `src/main/java/soc/client/ColorSquare.java`; recorded as design intent, not current code fact.)
+- **[UNVERIFIED]** The color-blind palette MUST be resolved at class load before any ColorSquare is created, because resource colors are compared by reference (c == CLAY); changing the preference therefore requires a client restart. — src/main/java/soc/client/ColorSquare.java static initializer invoking applyColorBlindPalette() (cross-document reconciliation: not verified against `src/main/java/soc/client/ColorSquare.java`; recorded as design intent, not current code fact.)
+- **[SOFT]** GREY MUST NOT equal ORE, and FOG SHOULD NOT equal GREY, so reference/equality-based auto-tooltips and comparisons resolve correctly. — src/main/java/soc/client/ColorSquare.java::GREY ('Must not equal ORE') and ::FOG ('Should not equal GREY') comments
+- **[SOFT]** The board SHOULD render with unscaled graphics unless the panel is at least SCALE_FACTOR_MIN (1.08×) of its minimum size. — src/main/java/soc/client/SOCBoardPanel.java::SCALE_FACTOR_MIN
+
+## Non-Functional Requirements
+- **accessibility** — Color-blind palettes (deuteranopia, protanopia, tritanopia) remap the solid-color resource/hex squares to avoid red-green and blue-yellow confusions; hex bitmap images are unchanged. — src/main/java/soc/client/ColorSquare.java::COLOR_BLIND_PALETTES / makeColorBlindPalettes
+- **performance** — Static hex/port terrain is rasterized once into a buffer image and reused; only placed pieces and the robber are composited per repaint. — SOCBoardPanel class javadoc 'Sequence for loading, rendering, and drawing images'; drawBoardEmpty
+- **performance** — Rendering-quality preferences (antialiasing, interpolation) are cached and refreshed only on rescale, not read per frame. — src/main/java/soc/client/SOCBoardPanel.java::refreshRenderingHintPrefs and renderAntialiasPref / interpolation field javadoc
+- **reliability** — Solid color fallbacks (e.g. WATER, hex border colors) are used when hex bitmaps are missing or still loading at window creation. — src/main/java/soc/client/ColorSquare.java::WATER javadoc; src/main/java/soc/client/SOCBoardPanel.java::HEX_BORDER_COLORS
+
+## Examples
+*Fail-safe default: an unset or 'off' preference leaves the historical hardcoded palette untouched.*
+*Source: `src/main/java/soc/client/ColorSquare.java:applyColorBlindPalette`*
+```
+final String mode = UserPreferences.getPref
+    (UserPreferences.PreferenceDescriptor.KEY_COLOR_BLIND_MODE, "off");
+if ((mode == null) || mode.equals("off"))
+    return;  // <--- Early return: color-blind mode disabled, keep default palette ---
+```
+
+*Validates input and short-circuits a no-op color change before rebuilding the border.*
+*Source: `src/main/java/soc/client/ColorSquare.java:setBorderColor`*
+```
+if (c == null)
+    throw new IllegalArgumentException();
+if (borderColor.equals(c))
+    return;
+```
+
+## Diagrams
+### Class
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class ColorSquare {
+        -private static Map<String, int[]> makeColorBlindPalettes()
+        -private static void applyColorBlindPalette()
+        +ColorSquare()
+        +public void setInteractive(final boolean inter)
+        -setSizesAndFont()
+        +@Override
+    public void setMinimumSize(Dimension d)
+        +public void setMaximumSizeToCurrent()
+        +public void setBackground(Color c)
+        +public void setColor(Color c)
+        +setBorderColor()
+        +@Override
+    public void setSize(Dimension d)
+        +@Override
+    public void setToolTipText(String tip)
+        +setLowWarningLevel()
+        +public void clearLowWarningLevel()
+        +setToolTipLowWarningLevel()
+        +setHighWarningLevel()
+        +public void clearHighWarningLevel()
+        +setToolTipHighWarningLevel()
+        +setToolTipZeroText()
+        +@Override
+    public Dimension getPreferredSize()
+        +@Override
+    public Dimension getMinimumSize()
+        +@Override
+    public void setBounds(Rectangle r)
+        +public void paintComponent(Graphics g)
+        +public void addValue(int v)
+        +public void subtractValue(int v)
+        +public void setIntValue(int v)
+        +public int getIntValue()
+        +public void setBoolValue(boolean v)
+        +public boolean getBoolValue()
+        +public ColorSquareListener getSquareListener()
+        +public void setSquareListener(ColorSquareListener sp)
+        +public void mouseEntered(MouseEvent e)
+        +public void mouseExited(MouseEvent e)
+        +public void mouseClicked(MouseEvent e)
+        +public void mouseReleased(MouseEvent e)
+        +public void mousePressed(MouseEvent evt)
+    }
+    class ConfirmPlaceShipDialog {
+        -ConfirmPlaceShipDialog()
+        +@Override
+        public void button1Chosen()
+        +@Override
+        public void button2Chosen()
+        +@Override
+        public void windowCloseChosen()
+    }
+    class ConfirmAttackPirateFortressDialog {
+        -protected ConfirmAttackPirateFortressDialog()
+        +@Override
+        public void button1Chosen()
+        +@Override
+        public void button2Chosen()
+        +@Override
+        public void windowCloseChosen()
+    }
+    class BoardPanelSendBuildTask {
+        -protected BoardPanelSendBuildTask (int coord, int ptype)
+        +public int getBuildLoc()
+        +public int getPieceType()
+        +@Override
+        public void run()
+        +public synchronized void doNotSend()
+        +public synchronized boolean wasItSentAlready()
+        +public void sendOnceFromClientIfCurrentPlayer()
+    }
+    class BoardPopupMenu {
+        +public BoardPopupMenu(SOCBoardPanel bpanel)
+        +showCancelBuild()
+        +showBuild()
+        +showAtPirateFortress()
+        +public void actionPerformed(ActionEvent e)
+        -void tryBuild(int ptype)
+        -tryBuildFromLeftClick()
+        +public void confirmAttackPirateFortress()
+        +public void tryAttackPirateFortress()
+        -void tryCancel()
+        -void tryUndo()
+        -private void tryMoveShipFromHere()
+    }
+    class BoardToolTip {
+        -BoardToolTip(SOCBoardPanel ourBoardPanel)
+        +public String getHoverText()
+        +public boolean isVisible()
+        +public void positionToMouse(final int x, int y)
+        +public void setOffsetX(int ofsX)
+        +setHoverText()
+        +public void hideHoverAndPieces()
+        +public void paint(Graphics g)
+        -handleHover()
+        +public String portDescAtNode(int id)
+    }
+    class ResourceTradeAllMenu {
+        +ResourceTradeAllMenu()
+        +@Override
+        public void show(int x, int y)
+        +setEnabledIfCanTrade()
+        +@Override
+        public void destroy()
+    }
+    class SOCBoardPanel {
+        -makeDiceColorBlindPalettes()
+        +SOCBoardPanel()
+        -private void initCoordMappings()
+        -initEdgeMapAux()
+        -initHexMapAux()
+        -initNodeMapAux()
+        -initHexIDtoNumAux()
+        +@Override
+    public Dimension getPreferredSize()
+        +@Override
+    public Dimension getMinimumSize()
+        +getExtraSizeFromBoard()
+        +setSize()
+        +setBounds()
+        +setLatestPiecePlacement()
+        +public void pieceValueUpdated(final SOCPlayingPiece piece)
+        +public void flushBoardLayoutAndRepaint()
+        +flushBoardLayoutAndRepaintIfDebugShowPotentials()
+        -rescaleBoard()
+        -renderBorderedHex()
+        -private void renderPortImages()
+        -private void rescaleCoordinateArrays()
+        +public int[] scaleCopyToActual(int[] orig)
+        +rotateScaleCopyYToActualX()
+        -private static void refreshRenderingHintPrefs()
+        -static void setRenderingHints(final Graphics g)
+        +getScaledImageUp()
+        -void setDebugShowCoordsFlag(final boolean setOn)
+        -setDebugShowPotentialsFlag()
+        +@Override
+    public void paintComponent(Graphics g)
+        +@Override
+    public void update(Graphics g)
+        -drawHex()
+        -getDiceNumberCircleImage()
+        -drawRobber()
+        -drawRoadOrShip()
+        -drawSettlement()
+        -drawCity()
+        -drawSettlementOrCity()
+        -drawPieceMostRecentPlacementShadow()
+        -drawSeaEdgeLines()
+        -drawSeaEdgeLine()
+        -drawFortress()
+        -private void drawVillage(Graphics g, final SOCVillage v)
+        -drawMarker()
+        -drawArrow()
+        -private final void drawPortsRing(Graphics g)
+        -private final void drawPorts_LargeBoard(Graphics g)
+        -drawBoard()
+        -private final void drawBoard_SC_FTRI_placePort(Graphics g)
+        -private void drawBoardEmpty(Graphics g)
+        -drawBoardEmpty_drawPiratePath()
+        -drawBoardEmpty_specialEdges()
+        -drawBoardEmpty_specialNodes()
+        -drawBoardEmpty_drawDebugShowPotentials()
+        -drawBoardEmpty_drawDebugShowPotentialRoad()
+        -private void drawSuperText(Graphics g)
+        -private void drawSuperTextTop(Graphics g)
+        -private final int[] nodeToXY(final int nodeNum)
+        +public final int scaleToActual(int x)
+        +public final int scaleFromActual(int x)
+        +rotateScaleXYFromActual()
+        +public boolean isScaled()
+        +public boolean isRotated()
+        +public void updateMode()
+        -protected void updateHoverTipToMode()
+        -protected void clearModeAndHilight(final int ptype)
+        -setLeftClickBuildTarget()
+        -private void clearLeftClickBuildTarget()
+        +public void updateAtWarshipsChanged(final boolean isGain)
+        -void setPlayer(SOCPlayer pl)
+        -int getPlayerNumber()
+        +public void setOtherPlayer(final SOCPlayer op)
+        +public void mouseEntered(MouseEvent e)
+        +public void mousePressed(MouseEvent e)
+        +public void mouseReleased(MouseEvent e)
+        +public void mouseDragged(MouseEvent e)
+        +public void mouseExited(MouseEvent e)
+        +public void mouseMoved(MouseEvent e)
+        +mouseClicked()
+        -protected void doBoardMenuPopup (final int x, final int y)
+        +public boolean popupExpectingBuildRequest()
+        +public void popupSetBuildRequest(int coord, int ptype)
+        +public void popupClearBuildRequest()
+        +public void popupFireBuildingRequest()
+        -private final void tryMoveShipToEdge()
+        +setSuperimposedText()
+        +public void setSuperimposedTopText(String text)
+        -findEdge()
+        -private final int findNode(int x, int y)
+        -private final int findHex(int x, int y)
+        +public void setMode(int m)
+        +public void setModeMoveShip(final int edge)
+        -reloadBoardGraphics()
+        -loadImages()
+        -loadThemeColors()
+        -parseThemeColor()
+        -loadHexesAndImages()
+        -checkNonstandardHexesSize()
+        +public final Color hexColor(int hexType)
+    }
+    class DelayedRepaint {
+        +public DelayedRepaint (SOCBoardPanel bp)
+        +@Override
+        public void run()
+    }
+    class MoveRobberConfirmDialog {
+        -MoveRobberConfirmDialog()
+        +@Override
+        public void button1Chosen()
+        +@Override
+        public void button2Chosen()
+        +@Override
+        public void windowCloseChosen()
+    }
+
+```
+
+### Dependency
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_client_ColorSquare_java["ColorSquare.java"]
+    src_main_java_soc_client_SOCBoardPanel_java["SOCBoardPanel.java"]
+
+
+    ext_src_main_java_soc_game_GameAction_java["GameAction.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_GameAction_java
+    ext_src_main_java_soc_game_SOCBoard_java["SOCBoard.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoard_java
+    ext_src_main_java_soc_game_SOCBoardLarge_java["SOCBoardLarge.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoardLarge_java
+    ext_src_main_java_soc_game_SOCCity_java["SOCCity.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCCity_java
+    ext_src_main_java_soc_game_SOCFortress_java["SOCFortress.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCFortress_java
+    ext_src_main_java_soc_game_SOCGame_java["SOCGame.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    ext_src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    ext_src_main_java_soc_game_SOCInventoryItem_java["SOCInventoryItem.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCInventoryItem_java
+    ext_src_main_java_soc_game_SOCPlayer_java["SOCPlayer.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayer_java
+    ext_src_main_java_soc_game_SOCPlayingPiece_java["SOCPlayingPiece.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayingPiece_java
+    ext_src_main_java_soc_game_SOCRoad_java["SOCRoad.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoad_java
+    ext_src_main_java_soc_game_SOCRoutePiece_java["SOCRoutePiece.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoutePiece_java
+    ext_src_main_java_soc_game_SOCScenario_java["SOCScenario.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCScenario_java
+    ext_src_main_java_soc_game_SOCSettlement_java["SOCSettlement.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCSettlement_java
+    ext_src_main_java_soc_game_SOCShip_java["SOCShip.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCShip_java
+    ext_src_main_java_soc_game_SOCVillage_java["SOCVillage.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_game_SOCVillage_java
+    ext_src_main_java_soc_util_SOCStringManager_java["SOCStringManager.java"]:::default
+    src_main_java_soc_client_SOCBoardPanel_java -.->|"imports"| ext_src_main_java_soc_util_SOCStringManager_java
+```
+
+## Source Linkage
+- [SOCBoardPanel renders the hex board and playing pieces](../../../src/main/java/soc/client/SOCBoardPanel.java::SOCBoardPanel)
+- [ColorSquare paints an interactive colored box with optional number/checkmark/text](../../../src/main/java/soc/client/ColorSquare.java::ColorSquare)
+- [Color-blind palette remap of solid-color resource/hex squares](../../../src/main/java/soc/client/ColorSquare.java::applyColorBlindPalette)
+- [Color-blind palette table (deuteranopia/protanopia/tritanopia)](../../../src/main/java/soc/client/ColorSquare.java::COLOR_BLIND_PALETTES)
+- [Border-color null guard](../../../src/main/java/soc/client/ColorSquare.java::setBorderColor)
+- [Per-graphics-set theme.properties re-skinning of board colors](../../../src/main/java/soc/client/SOCBoardPanel.java::activeHexBorderColors)
+- [theme.properties filename constant](../../../src/main/java/soc/client/SOCBoardPanel.java::THEME_FILENAME)
+- [Rendering-hint preference caching (antialiasing/interpolation)](../../../src/main/java/soc/client/SOCBoardPanel.java::refreshRenderingHintPrefs)
+- [Right-click build/cancel/move popup menu](../../../src/main/java/soc/client/SOCBoardPanel.java::BoardPopupMenu)
+- [Hover tooltip for board hexes/pieces/ports/markers](../../../src/main/java/soc/client/SOCBoardPanel.java::BoardToolTip)
+- [Minimum scaling factor threshold](../../../src/main/java/soc/client/SOCBoardPanel.java::SCALE_FACTOR_MIN)
+
+Parent scope: [_scope.md](_scope.md)
+Sibling feature: [board-rendering-visual-themes.feature.md](board-rendering-visual-themes.feature.md)
+Scope architecture: [desktop-swing-client.arch.md](desktop-swing-client.arch.md)
+
+## Source Linkage Grounding
+
+_Per-row confidence; `_unverified_` rows are disclosed, not verified; `0.08 (resolved, uncited)` is the resolved-but-uncited baseline, not measured evidence._
+
+| Element | Doc Evidence | Code Evidence | Confidence |
+|---------|--------------|---------------|-----------:|
+| Source Linkage: SOCBoardPanel renders the hex board and playing pieces |  | src/main/java/soc/client/SOCBoardPanel.java:1972-2167 | 0.83 |
+| Source Linkage: ColorSquare paints an interactive colored box with optional number/checkmark/text |  | src/main/java/soc/client/ColorSquare.java:527-614 | 0.83 |
+| Source Linkage: Color-blind palette remap of solid-color resource/hex squares |  | src/main/java/soc/client/ColorSquare.java:190-215 | 0.83 |
+| Source Linkage: Color-blind palette table (deuteranopia/protanopia/tritanopia) |  | src/main/java/soc/client/ColorSquare.java | 0.83 |
+| Source Linkage: Border-color null guard |  | src/main/java/soc/client/ColorSquare.java:720-730 | 0.83 |
+| Source Linkage: Per-graphics-set theme.properties re-skinning of board colors |  | src/main/java/soc/client/SOCBoardPanel.java | 0.83 |
+| Source Linkage: theme.properties filename constant |  | src/main/java/soc/client/SOCBoardPanel.java | 0.83 |
+| Source Linkage: Rendering-hint preference caching (antialiasing/interpolation) |  | src/main/java/soc/client/SOCBoardPanel.java:3438-3451 | 0.83 |
+| Source Linkage: Right-click build/cancel/move popup menu | /** create a new BoardPopupMenu on this board */ | src/main/java/soc/client/SOCBoardPanel.java:9699-9728 | 0.83 |
+| Source Linkage: Hover tooltip for board hexes/pieces/ports/markers |  | src/main/java/soc/client/SOCBoardPanel.java:8681-8698 | 0.83 |
+| Source Linkage: Minimum scaling factor threshold |  | src/main/java/soc/client/SOCBoardPanel.java | 0.83 |
+
+Related scopes: [Game Model & Rules Engine](../game-model-rules-engine/game-model-rules-engine.arch.md), [Robot / AI Players](../robot-ai-players/robot-ai-players.arch.md), [Server & Message Protocol](../server-message-protocol/server-message-protocol.arch.md)

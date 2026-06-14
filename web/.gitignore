@@ -4,11 +4,13 @@ node_modules/
 # Build output
 dist/
 .vite/
+*.tsbuildinfo
 
 # Vitest / coverage
 coverage/
 
 # Playwright
+.playwright-cli/
 playwright-report/
 test-results/
 /blob-report/

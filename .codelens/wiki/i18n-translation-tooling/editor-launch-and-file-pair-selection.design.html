@@ -1,0 +1,266 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Editor launch and file-pair selection · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><div class="nav-sub"><a class="nav-item active" href="../i18n-translation-tooling/editor-launch-and-file-pair-selection.design.html"><span class="nm">Editor launch and file-pair selection</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../i18n-translation-tooling/contracts/i18n-translation-tooling.api-boundary.html"><span class="nm">i18n Translation Tooling API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.html"><span class="nm">ISO-8859-1 encoding with Unicode escapes</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../i18n-translation-tooling/side-by-side-properties-translation-editing.design.html"><span class="nm">Side-by-side properties translation editing</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../i18n-translation-tooling/contracts/i18n-translation-tooling.gateway.html"><span class="nm">i18n Translation Tooling Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../i18n-translation-tooling/contracts/i18n-translation-tooling.testplan.html"><span class="nm">i18n Translation Tooling Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">i18n Translation Tooling</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf low" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:30%"></i></span>
+      <span class="conf-val">0.30</span></span></div>
+        <h1 class="doc-title">Editor launch and file-pair selection</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Editor launch and file-pair selection</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Standalone i18n tooling separate from the game</strong> — Per <a href="http://CLAUDE.md">CLAUDE.md</a>, net.nand.util.PTE i18n tooling, built separately via <code>gradle i18neditorJar</code> and excluded from the shipped game JARs — so the editor’s launch path is intentionally independent of SOCServer/SOCPlayerClient lifecycle and ships as its own artifact.</li>
+<li><strong>Safe editing of ISO-8859-1 .properties bundles</strong> — Per <a href="http://CLAUDE.md">CLAUDE.md</a>, Java .properties files use ISO-8859-1 and out-of-range characters must be \uXXXX-escaped; the PTE editor exists so translators edit bundles through tooling that respects that encoding rather than hand-editing and risking string corruption.</li>
+</ul>
+<h2>Overview</h2>
+<p>PTEMain is the process entry point for the Properties Translator Editor, the standalone Swing tool used to translate the project’s <code>.properties</code> resource bundles. On launch it presents a small chooser window from which a translator drives one of three file-pair selection paths before any editing begins. The first path opens an existing destination+source pair the user browses to directly. The second path accepts a single ‘destination’ <code>.properties</code> file and derives its matching ‘source’ (base-language) file automatically from the filename convention, so a translator need only point at the localized bundle. The third path creates a brand-new destination file from an existing source, with NewDestSrcDialog recomputing the proposed destination filename live as the base name and target language are entered. Once a pair is resolved by any path, PTEMain hands off to PropertiesTranslatorEditor — the editor window owned by a sibling feature — which loads the bundle pair for side-by-side editing. PTEMain also persists the last-edited directory as a user preference so repeat sessions reopen near the translator’s previous working location, and guards application exit through unsaved-change checks routed back into the open editor.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>PTEMain</strong></li>
+<li><strong>NewDestSrcDialog</strong></li>
+<li><strong>OpenDestSrcDialog</strong></li>
+<li><strong>PropertiesTranslatorEditor</strong></li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>PropertiesTranslatorEditor</strong> (outbound) — via PTEMain constructs and opens the editor window once a destination+source pair is resolved (src/main/java/net/nand/util/i18n/gui/PropertiesTranslatorEditor.java) (evidence: PTEMain.openPropsEditor / clickedOpenDestSrc (src/main/java/net/nand/util/i18n/gui/PTEMain.java))</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Separate launcher (PTEMain) from editor window (PropertiesTranslatorEditor)</strong>: The entry point, file-pair chooser, and cross-session preferences are concerns distinct from the table-editing UI. Splitting them lets PTEMain own process lifecycle and selection while the editor owns the loaded bundle pair, and lets the editor also be launched directly when a pair is already known (PropertiesTranslatorEditor has its own main()).</li>
+<li><strong>Derive the ‘source’ file from a single chosen ‘destination’ filename</strong>: Translation bundles follow a base-name + language-suffix naming convention, so the base-language source is recoverable from the localized filename. Offering single-file selection removes a redundant second browse step in the common case where the translator only has the localized file in hand.</li>
+<li><strong>Live recomputation of the derived destination name in NewDestSrcDialog</strong>: Creating a new translation file is error-prone if the filename must be typed by hand to match the bundle convention. Recalculating the destination name from the chosen source and language as the user edits keeps the new file consistent with the naming scheme without manual string assembly.</li>
+<li><strong>Persist ‘last edited dir’ as a per-user preference</strong>: Translators work repeatedly within the same resource directory; storing and restoring the last directory avoids re-navigating the tree each session. Implemented via the dedicated tryGetPrefLastEditedDir / trySetPrefLastEditedDir helpers rather than ad-hoc state.</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — Application exit and window-close are gated by unsaved-change checks so in-progress translations are not lost; PTEMain routes closing events through checkUnsaved/askUnsaved into the open editor. — PTEMain.checkUnsaved / askUnsaved / windowClosing (src/main/java/net/nand/util/i18n/gui/PTEMain.java)</li>
+<li><strong>error-handling</strong> — Per-user ‘last edited dir’ preference access is isolated in try-prefixed helpers so missing or unreadable preferences degrade gracefully rather than blocking launch. — PTEMain.tryGetPrefLastEditedDir / trySetPrefLastEditedDir (src/main/java/net/nand/util/i18n/gui/PTEMain.java)</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class RequestFocusListener {
+        +public void ancestorAdded(final AncestorEvent e)
+        +public void ancestorMoved(AncestorEvent e)
+        +public void ancestorRemoved(AncestorEvent e)
+    }
+    class PTEMain {
+        +tryEditFromDestOnly()
+        +public static void main(String[] args)
+        -static void showAbout(final JFrame parent)
+        +public PTEMain()
+        +public void initAndShow()
+        +openPropsEditor()
+        -private void tryGetPrefLastEditedDir()
+        -private void trySetPrefLastEditedDir()
+        -addBtn()
+        -addToGrid()
+        +public void actionPerformed(ActionEvent e)
+        -private final void clickedNewDest()
+        -private final void clickedOpenDestSrc()
+        -chooseFile()
+        -checkUnsaved()
+        -askUnsaved()
+        +public void windowClosing(WindowEvent e)
+        +public void windowActivated(WindowEvent e)
+        +public void windowClosed(WindowEvent e)
+        +public void windowDeactivated(WindowEvent e)
+        +public void windowDeiconified(WindowEvent e)
+        +public void windowIconified(WindowEvent e)
+        +public void windowOpened(WindowEvent e)
+    }
+    class NewDestSrcDialog {
+        +public NewDestSrcDialog(final File src)
+        +public void actionPerformed(final ActionEvent ae)
+        -private void recalcDestName()
+        -private void doDocEvent(DocumentEvent e)
+        +public void insertUpdate(DocumentEvent e)
+        +public void changedUpdate(DocumentEvent e)
+        +public void removeUpdate(DocumentEvent e)
+    }
+    class PropertiesTranslatorEditor {
+        +PropertiesTranslatorEditor()
+        +public void setDestIsNew(List<String> comments)
+        +@SuppressWarnings("serial")
+    public void init()
+        +public void actionPerformed(final ActionEvent ae)
+        +public void doSearchHotkey()
+        -updateSaveButtonsForEditing()
+        -insertRow()
+        +public boolean hasUnsavedChanges()
+        +public void saveChangesToAny()
+        +public void saveChangesToDest()
+        +public void saveChangesToSrc()
+        +public boolean checkUnsavedBeforeDispose()
+        +makeParentFilename()
+        +findBaseAndLangInFilename()
+        +doMouseEvent()
+        +public void mousePressed(MouseEvent e)
+        +public void mouseReleased(MouseEvent e)
+        +public void mouseClicked(MouseEvent e)
+        +public void mouseEntered(MouseEvent e)
+        +public void mouseExited(MouseEvent e)
+        -private static void runUnitTests()
+        -static void initStringManager()
+        +main()
+    }
+    class OpenDestSrcDialog {
+        -OpenDestSrcDialog()
+        +public void actionPerformed(final ActionEvent ae)
+        -private boolean chooseSrcOther()
+    }
+    class CellEditorMouseListener {
+        +public void mouseReleased(MouseEvent e)
+        -showCellEditDialog()
+    }
+    class PTCellRenderer {
+        +public PTCellRenderer(PTSwingTableModel modelData)
+        +getTableCellRendererComponent()
+    }
+    class PTSwingTableModel {
+        +public PTSwingTableModel()
+        +public void endSearch()
+        +public boolean search(String txt, final boolean forward)
+        +public final int getRowCount()
+        +public final int getColumnCount()
+        +getValueAt()
+        +setValueAt()
+        +public String getColumnName(final int col)
+        +public String getPTEColumnToolTip(final int col)
+        +public boolean isCellEditable(final int r, final int c)
+        +public boolean isRowComment(final int r)
+        +public CellStatus getCellStatus(final int r, final int c)
+    }
+    class SearchPanel {
+        +public SearchPanel()
+        +public void hideAndEndSearch()
+        +public void showAndFocus()
+        -private void search(final boolean forward)
+        +public void actionPerformed(final ActionEvent ae)
+    }
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">PTEMain entry point and chooser window</code></li>
+<li><code class="code-ref" title="source file in your repository">main() process entry</code></li>
+<li><code class="code-ref" title="source file in your repository">Open existing destination+source pair</code></li>
+<li><code class="code-ref" title="source file in your repository">Single-destination selection with auto-derived source file</code></li>
+<li><code class="code-ref" title="source file in your repository">Create new destination file with live-recomputed name</code></li>
+<li><code class="code-ref" title="source file in your repository">Per-user last-edited-dir preference persistence</code></li>
+<li><code class="code-ref" title="source file in your repository">Open the resolved file pair in the editor</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">editor-launch-and-file-pair-selection.feature.md</span>
+Scope architecture: <span class="dead-ref" title="referenced doc not present in this generation">i18n-translation-tooling.arch.md</span></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: PTEMain entry point and chooser window</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/gui/PTEMain.java:248-281</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: main() process entry</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/gui/PTEMain.java:173-191</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Open existing destination+source pair</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/gui/PTEMain.java:990-1097</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Single-destination selection with auto-derived source file</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/gui/PTEMain.java:476-512</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Create new destination file with live-recomputed name</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/gui/PTEMain.java:667-766</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Per-user last-edited-dir preference persistence</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/gui/PTEMain.java:329-349</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Open the resolved file pair in the editor</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/gui/PTEMain.java:304-321</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#b83858" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="158.3"/>
+        </svg>
+        <div class="ring-num">0.30</div>
+      </div>
+      <div class="cap" style="color:#b83858">Low confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

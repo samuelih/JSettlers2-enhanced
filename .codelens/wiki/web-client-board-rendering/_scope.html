@@ -1,0 +1,230 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web Client &amp; Board Rendering · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item active" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../web-client-board-rendering/web-client-board-rendering.arch.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../web-client-board-rendering/board-geometry-svg-rendering.design.html"><span class="nm">Board Geometry &amp; SVG Rendering</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/custom-map-editor.design.html"><span class="nm">Custom Map Editor</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/screens-ui-components-client-state.design.html"><span class="nm">Screens, UI Components &amp; Client State</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/server-protocol-websocket-connectivity.design.html"><span class="nm">Server Protocol &amp; WebSocket Connectivity</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.api-boundary.html"><span class="nm">Web Client &amp; Board Rendering API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.gateway.html"><span class="nm">Web Client &amp; Board Rendering Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.testplan.html"><span class="nm">Web Client &amp; Board Rendering Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Web Client &amp; Board Rendering</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-scope">SCOPE</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:85%"></i></span>
+      <span class="conf-val">0.85</span></span></div>
+        <h1 class="doc-title">Web Client &amp; Board Rendering</h1>
+        <p class="doc-intent">The in-development browser front end in `web/`, a TypeScript / React 18 / Zustand / Vite application that renders the Catan board as SVG and connects to the authoritative Java `SOCServer` over WebSocket. Per Readme.md, each WebSocket text frame carries one existing `SOCMessage` string, so this scope replaces only the front end while the Java server remains…</p>
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Web Client &amp; Board Rendering</h1>
+<h2>Purpose</h2>
+<p>The in-development browser front end in <code>web/</code>, a TypeScript / React 18 / Zustand / Vite application that renders the Catan board as SVG and connects to the authoritative Java <code>SOCServer</code> over WebSocket. Per <a href="http://Readme.md">Readme.md</a>, each WebSocket text frame carries one existing <code>SOCMessage</code> string, so this scope replaces only the front end while the Java server remains authoritative for game state, rules, robot players, scenarios, and custom-map validation. The domain spans the protocol/connectivity layer (<code>web/src/protocol</code>), board geometry and SVG rendering (<code>web/src/board</code>), connect/lobby/game screens (<code>web/src/screens</code>) with shared UI components (<code>web/src/components</code>), client-side state stores (<code>web/src/store</code> — <code>gameStore.ts</code>, <code>settingsStore.ts</code>, <code>uiStore.ts</code>), and a custom-map editor (<code>web/src/map-editor</code>). <a href="http://Readme.md">Readme.md</a> notes it is a working in-development client, not yet a full replacement for the Java Swing client. Governs 8 code areas rooted at <code>web/src/protocol</code>, <code>web/src/store</code>, <code>web/src/board</code> (and 5 more), spanning 9 member documents (1 ARCH, 4 DESIGN, 4 FEATURE).</p>
+<h2>Scope</h2>
+<p>sgd:codelens/64c51e15-af55-50cd-8d03-12b24fb09071/web-client-board-rendering</p>
+<h2>Local Laws</h2>
+<ul>
+<li>Use the project glossary’s established terminology consistently — 466 term(s) carry a citable source document (e.g. “Game”).</li>
+</ul>
+<h2>Members</h2>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Kind</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="board-geometry-svg-rendering.design.html">Board Geometry &amp; SVG Rendering</a></td>
+<td>DESIGN</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><span class="dead-ref" title="referenced doc not present in this generation">board-geometry-svg-rendering.feature</span></td>
+<td>FEATURE</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><a href="custom-map-editor.design.html">Custom Map Editor</a></td>
+<td>DESIGN</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><span class="dead-ref" title="referenced doc not present in this generation">custom-map-editor.feature</span></td>
+<td>FEATURE</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><a href="screens-ui-components-client-state.design.html">Screens, UI Components &amp; Client State</a></td>
+<td>DESIGN</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><span class="dead-ref" title="referenced doc not present in this generation">screens-ui-components-client-state.feature</span></td>
+<td>FEATURE</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><a href="server-protocol-websocket-connectivity.design.html">Server Protocol &amp; WebSocket Connectivity</a></td>
+<td>DESIGN</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><span class="dead-ref" title="referenced doc not present in this generation">server-protocol-websocket-connectivity.feature</span></td>
+<td>FEATURE</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><a href="web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></td>
+<td>ARCH</td>
+<td>Draft</td>
+</tr>
+</tbody>
+</table>
+<p>Total direct children: 9</p>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">web/src/protocol/SOCMessage.ts</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/store/gameStore.ts</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/coords.ts</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/map-editor/mapSchema.ts</code></li>
+<li><code class="code-ref" title="source file in your repository">web</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/types.ts</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.module.css</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/index.ts</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/store/settingsStore.ts</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/store/uiStore.ts</code></li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/MapEditorScreen.module.css</code></li>
+</ul>
+<p>Charter conventions: <a href="../documentation-conventions.html#epic-charter-conventions">documentation-conventions.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: web/src/protocol/SOCMessage.ts</td>
+<td>Base SOCMessage type, parser registry, and encode/decode helpers.</td>
+<td>web/src/protocol/SOCMessage.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/store/gameStore.ts</td>
+<td>gameStore — Zustand store for connection + lobby state.</td>
+<td>web/src/store/gameStore.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/board/coords.ts</td>
+<td></td>
+<td>web/src/board/coords.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/map-editor/mapSchema.ts</td>
+<td></td>
+<td>web/src/map-editor/mapSchema.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: web</td>
+<td></td>
+<td>web</td>
+<td style="text-align:right">1.00</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/board/types.ts</td>
+<td></td>
+<td>web/src/board/types.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/board/BoardSVG.module.css</td>
+<td></td>
+<td>web/src/board/BoardSVG.module.css</td>
+<td style="text-align:right">0.48</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/screens</td>
+<td></td>
+<td>web/src/screens</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/components/index.ts</td>
+<td>Design-system primitives barrel. Import from ‘…/components’ for convenience.</td>
+<td>web/src/components/index.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/store/settingsStore.ts</td>
+<td></td>
+<td>web/src/store/settingsStore.ts</td>
+<td style="text-align:right">0.64</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/store/uiStore.ts</td>
+<td>Top-level app views that sit alongside the connection/game flow. */</td>
+<td>web/src/store/uiStore.ts</td>
+<td style="text-align:right">0.40</td>
+</tr>
+<tr>
+<td>Source Linkage: web/src/screens/MapEditorScreen.module.css</td>
+<td></td>
+<td>web/src/screens/MapEditorScreen.module.css</td>
+<td style="text-align:right">0.48</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="33.9"/>
+        </svg>
+        <div class="ring-num">0.85</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

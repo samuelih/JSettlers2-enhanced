@@ -497,6 +497,9 @@ public class SOCBoardLayout2 extends SOCMessage
         String[] pieces = messageStrParams.split("\\|");  // split on SOCMessage.SEP_CHAR
         StringBuffer ret = new StringBuffer();
 
+        if (pieces.length < 2)
+            return null;
+
         if (! pieces[0].startsWith("game="))
             return null;
         ret.append(pieces[0].substring(5)).append(sep2_char);

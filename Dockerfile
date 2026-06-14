@@ -6,15 +6,10 @@ WORKDIR /workspace
 COPY settings.gradle build.gradle ./
 COPY src ./src
 
-RUN gradle --no-daemon serverJar \
+RUN gradle --no-daemon serverJar copyRuntimeLibs \
     && mkdir -p build/docker-server \
     && cp build/libs/Sammys-SettlersServer-*.jar build/docker-server/Sammys-SettlersServer.jar \
-    && cp "$(find "$HOME/.gradle/caches/modules-2/files-2.1" -name 'gson-2.8.6.jar' | head -n 1)" \
-        build/docker-server/gson.jar \
-    && cp "$(find "$HOME/.gradle/caches/modules-2/files-2.1" -name 'Java-WebSocket-1.5.6.jar' | head -n 1)" \
-        build/docker-server/Java-WebSocket-1.5.6.jar \
-    && cp "$(find "$HOME/.gradle/caches/modules-2/files-2.1" -name 'slf4j-api-2.0.6.jar' | head -n 1)" \
-        build/docker-server/slf4j-api-2.0.6.jar
+    && cp build/runtime-libs/*.jar build/docker-server/
 
 FROM node:20-bookworm-slim AS web-build
 

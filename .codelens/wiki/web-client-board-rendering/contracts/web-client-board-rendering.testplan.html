@@ -1,0 +1,294 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web Client &amp; Board Rendering Test Plan · ZimWiki</title>
+<link rel="stylesheet" href="../../assets/zimwiki.css">
+</head><body>
+<script src="../../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../../web-client-board-rendering/web-client-board-rendering.arch.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../../web-client-board-rendering/board-geometry-svg-rendering.design.html"><span class="nm">Board Geometry &amp; SVG Rendering</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../web-client-board-rendering/custom-map-editor.design.html"><span class="nm">Custom Map Editor</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../web-client-board-rendering/screens-ui-components-client-state.design.html"><span class="nm">Screens, UI Components &amp; Client State</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../web-client-board-rendering/server-protocol-websocket-connectivity.design.html"><span class="nm">Server Protocol &amp; WebSocket Connectivity</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../web-client-board-rendering/contracts/web-client-board-rendering.api-boundary.html"><span class="nm">Web Client &amp; Board Rendering API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../web-client-board-rendering/contracts/web-client-board-rendering.gateway.html"><span class="nm">Web Client &amp; Board Rendering Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item active" href="../../web-client-board-rendering/contracts/web-client-board-rendering.testplan.html"><span class="nm">Web Client &amp; Board Rendering Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../../index.html">Overview</a> <span class="sep">/</span><a href="../_scope.html">Web Client &amp; Board Rendering</a> <span class="sep">/</span><a href="_scope.html">Web Client &amp; Board Renderin…</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-testplan">TESTPLAN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:85%"></i></span>
+      <span class="conf-val">0.85</span></span></div>
+        <h1 class="doc-title">Web Client &amp; Board Rendering Test Plan</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Web Client &amp; Board Rendering Test Plan</h1>
+<blockquote>
+<p><em>Coverage Map aggregated by test file: 17 test file(s) mapping 201 test case(s). Per-file case counts sum to the full total; when this plan exceeds the doc size ceiling the full file inventory is chunked into <code>*.part-N.testplan.md</code> sidecars (see Testplan Sidecars).</em></p>
+</blockquote>
+<h2>Coverage Map</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx</code> <code>renders the board-svg root with the expected hex count</code>, <code>shows a dice number on the resource hex but not on desert/water</code>, <code>renders the robber on the robber hex</code>, <code>renders the port marker</code>, <code>renders a settlement at the correct node and a road on its edge</code>, <code>renders a city with a filled body and small architectural details</code>, <code>renders clickable node targets for highlightNodes and fires onNodeClick</code>, <code>renders clickable edge targets for highlightEdges and fires onEdgeClick</code>, <code>only wires hex clicks for highlighted robber/pirate targets</code>, <code>omits highlight target groups when none are given</code> (10 test cases) covers web/src/board/BoardSVG.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/Button.test.tsx</code> <code>renders its children</code>, <code>defaults to type=&quot;button&quot;</code>, <code>calls onClick when activated</code>, <code>does not fire onClick when disabled</code> (4 test cases) covers web/src/components/Button.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/Dialog.test.tsx</code> <code>keeps tab focus inside the modal</code>, <code>does not override autofocus inside the modal</code> (2 test cases) covers web/src/components/Button.tsx, web/src/components/Dialog.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/ck/ckCatalog.test.ts</code> <code>lists the full official 54-card progress deck</code>, <code>maps server-backed item types to their official current-edition names</code>, <code>includes the official C&amp;K pieces and materials missing from the old web panel</code> (3 test cases) covers web/src/components/Panel.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/newgame/NewGameDialog.test.tsx</code> <code>renders name, nickname (default WebPlayer) and Create/Cancel</code>, <code>promotes PL and VP into the prominent block at the top</code>, <code>disables Create until a game name is entered</code>, <code>calls onCreate with the entered name, nick and chosen option values</code>, <code>falls back to default nick WebPlayer when cleared</code>, <code>shows a scenario select when scenarios are provided and passes the chosen key</code>, <code>does not render a scenario select when no scenarios are given</code>, <code>calls onCancel when Cancel is clicked</code>, <code>shows a spinner in the options area while option discovery is in flight</code>, <code>hides the spinner once options have loaded</code> (10 test cases) covers web/src/components/Dialog.tsx, web/src/components/Spinner.tsx, web/src/components/newgame/NewGameDialog.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/newgame/OptionField.test.tsx</code> <code>renders a bool option as a labeled checkbox and fires onChange</code>, <code>renders an int option as a number input and clamps to min/max</code>, <code>renders an intbool option, disabling the number when unchecked</code>, <code>renders an enum option as a select of enumVals (1-indexed) and fires onChange</code>, <code>renders an enumbool option with checkbox + select, select disabled when unchecked</code>, <code>renders a str option as a text input and fires onChange</code>, <code>renders a strhide option as a masked (password) input</code>, <code>renders an unknown option as a non-interactive notice</code>, <code>strips the # marker from the rendered label</code> (9 test cases) covers web/src/components/newgame/OptionField.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/map-editor/validation.test.ts</code> <code>produces zero errors</code>, <code>produces zero warnings (each island is one contiguous area)</code>, <code>flags a missing name</code>, <code>flags name containing | or ,</code>, <code>flags a name with control/newline characters</code>, <code>flags a name with a Unicode LINE SEPARATOR (U+2028)</code>, <code>flags a name with a Unicode PARAGRAPH SEPARATOR (U+2029)</code>, <code>errors on a dashed prefix with nothing after it</code>, <code>errors on a dashed prefix missing the required trailing space</code>, <code>errors on a bracketed prefix missing the required trailing space</code>, …and 54 more in this file (64 test cases) covers web/src/main.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/net/liveDiscovery.test.ts</code> <code>returns PL/VP/SBL/BC as fully-typed descriptors, not unknown</code>, <code>the defaults reply lists the standard option keys</code> (2 test cases) covers web/src/App.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/DisconnectOverlay.test.tsx</code> <code>renders when the connection drops while a game is in progress</code>, <code>does not render while connected, nor when no game is joined</code>, <code>Reconnect re-runs connect against the saved host/port and clears the stale game</code>, <code>&quot;Back to connect screen&quot; abandons the stale game and shows the connect screen</code> (4 test cases) covers web/src/screens/DisconnectOverlay.tsx, web/src/screens/Root.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/GameOverOverlay.test.tsx</code> <code>renders for GAMESTATE OVER and names the CURRENT_PLAYER winner</code>, <code>fills final per-seat scores from GAMESTATS (TYPE_PLAYERS)</code>, <code>does not render the overlay before the game is OVER</code> (3 test cases) covers web/src/screens/GameScreen.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/GameRoom.test.tsx</code> <code>shows &quot;Starting game…&quot; and disables the button after clicking Start</code>, <code>re-enables Start when the server rejects the request (error toast)</code>, <code>labels empty-seat actions by seat number before the player sits</code>, <code>labels room-level and locked-seat actions clearly</code> (4 test cases) covers web/src/screens/GameRoom.tsx, web/src/screens/Root.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/GameScreen.test.tsx</code> <code>renders a player panel per seat with name, color swatch, and resource total</code>, <code>highlights the current player via data-current</code>, <code>shows the turn banner with the current player name and a state label</code>, <code>shows the dice display with the last roll total</code>, <code>shows a placeholder dice display before any roll</code>, <code>shows the local player per-resource breakdown</code>, <code>updates the VP shown after placing a settlement</code>, <code>renders the game log with appended lines</code>, <code>renders player chat lines with the speaker nickname, distinct from server lines</code>, <code>renders the chat input row with Send disabled until text is entered</code>, …and 4 more in this file (14 test cases) covers web/src/screens/GameScreen.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/GameScreenCK.test.tsx</code> <code>renders the C&amp;K panel in a C&amp;K game</code>, <code>does not render the C&amp;K panel in a plain game</code>, <code>shows my cloth/coin/paper counts</code>, <code>enables Build only on my turn in PLAY1 with enough of the commodity</code>, <code>disables Build outside PLAY1</code>, <code>shows a metropolis badge with the owner name</code>, <code>shows counts by level with active totals</code>, <code>gates Buy (sheep+ore), Activate (wheat + an inactive knight), Promote</code>, <code>disables Activate when all knights are active and Buy when unaffordable</code>, <code>requires Politics &gt;= 3 to promote a strong knight to mighty</code>, …and 13 more in this file (23 test cases) covers web/src/screens/GameScreen.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/GameScreenInteractions.test.tsx</code> <code>renders the bank and propose-offer controls</code>, <code>keeps bank trade at 4:1 when the player does not own the visible port</code>, <code>unlocks a resource harbor only from a settlement on either port corner</code>, <code>shows an incoming offer with Accept/Reject buttons</code>, <code>quick asks prefill the player-trade composer</code>, <code>shows bot-to-bot offers without invalid local actions</code>, <code>records declined and accepted trade activity clearly</code>, <code>records successful bank trades in the trade activity feed</code>, <code>renders Buy + a Play button for a playable Knight</code>, <code>disables Play for a brand-new (this-turn) card</code>, …and 8 more in this file (18 test cases) covers web/src/screens/GameScreen.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/LobbyScreen.test.tsx</code> <code>shows a non-OK SOCStatusMessage error as a toast and clears it</code>, <code>does not toast when there is no error</code>, <code>shows a loading row until the initial game list arrives</code>, <code>shows the populated list once games arrive</code>, <code>labels join buttons with their game names</code>, <code>shows grouped expansion choices in stable order</code> (6 test cases) covers web/src/screens/LobbyScreen.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/MapEditorScreen.test.tsx</code> <code>mounts with the core editor regions</code>, <code>loads the bundled sample map and reports a valid state</code>, <code>loads a template and can undo back to the prior draft</code>, <code>edits the selected hex through the inspector</code>, <code>clicks a validation issue to focus the offending field</code>, <code>zooms the editor canvas from the workflow bar</code>, <code>labels repeated stepper controls for assistive tech</code>, <code>surfaces an error when mutated to an invalid state</code>, <code>surfaces a dice-range error when a bad dice number is imported</code>, <code>exports JSON that round-trips back to the sample map</code>, …and 7 more in this file (17 test cases) covers web/src/screens/MapEditorScreen.tsx</li>
+<li><code class="code-ref" title="source file in your repository">web/src/screens/SettingsScreen.test.tsx</code> <code>renders nothing when settings are closed</code>, <code>renders all controls inside settings-body</code>, <code>changing theme select updates store + data-theme</code>, <code>changing color-blind select updates store + data-theme-cb</code>, <code>changing quality select updates store + data-render-quality</code>, <code>moving font-scale slider updates store + --font-scale</code>, <code>sound toggle disables the volume slider when off</code>, <code>reset button restores defaults</code> (8 test cases) covers web/src/screens/Root.tsx, web/src/screens/SettingsScreen.tsx</li>
+</ul>
+<h2>Acceptance Evidence</h2>
+<ul>
+<li>Given the implementation under test, when renders the board svg root with the expected hex count is exercised by <code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx::renders the board-svg root with the expected hex count</code>, then the feature preserves that observable behavior.</li>
+<li>Given the implementation under test, when shows a dice number on the resource hex but not on desert/water is exercised by <code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx::shows a dice number on the resource hex but not on desert/water</code>, then the feature preserves that observable behavior.</li>
+<li>Given the implementation under test, when renders the robber on the robber hex is exercised by <code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx::renders the robber on the robber hex</code>, then the feature preserves that observable behavior.</li>
+<li>Given the implementation under test, when renders the port marker is exercised by <code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx::renders the port marker</code>, then the feature preserves that observable behavior.</li>
+<li>Given the implementation under test, when renders a settlement at the correct node and a road on its edge is exercised by <code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx::renders a settlement at the correct node and a road on its edge</code>, then the feature preserves that observable behavior.</li>
+<li>Given the implementation under test, when renders a city with a filled body and small architectural details is exercised by <code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx::renders a city with a filled body and small architectural details</code>, then the feature preserves that observable behavior.</li>
+<li>Given the implementation under test, when renders clickable node targets for highlight Nodes and fires on Node Click is exercised by <code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx::renders clickable node targets for highlightNodes and fires onNodeClick</code>, then the feature preserves that observable behavior.</li>
+<li>Given the implementation under test, when renders clickable edge targets for highlight Edges and fires on Edge Click is exercised by <code class="code-ref" title="source file in your repository">web/src/board/BoardSVG.test.tsx::renders clickable edge targets for highlightEdges and fires onEdgeClick</code>, then the feature preserves that observable behavior.</li>
+</ul>
+<h2>Coverage Gaps</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">web/src/board/pieces/BoardDefs.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/pieces/HexTile.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/pieces/Pieces.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/pieces/PortMarker.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/pieces/ResourceMotif.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/pieces/RobberPirate.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/board/pieces/TerrainTexture.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/AppFrame.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/Toast.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">web/src/components/ck/CKPanel.tsx</code> has no mapped test file in the scanned corpus.</li>
+<li>…and 6 more unmapped paths (see parts).</li>
+</ul>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coverage Map: web/src/board/BoardSVG.test.tsx</td>
+<td></td>
+<td>linkonly: web/src/board/BoardSVG.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/components/Button.test.tsx</td>
+<td></td>
+<td>linkonly: web/src/components/Button.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/components/Dialog.test.tsx</td>
+<td></td>
+<td>linkonly: web/src/components/Dialog.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/components/ck/ckCatalog.test.ts</td>
+<td></td>
+<td>linkonly: web/src/components/ck/ckCatalog.test.ts</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/components/newgame/NewGameDialog.test.tsx</td>
+<td></td>
+<td>linkonly: web/src/components/newgame/NewGameDialog.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/components/newgame/OptionField.test.tsx</td>
+<td></td>
+<td>linkonly: web/src/components/newgame/OptionField.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/map-editor/validation.test.ts</td>
+<td>Tests for validation.ts — mirrors soc.server.CustomMapValidator rule-for-rule.</td>
+<td>web/src/map-editor/validation.test.ts</td>
+<td style="text-align:right">0.14</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/net/liveDiscovery.test.ts</td>
+<td>@vitest-environment node</td>
+<td>linkonly: web/src/net/liveDiscovery.test.ts</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/DisconnectOverlay.test.tsx</td>
+<td>Tests for the mid-game disconnect flow: when the WebSocket drops (status</td>
+<td>web/src/screens/DisconnectOverlay.test.tsx</td>
+<td style="text-align:right">0.51</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/GameOverOverlay.test.tsx</td>
+<td>Vitest render test for the game-over overlay (Phase 4).</td>
+<td>linkonly: web/src/screens/GameOverOverlay.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/GameRoom.test.tsx</td>
+<td>Tests for the GameRoom’s Start-game pending state: after clicking Start, the</td>
+<td>linkonly: web/src/screens/GameRoom.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/GameScreen.test.tsx</td>
+<td>Render tests for the live in-game GameScreen: board, per-seat player panels</td>
+<td>linkonly: web/src/screens/GameScreen.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/GameScreenCK.test.tsx</td>
+<td>Render tests for the Cities &amp; Knights GameScreen additions: the C&amp;K panel</td>
+<td>linkonly: web/src/screens/GameScreenCK.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/GameScreenInteractions.test.tsx</td>
+<td>Render tests for the Phase-4 interaction UI on GameScreen: the trade panel</td>
+<td>linkonly: web/src/screens/GameScreenInteractions.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/LobbyScreen.test.tsx</td>
+<td>Tests for LobbyScreen’s surfacing of server-side rejections. A non-OK</td>
+<td>linkonly: web/src/screens/LobbyScreen.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/MapEditorScreen.test.tsx</td>
+<td>Component test for the map editor screen (Phase 5).</td>
+<td>linkonly: web/src/screens/MapEditorScreen.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Map: web/src/screens/SettingsScreen.test.tsx</td>
+<td>Tests for SettingsScreen: it renders the labeled controls inside</td>
+<td>linkonly: web/src/screens/SettingsScreen.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Acceptance Evidence: web/src/board/BoardSVG.test.tsx::renders the board-svg root with the expected hex count</td>
+<td></td>
+<td>linkonly: web/src/board/BoardSVG.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/board/pieces/BoardDefs.tsx</td>
+<td>Hex kinds that get a gradient sheen, paired with their gradient id. */</td>
+<td>web/src/board/pieces/BoardDefs.tsx</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/board/pieces/HexTile.tsx</td>
+<td>Map a HexKind to its CSS-module fill class. */</td>
+<td>web/src/board/pieces/HexTile.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/board/pieces/Pieces.tsx</td>
+<td>Owning player’s color (hex/rgb string from the playerColors prop). */</td>
+<td>web/src/board/pieces/Pieces.tsx</td>
+<td style="text-align:right">0.79</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/board/pieces/PortMarker.tsx</td>
+<td>Port type 0 = misc 3:1; 1…5 = clay/ore/sheep/wheat/wood 2:1. */</td>
+<td>web/src/board/pieces/PortMarker.tsx</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/board/pieces/ResourceMotif.tsx</td>
+<td>Hex center pixel. */</td>
+<td>web/src/board/pieces/ResourceMotif.tsx</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/board/pieces/RobberPirate.tsx</td>
+<td>0xRRCC hex coordinate the marker sits on. */</td>
+<td>web/src/board/pieces/RobberPirate.tsx</td>
+<td style="text-align:right">0.36</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/board/pieces/TerrainTexture.tsx</td>
+<td></td>
+<td>web/src/board/pieces/TerrainTexture.tsx</td>
+<td style="text-align:right">0.64</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/components/AppFrame.tsx</td>
+<td>App title shown in the header. Defaults to “Sammy’s Settlers”. */</td>
+<td>linkonly: web/src/components/AppFrame.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/components/Toast.tsx</td>
+<td>Auto-dismiss delay in ms. Use 0 to keep until dismissed. Default 5000. */</td>
+<td>web/src/components/Toast.tsx</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Coverage Gaps: web/src/components/ck/CKPanel.tsx</td>
+<td>Cities &amp; Knights in-game UI: the local player’s C&amp;K panel (commodities,</td>
+<td>web/src/components/ck/CKPanel.tsx</td>
+<td style="text-align:right">0.72</td>
+</tr>
+</tbody>
+</table>
+<h2>Unverified Areas</h2>
+<p>Parts of this document have limited verifiable source evidence — treat normative claims as unverified until confirmed. See <a href="../../documentation-conventions.html#unverified-areas">documentation conventions</a>.</p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="33.9"/>
+        </svg>
+        <div class="ring-num">0.85</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../../assets/zimwiki.js"></script>
+</body></html>

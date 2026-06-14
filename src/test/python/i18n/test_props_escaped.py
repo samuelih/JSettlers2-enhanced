@@ -6,9 +6,36 @@
 # License: GPLv3
 
 import io, os, re, unittest
+from collections import OrderedDict
 
 SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 MAIN_RESOURCES_DIR = os.path.join(SRC_DIR, "main", "resources")
+STRINGS_DIR = os.path.join(MAIN_RESOURCES_DIR, "resources", "strings")
+
+RE_EMPTY_LINE = re.compile(r"^\s*$")
+RE_COMMENT_LINE = re.compile(r"^\s*[#!]")
+RE_DATA_LINE = re.compile(r"^\s*([^=]+?)\s*=\s*(.*?)$")
+SOC_SPECIAL_PLACEHOLDER_TYPES = set(["rsrcs", "list", "dcards"])
+
+def parse_props_list(props_list):
+  """Parse simple name=value Java properties lines, preserving values and line numbers.
+  Returns (props, parse_errors), where props maps key -> (value, line_number).
+  This parser intentionally matches the current project resource files: no line continuations.
+  """
+  props = OrderedDict()
+  fails = []
+
+  for linenum in range(len(props_list)):
+    propline = props_list[linenum].rstrip("\r\n")
+    if RE_EMPTY_LINE.search(propline) or RE_COMMENT_LINE.search(propline):
+      continue
+    m = RE_DATA_LINE.search(propline)
+    if not m:
+      fails.append( (linenum + 1, 0, "(Cannot parse this line)") )
+      continue
+    props[m.group(1)] = (m.group(2), linenum + 1)
+
+  return props, fails
 
 def check_missing_escape(localized_str):
   """ Test localized_str contents against java MessageFormat.format format, looking for missing escape chars.
@@ -46,24 +73,108 @@ def check_props_list_missing_escape(props_list):
   to retain line numbers and prevent any interpretation of "#" chars in values as comments.
   """
   fails = []
-  re_empty_line = re.compile(r"^\s*$")
-  re_comment_line = re.compile(r"^\s*#")
-  re_data_line = re.compile(r"^\s*([^=]+?)\s*=\s*(.*?)$")
+  props, parse_errors = parse_props_list(props_list)
+  fails.extend(parse_errors)
 
-  for linenum in range(len(props_list)):
-    propline = props_list[linenum]
-    if re_empty_line.search(propline) or re_comment_line.search(propline):
-      continue
-    m = re_data_line.search(propline)
-    if not m:
-      fails.append( (linenum + 1, 0, "(Cannot parse this line)") )
-      continue
-    k, v = m.group(1), m.group(2)
+  for k, (v, linenum) in props.items():
     idx = check_missing_escape(v)
     if idx != -1:
-      fails.append( (linenum + 1, idx, k) )
+      fails.append( (linenum, idx, k) )
 
   return fails
+
+def _find_message_placeholder_end(localized_str, start_pos):
+  """Find matching } for a MessageFormat placeholder at start_pos, or -1."""
+  pos = start_pos + 1
+  depth = 1
+
+  while pos < len(localized_str):
+    ch = localized_str[pos]
+    if ch == "'":
+      pos += 1
+      while pos < len(localized_str):
+        if localized_str[pos] == "'":
+          if (pos + 1 < len(localized_str)) and (localized_str[pos + 1] == "'"):
+            pos += 2
+            continue
+          pos += 1
+          break
+        pos += 1
+      continue
+    elif ch == "{":
+      depth += 1
+    elif ch == "}":
+      depth -= 1
+      if depth == 0:
+        return pos
+
+    pos += 1
+
+  return -1
+
+def message_arg_signature(localized_str):
+  """Return required MessageFormat argument indexes and SoC-special placeholder types.
+  Standard MessageFormat types such as number/choice are intentionally ignored,
+  because translated strings may need different pluralization formats.
+  """
+  indexes = set()
+  special_types = {}
+  pos = 0
+  in_quote = False
+
+  while pos < len(localized_str):
+    ch = localized_str[pos]
+    if ch == "'":
+      if (pos + 1 < len(localized_str)) and (localized_str[pos + 1] == "'"):
+        pos += 2
+        continue
+      in_quote = not in_quote
+      pos += 1
+      continue
+
+    if (not in_quote) and (ch == "{"):
+      end_pos = _find_message_placeholder_end(localized_str, pos)
+      if end_pos == -1:
+        pos += 1
+        continue
+
+      ph_text = localized_str[pos + 1:end_pos].strip()
+      m = re.match(r"^(\d+)\s*(?:,\s*([A-Za-z]+))?", ph_text)
+      if m:
+        arg_num = int(m.group(1))
+        arg_type = m.group(2)
+        indexes.add(arg_num)
+        if arg_type in SOC_SPECIAL_PLACEHOLDER_TYPES:
+          special_types[arg_num] = arg_type
+
+      pos = end_pos + 1
+      continue
+
+    pos += 1
+
+  return (indexes, special_types)
+
+def check_props_placeholder_parity(base_props, localized_props):
+  """Check placeholder parity for keys present in both parsed properties maps.
+  Returns list of (key, base_line, localized_line, base_signature, localized_signature).
+  """
+  mismatches = []
+
+  for k in sorted(localized_props.keys()):
+    if k not in base_props:
+      continue
+    base_value, base_line = base_props[k]
+    localized_value, localized_line = localized_props[k]
+    base_sig = message_arg_signature(base_value)
+    localized_sig = message_arg_signature(localized_value)
+    if base_sig != localized_sig:
+      mismatches.append( (k, base_line, localized_line, base_sig, localized_sig) )
+
+  return mismatches
+
+def check_props_extra_keys(base_props, localized_props):
+  """Return keys present in localized_props but absent from base_props."""
+  return sorted(set(localized_props.keys()) - set(base_props.keys()))
 
 class TestPropsEscaped(unittest.TestCase):
 
@@ -136,6 +247,40 @@ class TestPropsEscaped(unittest.TestCase):
     self.assertEqual(res[0], (1, 3, "some.prop"))
     self.assertEqual(res[1], (2, 8, "x.prop"))
 
+  def test_message_arg_signature(self):
+    self.assertEqual((set(), {}), message_arg_signature(""))
+    self.assertEqual((set([0]), {}), message_arg_signature("Hello {0}"))
+    self.assertEqual((set([0]), {}), message_arg_signature("{0,number} points"))
+    self.assertEqual((set([0]), {}), message_arg_signature("{0,choice,0#none|1#one|1<{0,number}}"))
+    self.assertEqual((set([0]), {0: "rsrcs"}), message_arg_signature("{0,rsrcs}"))
+    self.assertEqual((set([0, 2]), {2: "list"}), message_arg_signature("{0}: {2,list}"))
+    self.assertEqual((set([0]), {}), message_arg_signature("'{1}' literal and {0} real"))
+
+  def test_check_props_placeholder_parity(self):
+    base_props, parse_errors = parse_props_list([
+      "plain = no args",
+      "name = Hello {0}",
+      "rsrc = Give {0,rsrcs}",
+      "count = {0,number} points",
+      "obsolete.base = still here"
+    ])
+    self.assertFalse(parse_errors)
+
+    localized_props, parse_errors = parse_props_list([
+      "plain = no args translated",
+      "name = Hola",
+      "rsrc = Da {0}",
+      "count = {0,choice,0#none|1#one|1<{0,number}} puntos",
+      "extra = obsolete"
+    ])
+    self.assertFalse(parse_errors)
+
+    mismatches = check_props_placeholder_parity(base_props, localized_props)
+    self.assertEqual(2, len(mismatches))
+    self.assertEqual("name", mismatches[0][0])
+    self.assertEqual("rsrc", mismatches[1][0])
+    self.assertEqual(["extra"], check_props_extra_keys(base_props, localized_props))
+
   def test_parse_all_props_files(self):
     """Gather all properties files, parse each one, print results if not as expected.
     and *.properties should be under src/main/resources/**/
@@ -158,6 +303,46 @@ class TestPropsEscaped(unittest.TestCase):
           all_errors[fname] = file_errors
     if all_errors:
       self.fail("\n\nCharacter escape problems in properties files (line, char, key):\n" + repr(all_errors) + "\n\n")
+
+  def test_localized_placeholder_parity(self):
+    """Check localized bundles against their base bundle for keys they translate."""
+    families = [
+      os.path.join(STRINGS_DIR, "client", "data.properties"),
+      os.path.join(STRINGS_DIR, "server", "toClient.properties")
+    ]
+
+    all_errors = {}
+    for base_fname in families:
+      with io.open(base_fname, 'r', encoding='iso-8859-1') as f:
+        base_props, parse_errors = parse_props_list(f.readlines())
+      if parse_errors:
+        all_errors[base_fname] = {"parse": parse_errors}
+        continue
+
+      base_dir = os.path.dirname(base_fname)
+      base_name = os.path.basename(base_fname)
+      base_prefix = base_name[:-len(".properties")]
+      for fname in sorted(os.listdir(base_dir)):
+        if (not fname.endswith(".properties")) or (fname == base_name) or (not fname.startswith(base_prefix + "_")):
+          continue
+
+        localized_fname = os.path.join(base_dir, fname)
+        with io.open(localized_fname, 'r', encoding='iso-8859-1') as f:
+          localized_props, parse_errors = parse_props_list(f.readlines())
+        if parse_errors:
+          all_errors[localized_fname] = {"parse": parse_errors}
+          continue
+
+        extra_keys = check_props_extra_keys(base_props, localized_props)
+        mismatches = check_props_placeholder_parity(base_props, localized_props)
+        if extra_keys or mismatches:
+          all_errors[localized_fname] = {
+            "extra_keys": extra_keys,
+            "placeholder_mismatches": mismatches
+          }
+
+    if all_errors:
+      self.fail("\n\nLocalized properties do not match base placeholder/key requirements:\n" + repr(all_errors) + "\n\n")
 
 if __name__ == '__main__':
     unittest.main()

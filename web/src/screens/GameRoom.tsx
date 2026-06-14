@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 import { Button, Panel, useToast } from '../components';
 import { SeatLockState } from '../protocol';
@@ -68,6 +68,8 @@ function Seat({
           <Button
             variant="primary"
             size="sm"
+            className={styles.seatButton}
+            aria-label={`Sit in seat ${seat + 1}`}
             onClick={onSit}
             data-testid={`sit-${seat}`}
           >
@@ -78,8 +80,10 @@ function Seat({
           <Button
             variant={locked ? 'danger' : 'ghost'}
             size="sm"
+            className={styles.seatButton}
             onClick={onToggleLock}
             aria-pressed={locked}
+            aria-label={locked ? `Unlock seat ${seat + 1}` : `Lock seat ${seat + 1}`}
             data-testid={`lock-${seat}`}
           >
             {locked ? 'Locked' : 'Lock'}
@@ -109,6 +113,7 @@ export function GameRoom(): JSX.Element | null {
   // the server's start broadcast advances the game state (Root then swaps to
   // the started view and unmounts this room).
   const [starting, setStarting] = useState(false);
+  const startHintId = useId();
 
   // Surface server-side rejections received while in the room (e.g. SOCStatusMessage
   // non-OK svalues from a sit/start request). Show once, then clear so it does not
@@ -162,6 +167,7 @@ export function GameRoom(): JSX.Element | null {
           variant="ghost"
           size="sm"
           className={styles.leave}
+          aria-label="Leave game room"
           onClick={onLeave}
           data-testid="leave-game"
         >
@@ -183,13 +189,14 @@ export function GameRoom(): JSX.Element | null {
           size="lg"
           onClick={onStart}
           disabled={!iAmSeated || starting}
+          aria-describedby={!iAmSeated ? startHintId : undefined}
           data-pending={starting ? 'true' : 'false'}
           data-testid="start-game"
         >
           {starting ? 'Starting game…' : 'Start game'}
         </Button>
         {!iAmSeated && (
-          <span className={styles.hint} data-testid="start-hint">
+          <span id={startHintId} className={styles.hint} data-testid="start-hint">
             Sit down at a seat to start the game.
           </span>
         )}

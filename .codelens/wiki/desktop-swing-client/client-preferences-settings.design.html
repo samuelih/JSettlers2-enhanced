@@ -1,0 +1,364 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Client Preferences &amp; Settings · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../desktop-swing-client/desktop-swing-client.arch.html"><span class="nm">Desktop Swing Client</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../desktop-swing-client/board-rendering-visual-themes.design.html"><span class="nm">Board Rendering &amp; Visual Themes</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../desktop-swing-client/client-preferences-settings.design.html"><span class="nm">Client Preferences &amp; Settings</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.api-boundary.html"><span class="nm">Desktop Swing Client API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/in-game-player-interface.design.html"><span class="nm">In-Game Player Interface</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/network-game-list-client.design.html"><span class="nm">Network &amp; Game-List Client</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.gateway.html"><span class="nm">Desktop Swing Client Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.testplan.html"><span class="nm">Desktop Swing Client Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Desktop Swing Client</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:58%"></i></span>
+      <span class="conf-val">0.58</span></span></div>
+        <h1 class="doc-title">Client Preferences &amp; Settings</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Client Preferences &amp; Settings</h1>
+<h2>Overview</h2>
+<p>This subsystem is the desktop client’s persistent user-preference layer. UserPreferences statically wraps a per-package java.util.prefs.Preferences node, exposing typed getPref/putPref accessors plus a lazily-built LinkedHashMap registry of PreferenceDescriptor metadata. SwingMainDisplay’s ‘Preferences…’ button opens PreferencesDialog, which calls getRegisteredPreferences() and builds one editor control per descriptor, grouping them under section headers and localizing labels through SOCStringManager. On open, each control is initialized from the current persisted value; on OK, applyChanges() reads each control and writes back only values that differ, persisting asynchronously via EventQueue.invokeLater. Most changes (font size, UI scale, rendering quality) take effect only for new windows or after restart — applied once at startup by SwingMainDisplay — while the hex graphics set takes effect immediately by reloading open games’ board graphics. Cancel discards everything. This keeps display/UI configuration entirely separate from the soc.message network layer.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>PreferencesDialog</strong>: Modal editor that enumerates every registered PreferenceDescriptor and renders one control per preference (JCheckBox for BOOLEAN, JSpinner for INT, JComboBox for CHOICE), loading current values on open and applying/persisting only changed values on OK.</li>
+<li><strong>UserPreferences</strong>: Wraps java.util.prefs.Preferences with typed getPref/putPref accessors and an additive LinkedHashMap registry of PreferenceDescriptors built lazily by buildRegistry(); owns persistence, async flush, and clearing.</li>
+<li><strong>PreferenceDescriptor</strong>: Describes one preference: key, Type enum (BOOLEAN/INT/CHOICE), default value, allowed choices, choiceStoredAsInt flag, and i18n label key; declares the newer KEY_* constants (render antialiasing/interpolation, color-blind mode, UI font size, hex graphics set).</li>
+<li><strong>SwingMainDisplay</strong>: Hosts the ‘Preferences…’ button that launches the dialog, supplies the display-scale factor and SOCPlayerClient for immediate-effect changes, and applies the font-size preference once at startup via scaleUIManagerFontsForFontSizePref().</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>UserPreferences</strong> (outbound) — via PreferencesDialog imports soc.client.UserPreferences; calls getRegisteredPreferences(), getPref(), putPref() (evidence: src/main/java/soc/client/PreferencesDialog.java import + buildEditor/applyChanges)</li>
+<li><strong>SOCStringManager</strong> (outbound) — via SOCStringManager.getClientManager() for localized labels and section headers (strings.get) (evidence: src/main/java/soc/client/PreferencesDialog.java field ‘strings’ and buildEditor label lookups)</li>
+<li><strong>MainDisplay / SwingMainDisplay</strong> (bidirectional) — via SwingMainDisplay ‘pref’ button opens the dialog; dialog calls md.getDisplayScaleFactor() and md.getClient().reloadBoardGraphics() (evidence: src/main/java/soc/client/SwingMainDisplay.java field ‘pref’ (JButton opening PreferencesDialog); src/main/java/soc/client/PreferencesDialog.java mainDisplay usage)</li>
+<li><strong>java.util.prefs.Preferences</strong> (outbound) — via UserPreferences.userNodeForPackage(SOCPlayerInterface.class) backing store; getBoolean/getInt/get + put*/flush/remove (evidence: src/main/java/soc/client/UserPreferences.java static block + getPref/putPref/clear)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Additive descriptor mini-registry layered over the existing static getPref/putPref API rather than replacing it.</strong>: The PreferenceDescriptor registry exists so UI can enumerate preferences and build the correct control without hardcoding each key, type, and default; its javadoc explicitly states it ‘does not change the existing static UserPreferences.getPref/putPref API, which remains the way to read and write preference values.’ This preserves backward compatibility with all existing call sites.</li>
+<li><strong>Registry uses LinkedHashMap so insertion order in buildRegistry() determines dialog display order.</strong>: Registration order is grouped to match the section headers (general, display, accessibility), giving a stable, intentional layout without a separate ordering mechanism. getRegisteredPreferences() returns descriptors in registration order.</li>
+<li><strong>CHOICE preferences can be stored as a String value or as an integer index (choiceStoredAsInt) into choices[].</strong>: Legacy keys like KEY_HEX_GRAPHICS_SET predate this registry and were already persisted as an integer index (0=pastel, 1=classic); the dual storage lets the registry absorb them without migrating existing persisted values.</li>
+<li><strong>Apply-on-OK / discard-on-Cancel, writing back only values that differ from the stored value.</strong>: applyChanges() compares each editor’s value to UserPreferences.getPref before calling putPref, minimizing writes and async flushes; Cancel simply dispose()s without touching storage.</li>
+<li><strong>Split immediate-effect vs. deferred-effect preferences.</strong>: The dialog’s javadoc notes board rendering quality, UI font size, and UI scale ‘take effect only for newly created windows or after a restart,’ so the dialog persists them but does not re-render; only the hex graphics set is refreshed live via mainDisplay.getClient().reloadBoardGraphics(), mirroring NewGameOptionsFrame’s behavior.</li>
+<li><em><em>KEY_</em> preference constants are declared on PreferenceDescriptor, not SOCPlayerClient.</em>*: Per the KEY_HEX_GRAPHICS_SET javadoc, declaring the keys here lets the registry reference them ‘without depending on SOCPlayerClient class-load order,’ avoiding static-initialization ordering hazards.</li>
+<li><strong>Persistence namespace is keyed to the soc.client package, not a class name.</strong>: UserPreferences javadoc: ‘Because the user preference storage namespace is based on the soc.client package and not a class name, preferences are shared among all Sammys-Settlers client versions,’ so upgrades retain settings.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> PreferencesDialog MUST be constructed with a non-null MainDisplay. — src/main/java/soc/client/PreferencesDialog.java::PreferencesDialog (throws IllegalArgumentException when md == null)</li>
+<li><strong>[HARD]</strong> Startup font-size scaling MUST run at most once. — src/main/java/soc/client/SwingMainDisplay.java field didScaleUIManagerFontsForPref guards scaleUIManagerFontsForFontSizePref()</li>
+<li><strong>[SOFT]</strong> INT preference editor values MUST be clamped to the [-999, 999] spinner range while preserving negative ‘disabled’ sentinels. — src/main/java/soc/client/PreferencesDialog.java::buildEditor (clamps cur to -999…999 before SpinnerNumberModel)</li>
+<li><strong>[UNVERIFIED]</strong> Preference writes MUST NOT exceed Preferences.MAX_KEY_LENGTH / MAX_VALUE_LENGTH or putPref throws IllegalArgumentException. — src/main/java/soc/client/UserPreferences.java::putPref (documented throws IllegalArgumentException) (cross-document reconciliation: not verified against <code>src/main/java/soc/client/UserPreferences.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> getRegisteredPreferences() SHOULD never return null or empty so the dialog always has rows to render. — src/main/java/soc/client/UserPreferences.java::getRegisteredPreferences javadoc (‘never null or empty’) (cross-document reconciliation: not verified against <code>src/main/java/soc/client/UserPreferences.java</code>; recorded as design intent, not current code fact.)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — All preference reads tolerate a missing backing store: getPref returns the supplied default when userPrefs is null or a RuntimeException is thrown, so the client runs without persistent storage. — src/main/java/soc/client/UserPreferences.java::getPref (null check + catch RuntimeException returning dflt)</li>
+<li><strong>performance</strong> — Persistence is non-blocking: putPref schedules Preferences.flush() via EventQueue.invokeLater rather than flushing on the calling thread. — src/main/java/soc/client/UserPreferences.java::flushSoon</li>
+<li><strong>error-handling</strong> — OK-button apply is wrapped so a failure in applyChanges() logs to System.err and still disposes the dialog instead of leaving it open. — src/main/java/soc/client/PreferencesDialog.java::actionPerformed (catch Throwable around applyChanges)</li>
+<li><strong>observability</strong> — Storage failures and preference clears emit diagnostics to System.err rather than failing silently. — src/main/java/soc/client/UserPreferences.java::clear and flushSoon (System.err messages)</li>
+<li><strong>reliability</strong> — A static initializer suppresses the spurious Windows java.util.prefs root-node warning while loading userPrefs, restoring the prior log level afterward. — src/main/java/soc/client/UserPreferences.java static block (Logger java.util.prefs level workaround)</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Only changed values are persisted, avoiding redundant writes and flushes.</em>
+<em>Source: <code>src/main/java/soc/client/PreferencesDialog.java::applyChanges</code></em></p>
+<pre><code>if (newVal != UserPreferences.getPref(pd.key, dflt))
+    UserPreferences.putPref(pd.key, newVal);
+</code></pre>
+<p><em>Shows the one immediate-effect preference path versus the deferred (restart/new-window) ones.</em>
+<em>Source: <code>src/main/java/soc/client/PreferencesDialog.java::applyChanges</code></em></p>
+<pre><code>if (PreferenceDescriptor.KEY_HEX_GRAPHICS_SET.equals(pd.key))
+    mainDisplay.getClient().reloadBoardGraphics();
+</code></pre>
+<p><em>Insertion-ordered map makes registration order the dialog’s display order.</em>
+<em>Source: <code>src/main/java/soc/client/UserPreferences.java::buildRegistry</code></em></p>
+<pre><code>final Map&lt;String, PreferenceDescriptor&gt; reg = new LinkedHashMap&lt;String, PreferenceDescriptor&gt;();
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class JoinableListItem {
+        +JoinableListItem()
+        +public String toString()
+        +@Override
+        public boolean equals(Object i)
+    }
+    class PreferenceDescriptor {
+        +PreferenceDescriptor()
+        +getCurrentChoice()
+        +putCurrentChoice()
+        +public int indexOfChoice(final String choice)
+    }
+    class GameOptionsTimeoutTask {
+        +GameOptionsTimeoutTask()
+        +@Override
+        public void run()
+    }
+    class PreferencesDialog {
+        +createAndShow()
+        +PreferencesDialog()
+        -private void buildUI()
+        -private static String sectionKeyFor(final String prefKey)
+        -buildEditor()
+        +public void actionPerformed(final ActionEvent e)
+        -private void applyChanges()
+    }
+    class ClientWindowAdapter {
+        +public ClientWindowAdapter(SwingMainDisplay md)
+        +windowClosing()
+        +@Override
+        public void windowOpened(WindowEvent evt)
+    }
+    class UserPreferences {
+        +getPref()
+        +putPref()
+        -private static void flushSoon()
+        +public static final void clear(final String prefKeyList)
+        +getRegisteredPreferences()
+        +getDescriptor()
+        -private static void buildRegistry()
+    }
+    class GameOptionDefaultsTimeoutTask {
+        +GameOptionDefaultsTimeoutTask()
+        +@Override
+        public void run()
+    }
+    class SwingMainDisplay {
+        +SwingMainDisplay()
+        +getForegroundBackgroundColors()
+        +public static final boolean isOSColorHighContrast()
+        +underlineComponentFont()
+        +checkDisplayScaleFactor()
+        +scaleUIManagerFonts()
+        +scaleUIManagerFontsForFontSizePref()
+        +public SOCPlayerClient getClient()
+        +public final GameMessageSender getGameMessageSender()
+        +public final Container getGUIContainer()
+        +public final int getDisplayScaleFactor()
+        +public WindowAdapter createWindowAdapter()
+        +public void setMessage(String message)
+        +showErrorDialog()
+        +public void initVisualElements()
+        -initMainPanelLayout()
+        +connect()
+        +public void clickPracticeButton()
+        -private void guardedActionPerform(Object target)
+        -guardedActionPerform_channels()
+        +public boolean readValidNicknameAndPassword()
+        -private boolean guardedActionPerform_games(Object target)
+        -getValidNickname()
+        -private String checkNameFormat(final String n)
+        -protected String getPassword()
+        +public Timer getEventTimer()
+        +gameWithOptionsBeginSetup()
+        -showGameOptions()
+        +askStartGameWithOptions()
+        +public void clearWaitingStatus(final boolean clearStatus)
+        -findAnyActiveGame()
+        +hasAnyActiveGame()
+        +showErrorPanel()
+        +public void enableOptions()
+        +showVersion()
+        +showStatus()
+        +public void setNickname(final String nm)
+        +public void focusPassword()
+        +public void setPassword(final String pw)
+        +public void repaintGameAndChannelLists()
+        +channelJoined()
+        +channelLeft()
+        +channelMemberList()
+        +public void channelDeleted(String channelName)
+        +public void channelsClosed(String message)
+        +addToList()
+        +deleteFromList()
+        +public void channelCreated(String channelName)
+        +channelList()
+        +public void chatMessageBroadcast(String message)
+        +chatMessageReceived()
+        +gameTimingStatsReceived()
+        +public void dialogClosed(final NewGameOptionsFrame ngof)
+        +public void leaveGame(SOCGame game)
+        +gameJoined()
+        -private void gameOptionsSetTimeoutTask()
+        -private void gameOptionsCancelTimeoutTask()
+        +public void optionsRequested()
+        +optionsReceived()
+        +addToGameList()
+        +deleteFromGameList()
+        +public void sendToChannel(String ch, String mes)
+        +public boolean doLocalCommand(String ch, String cmd)
+        +public void printIgnoreList(SOCPlayerInterface pi)
+        +public void practiceGameStarting()
+        +startLocalTCPServer()
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_client_PreferencesDialog_java["PreferencesDialog.java"]
+    src_main_java_soc_client_SwingMainDisplay_java["SwingMainDisplay.java"]
+    src_main_java_soc_client_UserPreferences_java["UserPreferences.java"]
+
+    src_main_java_soc_client_PreferencesDialog_java -->|"imports"| src_main_java_soc_client_UserPreferences_java
+
+    ext_src_main_java_soc_game_SOCGame_java["SOCGame.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    ext_src_main_java_soc_game_SOCGameOption_java["SOCGameOption.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOption_java
+    ext_src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    ext_src_main_java_soc_game_SOCScenario_java["SOCScenario.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_game_SOCScenario_java
+    ext_src_main_java_soc_game_SOCVersionedItem_java["SOCVersionedItem.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_game_SOCVersionedItem_java
+    ext_src_main_java_soc_message_SOCAuthRequest_java["SOCAuthRequest.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_message_SOCAuthRequest_java
+    ext_src_main_java_soc_message_SOCChannelTextMsg_java["SOCChannelTextMsg.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_message_SOCChannelTextMsg_java
+    ext_src_main_java_soc_message_SOCJoinChannel_java["SOCJoinChannel.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_message_SOCJoinChannel_java
+    ext_src_main_java_soc_message_SOCLocalizedStrings_java["SOCLocalizedStrings.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_message_SOCLocalizedStrings_java
+    ext_src_main_java_soc_server_SOCServer_java["SOCServer.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_server_SOCServer_java
+    ext_src_main_java_soc_util_SOCFeatureSet_java["SOCFeatureSet.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    ext_src_main_java_soc_util_SOCGameList_java["SOCGameList.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_util_SOCGameList_java
+    ext_src_main_java_soc_util_SOCStringManager_java["SOCStringManager.java"]:::default
+    src_main_java_soc_client_PreferencesDialog_java -.->|"imports"| ext_src_main_java_soc_util_SOCStringManager_java
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_util_SOCStringManager_java
+    ext_src_main_java_soc_util_Version_java["Version.java"]:::default
+    src_main_java_soc_client_SwingMainDisplay_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">PreferencesDialog (JDialog implements ActionListener)</code></li>
+<li><code class="code-ref" title="source file in your repository">Per-descriptor editor construction</code></li>
+<li><code class="code-ref" title="source file in your repository">Apply-only-changed persistence on OK</code></li>
+<li><code class="code-ref" title="source file in your repository">UserPreferences typed accessors</code></li>
+<li><code class="code-ref" title="source file in your repository">Lazy LinkedHashMap registry build</code></li>
+<li><code class="code-ref" title="source file in your repository">Asynchronous flush</code></li>
+<li><code class="code-ref" title="source file in your repository">PreferenceDescriptor metadata (key, type, default, choices, i18n label)</code></li>
+<li><code class="code-ref" title="source file in your repository">UI font-size scaling applied once at startup</code></li>
+<li><code class="code-ref" title="source file in your repository">Preferences button launching the dialog</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">client-preferences-settings.feature.md</span>
+Scope architecture: <a href="desktop-swing-client.arch.html">desktop-swing-client.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: PreferencesDialog (JDialog implements ActionListener)</td>
+<td></td>
+<td>src/main/java/soc/client/PreferencesDialog.java:128-143</td>
+<td style="text-align:right">0.43</td>
+</tr>
+<tr>
+<td>Source Linkage: Per-descriptor editor construction</td>
+<td></td>
+<td>src/main/java/soc/client/PreferencesDialog.java:246-300</td>
+<td style="text-align:right">0.43</td>
+</tr>
+<tr>
+<td>Source Linkage: Apply-only-changed persistence on OK</td>
+<td></td>
+<td>src/main/java/soc/client/PreferencesDialog.java:329-376</td>
+<td style="text-align:right">0.43</td>
+</tr>
+<tr>
+<td>Source Linkage: UserPreferences typed accessors</td>
+<td></td>
+<td>src/main/java/soc/client/UserPreferences.java:143-154</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Source Linkage: Lazy LinkedHashMap registry build</td>
+<td></td>
+<td>src/main/java/soc/client/UserPreferences.java:351-403</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Source Linkage: Asynchronous flush</td>
+<td></td>
+<td>src/main/java/soc/client/UserPreferences.java:254-268</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Source Linkage: PreferenceDescriptor metadata (key, type, default, choices, i18n label)</td>
+<td></td>
+<td>src/main/java/soc/client/UserPreferences.java:539-549</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Source Linkage: UI font-size scaling applied once at startup</td>
+<td></td>
+<td>src/main/java/soc/client/SwingMainDisplay.java:861-902</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Preferences button launching the dialog</td>
+<td></td>
+<td>src/main/java/soc/client/SwingMainDisplay.java:861-902</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="95.0"/>
+        </svg>
+        <div class="ring-num">0.58</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

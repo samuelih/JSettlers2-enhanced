@@ -26,6 +26,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import soc.game.SOCBoard;
+import soc.game.SOCGameOption;
+import soc.game.SOCGameOptionSet;
 import soc.game.SOCScenario;
 import soc.server.CustomMapLoader;
 import soc.server.CustomMapLoader.CustomMapException;
@@ -106,6 +108,23 @@ public class TestCustomMapLoader
             w.write(json);
         }
         return f;
+    }
+
+    /**
+     * Build game options which select a custom map, optionally including extra packed options like {@code "PL=6"}.
+     * @param scenarioKey  Custom-map scenario key
+     * @param extraOpts  Extra packed options, or {@code null}
+     * @return a game option set selecting {@code scenarioKey}
+     */
+    private static SOCGameOptionSet customMapGameOptions(final String scenarioKey, final String extraOpts)
+    {
+        final SOCGameOptionSet knownOpts = SOCGameOptionSet.getAllKnownOptions();
+        final SOCGameOptionSet opts =
+            (extraOpts != null) ? SOCGameOption.parseOptionsToSet(extraOpts, knownOpts) : new SOCGameOptionSet();
+        final SOCGameOption scOpt = knownOpts.getKnownOption("SC", true);
+        scOpt.setStringValue(scenarioKey);
+        opts.put(scOpt);
+        return opts;
     }
 
     /**
@@ -507,6 +526,37 @@ public class TestCustomMapLoader
         catch (CustomMapException e) {
             // expected
         }
+    }
+
+    /**
+     * Custom-map game options are checked against the map's declared supported player counts.
+     */
+    @Test
+    public void testGameOptionsUnsupportedPlayerCount()
+        throws IOException, CustomMapException
+    {
+        final File f = writeTempMap("isle", VALID_MAP_JSON);
+        final ParsedCustomMap pmap = CustomMapLoader.loadAndRegisterOne(f);
+
+        assertNull(CustomMapLoader.checkGameOptionsForUnsupportedPlayerCount(null));
+        assertNull(CustomMapLoader.checkGameOptionsForUnsupportedPlayerCount
+            (customMapGameOptions(pmap.scenarioKey, null)));  // default PL=4
+        assertNull(CustomMapLoader.checkGameOptionsForUnsupportedPlayerCount
+            (customMapGameOptions(pmap.scenarioKey, "PL=3")));
+        assertNull(CustomMapLoader.checkGameOptionsForUnsupportedPlayerCount
+            (customMapGameOptions(SOCScenario.K_SC_4ISL, "PL=6")));
+
+        String problem = CustomMapLoader.checkGameOptionsForUnsupportedPlayerCount
+            (customMapGameOptions(pmap.scenarioKey, "PL=6"));
+        assertNotNull(problem);
+        assertTrue(problem.contains(pmap.scenarioKey));
+        assertTrue(problem.contains("6 players"));
+        assertTrue(problem.contains("[3, 4]"));
+
+        problem = CustomMapLoader.checkGameOptionsForUnsupportedPlayerCount
+            (customMapGameOptions(pmap.scenarioKey, "PLB=t"));
+        assertNotNull(problem);
+        assertTrue(problem.contains("6 players"));
     }
 
     /**

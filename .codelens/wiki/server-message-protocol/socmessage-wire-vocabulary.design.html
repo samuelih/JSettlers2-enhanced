@@ -1,0 +1,332 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SOCMessage Wire Vocabulary · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../server-message-protocol/server-message-protocol.arch.html"><span class="nm">Server &amp; Message Protocol</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../server-message-protocol/browser-websocket-protocol-bridge.design.html"><span class="nm">Browser WebSocket Protocol Bridge</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../server-message-protocol/game-action-message-sequences.design.html"><span class="nm">Game-Action Message Sequences</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../server-message-protocol/contracts/server-message-protocol.api-boundary.html"><span class="nm">Server &amp; Message Protocol API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../server-message-protocol/server-runtime-request-dispatch.design.html"><span class="nm">Server Runtime &amp; Request Dispatch</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../server-message-protocol/socmessage-wire-vocabulary.design.html"><span class="nm">SOCMessage Wire Vocabulary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../server-message-protocol/contracts/server-message-protocol.gateway.html"><span class="nm">Server &amp; Message Protocol Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../server-message-protocol/contracts/server-message-protocol.testplan.html"><span class="nm">Server &amp; Message Protocol Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Server &amp; Message Protocol</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:70%"></i></span>
+      <span class="conf-val">0.70</span></span></div>
+        <h1 class="doc-title">SOCMessage Wire Vocabulary</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>SOCMessage Wire Vocabulary</h1>
+<h2>Overview</h2>
+<p>The soc.message package is the single source of truth for the client-server wire vocabulary: each game action or state change is represented by exactly one SOCMessage subclass that owns the typed fields for that action. On the sending side a subclass serializes its fields into a flat command string via toCmd(), prefixed with its numeric type ID; this string is written to the socket with DataOutputStream.writeUTF (server-launched bots use StringConnection and skip UTF coding). On the receiving end SOCMessage.toMsg(String) reads the leading type ID, switches to the matching subclass, and calls its static parseDataStr to rebuild a typed instance, which the server’s SOCMessageDispatcher or the client’s MessageHandler then dispatches. Unknown type IDs return null and are silently ignored, preserving cross-version interoperability. A parallel toString() form exists purely for human-readable debug logs and, since v2.5.00, must itself round-trip back through parseMsgStr.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCMessage</strong></li>
+<li><strong>SOCBoardLayout2</strong></li>
+<li><strong>SOCGameElements</strong></li>
+<li><strong>SOCPlayerElements</strong></li>
+<li><strong>SOCServerPing</strong></li>
+<li><strong>TestToCmdToStringParse</strong></li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>soc.server.SOCMessageDispatcher</strong> (outbound) — via Reconstructed messages are dispatched via SOCMessageDispatcher.dispatch(SOCMessage, Connection) referenced by SOCMessage.toMsg (evidence: src/main/java/soc/message/SOCMessage.java class javadoc (server receives messages in SOCMessageDispatcher.dispatch))</li>
+<li><strong>soc.client.MessageHandler</strong> (outbound) — via Client decodes incoming messages in MessageHandler.handle(SOCMessage, boolean) (evidence: src/main/java/soc/message/SOCMessage.java class javadoc (client receives messages in soc.client.MessageHandler.handle))</li>
+<li><strong>soc.game (SOCBoard, SOCBoardLarge, SOCScenario)</strong> (outbound) — via import soc.game.SOCBoard / references for hex-constant remapping and layout-part semantics (evidence: src/main/java/soc/message/SOCBoardLayout2.java imports soc.game.SOCBoard, SOCBoardLarge, SOCScenario)</li>
+<li><strong>soc.game.SOCGame</strong> (outbound) — via GEType element values sourced from SOCGame getters (getRoundCount, getNumDevCards, getCurrentPlayerNumber, …) (evidence: src/main/java/soc/message/SOCGameElements.java imports soc.game.SOCGame (for javadocs); GEType enum field references)</li>
+<li><strong>soctest.message.TestToCmdToStringParse</strong> (inbound) — via Test constructs each message and asserts toCmd/toString round-trip via TOCMD_TOSTRING_COMPARES (evidence: src/test/java/soctest/message/TestToCmdToStringParse.java::TestToCmdToStringParse)</li>
+<li><strong>soc.util.DataUtils</strong> (outbound) — via import soc.util.DataUtils for int-array toString formatting helpers (evidence: src/main/java/soc/message/SOCBoardLayout2.java imports soc.util.DataUtils)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Strings-and-integers-only flat string encoding rather than Java object serialization</strong>: The SOCMessage javadoc states no Objects, only strings and integers, are sent over the network, and the payload is a plain unicode string via writeUTF/readUTF. This deliberate simplicity is the enabling trade-off for non-Java clients and bots to interoperate with the server, at the cost of hand-written per-class toCmd/parseDataStr boilerplate.</li>
+<li><strong>One class per message type with a numeric type-ID registry and a central toMsg() switch</strong>: Each of the ~120 message types is a distinct subclass registered with a stable integer constant (e.g. PUTPIECE=1009); the toMsg(String) switch is the single reconstruction point. Type IDs are partitioned by intent — 1xxx for generic game messages, &gt;10000 for Sammys-Settlers-specific UI messages, 2xxx reserved for forks/third parties — so future game types can coexist without colliding.</li>
+<li><strong>Extensible named Layout Parts map in SOCBoardLayout2 instead of a fixed field list</strong>: Layout is a Map&lt;String,Object&gt; of named parts so scenarios (e.g. SC_PIRI’s PP pirate path) can add keys without continually changing SOCBoardLayout2 or SOCBoardLarge. getAddedParts() generically returns unknown keys for setAddedLayoutParts(), while KNOWN_KEYS route to part-specific setters — a generic extension mechanism that avoids per-scenario message churn.</li>
+<li><strong>Parallel-array element messages (SOCMessageTemplateMi) replacing single-purpose messages</strong>: SOCGameElements/SOCPlayerElements unify what were many narrow pre-2.0.00 messages (SOCLongestRoad, SOCDevCardCount, SOCFirstPlayer, SOCSetTurn) into one batched type-plus-value message. GEType was converted from int constants to an enum in v2.3.00 for cleaner design and human-readable savegame serialization, while still transmitting ints to preserve unknown values across versions.</li>
+<li><strong>Backward/forward compatibility via value remapping and tolerant parsing rather than versioned message formats</strong>: SOCBoardLayout2 remaps WATER_HEX/DESERT_HEX to pre-v2.0 values in the HL part on send and back on receive, keeping older clients able to parse the field. The javadoc advises avoiding sending different message formats to different versions; instead parseDataStr methods ignore extra fields and unknown type IDs return null — favoring one tolerant format over branching.</li>
+<li><strong>Maintain a separate human-readable toString() that must itself round-trip (since v2.5.00)</strong>: toString() includes every field sent over the wire for debug logs and replay; from v2.5.00 it must parse back via parseMsgStr so third-party tools can interpret recorded logs. Fields that can’t auto-parse (hex, constant names) require a stripAttribNames helper, and renames must preserve old parseability through MESSAGE_RENAME_MAP rather than changing a type’s numeric value.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> A new message type MUST be added to the toMsg(String) switch and registered with a unique, never-reused type-ID constant; unknown type IDs MUST be tolerated (returned as null) rather than erroring. — src/main/java/soc/message/SOCMessage.java::toMsg (backwards-compatibility section of class javadoc)</li>
+<li><strong>[HARD]</strong> Strings placed in a message MUST NOT contain the separator characters (sep_char / sep2_char); use isSingleLineAndSafe(String) to guarantee this. — src/main/java/soc/message/SOCMessage.java::isSingleLineAndSafe</li>
+<li><strong>[HARD]</strong> SOCGameElements MUST be constructed with element-type and value arrays of equal, non-zero length; the constructor throws IllegalArgumentException otherwise, and parseDataStr requires an odd parameter count of length 3 or more. — src/main/java/soc/message/SOCGameElements.java::SOCGameElements (private constructor length checks) and parseDataStr</li>
+<li><strong>[UNVERIFIED]</strong> A message’s toString() form MUST be parsable back into the same object via parseMsgStr (round-trip), and every new message type MUST be added to TestToCmdToStringParse’s TOCMD_TOSTRING_COMPARES array. — src/test/java/soctest/message/TestToCmdToStringParse.java::TestToCmdToStringParse; SOCMessage.java class javadoc ‘To create and add a new message type’ (cross-document reconciliation: not verified against <code>src/test/java/soctest/message/TestToCmdToStringParse.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[HARD]</strong> An incompatible change to a message’s toString() form MUST NOT reuse the old class name or change the getType() numeric value; rename the class and keep the old name parseable via MESSAGE_RENAME_MAP. — src/main/java/soc/message/SOCMessage.java (MESSAGE_RENAME_MAP / ‘Renaming a message’ javadoc section)</li>
+<li><strong>[SOFT]</strong> New message classes SHOULD set serialVersionUID to the version they were added in, and override getMinimumVersion() to report the earliest compatible protocol version. — src/main/java/soc/message/SOCGameElements.java::getMinimumVersion (MIN_VERSION=2000)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — Every message type’s toCmd()/toString() output must reconstruct a field-equal object; round-trip and malformed-input behavior is regression-tested. — src/test/java/soctest/message/TestToCmdToStringParse.java::testRoundTripParsing, testMalformedParserInputs</li>
+<li><strong>error-handling</strong> — parseDataStr methods fail closed by returning null on any malformed input (caught Exception) rather than propagating parse errors into dispatch. — src/main/java/soc/message/SOCBoardLayout2.java::parseDataStr (catch (Exception e) return null); src/main/java/soc/message/SOCGameElements.java::parseDataStr</li>
+<li><strong>observability</strong> — toString() must render all wire fields in human-readable form for debug traffic logs and replay, including a Version marker recommendation near the log start. — src/main/java/soc/message/SOCMessage.java (Human-readable format javadoc); SOCGameElements.java::toString</li>
+<li><strong>security</strong> — Messages that may legitimately arrive from a not-yet-authenticated client must be explicitly marked; others are implicitly auth-gated by the dispatch layer. — src/main/java/soc/message/SOCServerPing.java (implements SOCMessageFromUnauthClient)</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Parallel-array element messages validate type/value length parity at construction — the enforced guard behind the hard constraint.</em>
+<em>Source: <code>src/main/java/soc/message/SOCGameElements.java</code></em></p>
+<pre><code>if (values.length != L)
+    throw new IllegalArgumentException(&quot;lengths&quot;);
+if (L == 0)
+    throw new IllegalArgumentException(&quot;empty&quot;);
+</code></pre>
+<p><em>Illustrates the on-the-wire value remapping that keeps the HL layout part parseable by pre-v2.0 clients.</em>
+<em>Source: <code>src/main/java/soc/message/SOCBoardLayout2.java</code></em></p>
+<pre><code>case SOCBoard.WATER_HEX:
+    h = SENTLAND_WATER;   break;
+case SOCBoard.DESERT_HEX:
+    h = SENTLAND_DESERT;  break;
+</code></pre>
+<p><em>getAddedParts() generically surfaces scenario-added layout keys without changing the message class — the extensibility mechanism in action.</em>
+<em>Source: <code>src/main/java/soc/message/SOCBoardLayout2.java</code></em></p>
+<pre><code>if (! known)
+{
+    if (added == null)
+        added = new HashMap&lt;String, int[]&gt;();
+    added.put(key, getIntArrayPart(key));
+}
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCServerPing {
+        +public SOCServerPing(int st)
+        +public int getSleepTime()
+        +public String toCmd()
+        +public static SOCServerPing parseDataStr(String s)
+        +public String toString()
+    }
+    class SOCGameElements {
+        +SOCGameElements()
+        +@Override
+    public final int getMinimumVersion()
+        +public int[] getElementTypes()
+        +public int[] getValues()
+        +parseDataStr()
+        +stripAttribsToList()
+        +public String toString()
+    }
+    class SOCPlayerElements {
+        +SOCPlayerElements()
+        +@Override
+    public int getMinimumVersion()
+        +public int getPlayerNumber()
+        +public int getAction()
+        +public int[] getElementTypes()
+        +public int[] getAmounts()
+        +parseDataStr()
+        +stripAttribsToList()
+        +public String toString()
+    }
+    class SOCBoardLayout2 {
+        +SOCBoardLayout2()
+        +public String getGame()
+        +public int getBoardEncodingFormat()
+        +getIntArrayPart()
+        +public int getIntPart(String pkey)
+        +public String getStringPart(String pkey)
+        +public HashMap<String, int[]> getAddedParts()
+        +@Override
+    public String toCmd()
+        +public static SOCBoardLayout2 parseDataStr(String s)
+        +stripAttribNames()
+        +@Override
+    public String toString()
+    }
+    class SOCMessage {
+        +public int getType()
+        +public int getMinimumVersion()
+        +public int getMaximumVersion()
+        +public abstract String toCmd();
+        +@Override
+    public abstract String toString();
+        +isSingleLineAndSafe()
+        +public static SOCMessage toMsg(String s)
+        +parseMsgStr()
+        +stripAttribNames()
+        +stripAttribsToList()
+    }
+    class TestToCmdToStringParse {
+        +@Test
+    public void testRoundTripParsing()
+        -compareMsgObjFields()
+        -private static final String str(final Object val)
+        -sortedMapOf()
+        +@Test
+    public void testCoverageMessageRenameMap()
+        +testMiscMessageForms()
+        +@Test
+    public void testStripAttribNames()
+        +@Test
+    public void testStripAttribsToList()
+        +@Test
+    public void testMalformedParserInputs()
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_message_SOCBoardLayout2_java["SOCBoardLayout2.java"]
+    src_main_java_soc_message_SOCGameElements_java["SOCGameElements.java"]
+    src_main_java_soc_message_SOCMessage_java["SOCMessage.java"]
+    src_main_java_soc_message_SOCPlayerElements_java["SOCPlayerElements.java"]
+    src_main_java_soc_message_SOCServerPing_java["SOCServerPing.java"]
+    src_test_java_soctest_message_TestToCmdToStringParse_java["TestToCmdToStringParse.java"]
+
+
+    ext_src_main_java_soc_game_GameAction_java["GameAction.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_GameAction_java
+    ext_src_main_java_soc_game_SOCBoard_java["SOCBoard.java"]:::default
+    src_main_java_soc_message_SOCBoardLayout2_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoard_java
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoard_java
+    ext_src_main_java_soc_game_SOCDevCardConstants_java["SOCDevCardConstants.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCDevCardConstants_java
+    ext_src_main_java_soc_game_SOCGame_java["SOCGame.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    ext_src_main_java_soc_game_SOCGameOption_java["SOCGameOption.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOption_java
+    ext_src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    ext_src_main_java_soc_game_SOCPlayer_java["SOCPlayer.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayer_java
+    ext_src_main_java_soc_game_SOCPlayingPiece_java["SOCPlayingPiece.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayingPiece_java
+    ext_src_main_java_soc_game_SOCResourceConstants_java["SOCResourceConstants.java"]:::default
+    src_main_java_soc_message_SOCPlayerElements_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceConstants_java
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceConstants_java
+    ext_src_main_java_soc_game_SOCResourceSet_java["SOCResourceSet.java"]:::default
+    src_main_java_soc_message_SOCPlayerElements_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceSet_java
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceSet_java
+    ext_src_main_java_soc_game_SOCScenario_java["SOCScenario.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCScenario_java
+    ext_src_main_java_soc_game_SOCTradeOffer_java["SOCTradeOffer.java"]:::default
+    src_test_java_soctest_message_TestToCmdToStringParse_java -.->|"imports"| ext_src_main_java_soc_game_SOCTradeOffer_java
+    ext_src_main_java_soc_util_DataUtils_java["DataUtils.java"]:::default
+    src_main_java_soc_message_SOCBoardLayout2_java -.->|"imports"| ext_src_main_java_soc_util_DataUtils_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCMessage abstract base, type-ID registry and toMsg dispatch switch</code></li>
+<li><code class="code-ref" title="source file in your repository">isSingleLineAndSafe separator-safety guard</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCBoardLayout2 extensible Layout Parts map and hex-value remapping</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCBoardLayout2.getAddedParts generic scenario extension</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCGameElements GEType enum and length-parity constructor guard</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCPlayerElements per-player multi-integer message</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCServerPing unauthenticated-client trivial message</code></li>
+<li><code class="code-ref" title="source file in your repository">toCmd/parse round-trip consistency test</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">socmessage-wire-vocabulary.feature.md</span>
+Scope architecture: <a href="server-message-protocol.arch.html">server-message-protocol.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCMessage abstract base, type-ID registry and toMsg dispatch switch</td>
+<td></td>
+<td>src/main/java/soc/message/SOCMessage.java:165-1399</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: isSingleLineAndSafe separator-safety guard</td>
+<td></td>
+<td>src/main/java/soc/message/SOCMessage.java:682-705</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCBoardLayout2 extensible Layout Parts map and hex-value remapping</td>
+<td></td>
+<td>src/main/java/soc/message/SOCBoardLayout2.java:222-246</td>
+<td style="text-align:right">0.40</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCBoardLayout2.getAddedParts generic scenario extension</td>
+<td></td>
+<td>src/main/java/soc/message/SOCBoardLayout2.java:368-393</td>
+<td style="text-align:right">0.40</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCGameElements GEType enum and length-parity constructor guard</td>
+<td></td>
+<td>src/main/java/soc/message/SOCGameElements.java:314-318</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCPlayerElements per-player multi-integer message</td>
+<td></td>
+<td>src/main/java/soc/message/SOCPlayerElements.java:153-187</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCServerPing unauthenticated-client trivial message</td>
+<td></td>
+<td>src/main/java/soc/message/SOCServerPing.java:65-69</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Source Linkage: toCmd/parse round-trip consistency test</td>
+<td></td>
+<td>src/test/java/soctest/message/TestToCmdToStringParse.java:69-1406</td>
+<td style="text-align:right">0.32</td>
+</tr>
+</tbody>
+</table>
+<h2>Unverified Areas</h2>
+<p>Parts of this document have limited verifiable source evidence — treat normative claims as unverified until confirmed. See <a href="../documentation-conventions.html#unverified-areas">documentation conventions</a>.</p>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="67.9"/>
+        </svg>
+        <div class="ring-num">0.70</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

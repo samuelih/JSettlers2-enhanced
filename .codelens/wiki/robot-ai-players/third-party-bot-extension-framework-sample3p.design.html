@@ -1,0 +1,154 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Third-party bot extension framework (sample3p) · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../robot-ai-players/robot-ai-players.arch.html"><span class="nm">Robot / AI Players</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.api-boundary.html"><span class="nm">Robot / AI Players API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-client-networking-socrobotclient.design.html"><span class="nm">Robot client networking (SOCRobotClient)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-decision-loop-socrobotbrain.design.html"><span class="nm">Robot decision loop (SOCRobotBrain)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-robustness-for-unknown-inventory-items.design.html"><span class="nm">Robot robustness for unknown inventory items</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../robot-ai-players/third-party-bot-extension-framework-sample3p.design.html"><span class="nm">Third-party bot extension framework (sample3p)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.gateway.html"><span class="nm">Robot / AI Players Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.testplan.html"><span class="nm">Robot / AI Players Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Robot / AI Players</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf low" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:30%"></i></span>
+      <span class="conf-val">0.30</span></span></div>
+        <h1 class="doc-title">Third-party bot extension framework (sample3p)</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Third-party bot extension framework (sample3p)</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Bot subsystem is first-class, not an afterthought</strong> — <a href="http://CLAUDE.md">CLAUDE.md</a> records that the codebase originated as Robert S Thomas’ AI-agent dissertation, so the robot/bot subsystem is foundational; the sample3p templates exist to make that extensibility accessible to third-party authors rather than locking AI experimentation to internal classes. This is the distinctive product rationale for shipping documented sample subclasses.</li>
+</ul>
+<h2>Overview</h2>
+<p>This feature is a HYPOTHESIS that could not be verified against the supplied code context: no soc.robot.sample3p source files (Sample3PClient, Sample3PBrain, SampleDiscardStrategy) were present in the assembled  context, so their existence and behavior are asserted only from <a href="http://CLAUDE.md">CLAUDE.md</a> prose and the provided class diagram. As designed per that documentation, a third-party bot connects to the server exactly like a human client by speaking the SOCMessage protocol over the wire; the per-game decision loop lives in the brain’s run() method rather than the client. The sample subclasses are intended as the minimal starting template: the client subclass declares its feature set and instantiates a custom brain, while the brain subclass overrides lifecycle hooks (setOurPlayerData, resetFieldsAndBuildingPlan, resetFieldsAtEndTurn) and trade logic (considerOffer) to alter behavior without modifying core server code. Inbound messages on the server reach game handlers through InboundMessageQueue.push, which is the same path a bot’s messages traverse — the only confirmable wire-protocol detail in the supplied context.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>Sample3PClient</strong>: Per the class diagram, a minimal SOCRobotClient subclass exposing the bot bootstrap surface — buildClientFeats(), createBrain(), and a main(String[]) entry point — so a third-party bot can declare its feature set and instantiate its own brain.</li>
+<li><strong>Sample3PBrain</strong>: Per the class diagram, a SOCRobotBrain subclass overriding the decision-loop lifecycle hooks — setOurPlayerData(), setStrategyFields(), resetFieldsAndBuildingPlan(), resetFieldsAtEndTurn(), and considerOffer() — the documented seam for customizing bot behavior without touching core.</li>
+<li><strong>SampleDiscardStrategy</strong>: Per the class diagram, a pluggable discard-decision strategy with a discard() method, illustrating that strategy objects (not just the brain) are an extension point a third-party bot can override.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>SOCServer inbound message dispatch</strong> (outbound) — via SOCMessage wire protocol delivered to InboundMessageQueue.push(SOCMessage, Connection) (evidence: src/main/java/soc/server/genericServer/InboundMessageQueue.java::push)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Third-party bots subclass the same robot client/brain rather than implementing a new interface</strong>: <a href="http://CLAUDE.md">CLAUDE.md</a> states bots connect to the server exactly like human clients via SOCMessage and that the decision loop is in SOCRobotBrain.run(); providing trivial subclasses (Sample3PClient/Sample3PBrain) as templates keeps the extension surface identical to the built-in bot path, avoiding a parallel API. This rationale is documentation-sourced, not confirmed by supplied code.</li>
+<li><strong>Reserved _EXT_BOT game-option namespace for third-party bot data</strong>: <a href="http://CLAUDE.md">CLAUDE.md</a> describes _EXT_BOT/_EXT_CLI/_EXT_GAM as reserved option keys unused by core, letting third-party bots pass data without core involvement. UNVERIFIED: no _EXT_BOT symbol appears in the supplied context — the only SOCGameOptionSet member present is get(String optKey), a plain key lookup — so this design intent could not be substantiated against code.</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class Sample3PClient {
+        +Sample3PClient()
+        -@Override
+    protected SOCFeatureSet buildClientFeats()
+        +createBrain()
+        +public static void main(String[] args)
+    }
+    class SampleDiscardStrategy {
+        +SampleDiscardStrategy()
+        +discard()
+    }
+    class Sample3PBrain {
+        +Sample3PBrain()
+        +@Override
+    public void setOurPlayerData()
+        -@Override
+    protected void setStrategyFields()
+        +@Override
+    public void resetFieldsAndBuildingPlan()
+        +@Override
+    public void resetFieldsAtEndTurn()
+        -considerOffer()
+    }
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Sample3PClient / Sample3PBrain templates</code></li>
+<li><code class="code-ref" title="source file in your repository">Inbound bot message delivery path</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCGameOptionSet key lookup (only confirmed option-set symbol in context)</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">third-party-bot-extension-framework-sample3p.feature.md</span>
+Scope architecture: <a href="robot-ai-players.arch.html">robot-ai-players.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Sample3PClient / Sample3PBrain templates</td>
+<td></td>
+<td>src/main/java/soc/robot/sample3p</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Inbound bot message delivery path</td>
+<td></td>
+<td>src/main/java/soc/server/genericServer/InboundMessageQueue.java:126-134</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCGameOptionSet key lookup (only confirmed option-set symbol in context)</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGameOptionSet.java:999-1002</td>
+<td style="text-align:right">0.83</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../optional-database/optional-database.arch.html">Optional Database</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#b83858" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="158.3"/>
+        </svg>
+        <div class="ring-num">0.30</div>
+      </div>
+      <div class="cap" style="color:#b83858">Low confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -23,7 +23,7 @@ import {
   MAX_BOARD_HEIGHT,
   MAX_BOARD_WIDTH,
   HEX_TYPE_NAMES,
-  PORT_TYPE_NAMES,
+  CANONICAL_PORT_TYPE_NAMES,
   FACING_NAMES,
   EDITOR_TEMPLATES,
   autoBalanceDice,
@@ -32,6 +32,7 @@ import {
   analyzeMapBalance,
   targetForIssue,
   edgesAroundHex,
+  canonicalPortTypeName,
 } from '../map-editor';
 import {
   placeHex,
@@ -616,13 +617,25 @@ function EditorWorkflowBar({
         </Button>
       </div>
       <div className={styles.commandGroup}>
-        <Button size="sm" variant="ghost" data-testid="editor-zoom-out" onClick={onZoomOut}>
+        <Button
+          size="sm"
+          variant="ghost"
+          data-testid="editor-zoom-out"
+          aria-label="Zoom out"
+          onClick={onZoomOut}
+        >
           -
         </Button>
         <span className={styles.zoomReadout} data-testid="editor-zoom-readout">
           {Math.round(zoom * 100)}%
         </span>
-        <Button size="sm" variant="ghost" data-testid="editor-zoom-in" onClick={onZoomIn}>
+        <Button
+          size="sm"
+          variant="ghost"
+          data-testid="editor-zoom-in"
+          aria-label="Zoom in"
+          onClick={onZoomIn}
+        >
           +
         </Button>
         <Button size="sm" variant="ghost" data-testid="editor-fit-board" onClick={onFitBoard}>
@@ -760,16 +773,16 @@ function TileInspector({
               <select
                 className={styles.select}
                 data-testid="editor-inspector-port-type"
-                value={port.type}
+                value={canonicalPortTypeName(port.type)}
                 onChange={(e) => {
-                  const next = e.target.value as PortTypeName;
+                  const next = canonicalPortTypeName(e.target.value);
                   onSelectPortType(next);
                   onPortMutate(selection.edge, (m, edge) => placePort(m, edge, next, normalizeFacing(port.facing)));
                 }}
               >
-                {PORT_TYPE_NAMES.map((type) => (
+                {CANONICAL_PORT_TYPE_NAMES.map((type) => (
                   <option key={type} value={type}>
-                    {type === 'misc' || type === '3:1' ? '3:1 (misc)' : type}
+                    {type === 'misc' ? '3:1 (misc)' : type}
                   </option>
                 ))}
               </select>
@@ -780,7 +793,7 @@ function TileInspector({
                 onChange={(e) => {
                   const next = e.target.value as FacingName;
                   onSelectPortFacing(next);
-                  onPortMutate(selection.edge, (m, edge) => placePort(m, edge, normalizePortType(port.type), next));
+                  onPortMutate(selection.edge, (m, edge) => placePort(m, edge, canonicalPortTypeName(port.type), next));
                 }}
               >
                 {FACING_NAMES.map((facing) => (
@@ -937,6 +950,7 @@ function BoardSizeControls({
       <div className={styles.sizeStepper} aria-label="Adjust board height">
         <button
           type="button"
+          aria-label="Decrease board height"
           data-testid="editor-board-height-dec"
           disabled={size.height <= minHeight}
           onClick={() => onSizeChange(size.height - 2, size.width)}
@@ -945,6 +959,7 @@ function BoardSizeControls({
         </button>
         <button
           type="button"
+          aria-label="Increase board height"
           data-testid="editor-board-height-inc"
           disabled={size.height >= MAX_BOARD_HEIGHT}
           onClick={() => onSizeChange(size.height + 2, size.width)}
@@ -967,6 +982,7 @@ function BoardSizeControls({
       <div className={styles.sizeStepper} aria-label="Adjust board width">
         <button
           type="button"
+          aria-label="Decrease board width"
           data-testid="editor-board-width-dec"
           disabled={size.width <= minWidth}
           onClick={() => onSizeChange(size.height, size.width - 2)}
@@ -975,6 +991,7 @@ function BoardSizeControls({
         </button>
         <button
           type="button"
+          aria-label="Increase board width"
           data-testid="editor-board-width-inc"
           disabled={size.width >= MAX_BOARD_WIDTH}
           onClick={() => onSizeChange(size.height, size.width + 2)}
@@ -1058,11 +1075,6 @@ function focusField(field: string): void {
 function normalizeHexType(type: string): HexTypeName {
   const normalized = (type ?? '').toLowerCase() as HexTypeName;
   return HEX_TYPE_NAMES.includes(normalized) ? normalized : 'clay';
-}
-
-function normalizePortType(type: string): PortTypeName {
-  const normalized = (type ?? '').toLowerCase() as PortTypeName;
-  return PORT_TYPE_NAMES.includes(normalized) ? normalized : 'misc';
 }
 
 function normalizeFacing(facing: string): FacingName {

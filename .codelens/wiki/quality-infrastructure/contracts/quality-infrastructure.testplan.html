@@ -1,0 +1,511 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quality Infrastructure Test Plan · ZimWiki</title>
+<link rel="stylesheet" href="../../assets/zimwiki.css">
+</head><body>
+<script src="../../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../../quality-infrastructure/quality-infrastructure.arch.html"><span class="nm">Quality Infrastructure</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../../quality-infrastructure/functional-test-suite-extratest.design.html"><span class="nm">Functional Test Suite (extraTest)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../quality-infrastructure/java-unit-test-suite.design.html"><span class="nm">Java Unit Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../quality-infrastructure/protocol-message-sequence-consistency-tests.design.html"><span class="nm">Protocol Message-Sequence Consistency Tests</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../quality-infrastructure/contracts/quality-infrastructure.api-boundary.html"><span class="nm">Quality Infrastructure API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../quality-infrastructure/web-client-test-suite.design.html"><span class="nm">Web Client Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../quality-infrastructure/contracts/quality-infrastructure.gateway.html"><span class="nm">Quality Infrastructure Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item active" href="../../quality-infrastructure/contracts/quality-infrastructure.testplan.html"><span class="nm">Quality Infrastructure Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../../index.html">Overview</a> <span class="sep">/</span><a href="../_scope.html">Quality Infrastructure</a> <span class="sep">/</span><a href="_scope.html">Quality Infrastructure Cont…</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-testplan">TESTPLAN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:70%"></i></span>
+      <span class="conf-val">0.70</span></span></div>
+        <h1 class="doc-title">Quality Infrastructure Test Plan</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Quality Infrastructure Test Plan</h1>
+<h2>Coverage Map</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">src/extraTest/python/server/test_startup_params.py</code> <code>test_run_and_get_outputs</code> covers src/extraTest/python/server/<strong>init</strong>.py</li>
+<li><code class="code-ref" title="source file in your repository">src/extraTest/python/server/test_startup_params.py</code> <code>test_params_main</code> covers src/extraTest/python/server/<strong>init</strong>.py</li>
+</ul>
+<h2>Acceptance Evidence</h2>
+<ul>
+<li>Given the implementation under test, when run and get outputs is exercised by <code class="code-ref" title="source file in your repository">src/extraTest/python/server/test_startup_params.py::test_run_and_get_outputs</code>, then the feature preserves that observable behavior.</li>
+<li>Given the implementation under test, when params main is exercised by <code class="code-ref" title="source file in your repository">src/extraTest/python/server/test_startup_params.py::test_params_main</code>, then the feature preserves that observable behavior.</li>
+</ul>
+<h2>Source Linkage</h2>
+<ul>
+<li>
+<p>linkonly: <code class="code-ref" title="source file in your repository">src/extraTest/python/server/test_startup_params.py::test_run_and_get_outputs</code></p>
+</li>
+<li>
+<p>linkonly: <code class="code-ref" title="source file in your repository">src/extraTest/python/server/<strong>init</strong>.py</code></p>
+</li>
+<li>
+<p>linkonly: <code class="code-ref" title="source file in your repository">src/extraTest/python/server/test_startup_params.py::test_params_main</code></p>
+</li>
+</ul>
+<h2>Coverage Gaps</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">src/extraTest/java/soctest/game/TestBoardLayoutsRounds.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/extraTest/java/soctest/server/TestActionsMessages.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/extraTest/java/soctest/server/TestClientVersion.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/extraTest/python/game/<strong>init</strong>.py</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/client/TestDataOutputUtils.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/client/TestWhatsNewInfoDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/db/TestBCryptMisc.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/db/TestProps.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/GameTestUtils.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestBoard.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestBoardLarge.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestBoardLayouts.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestCitiesAndKnights.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestDevCard.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestGame.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestGameAction.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestGameOptions.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestPlayer.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestPlayingPiece.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestResourceSet.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestScenarioOpts.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestScenarioRules.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestSpecialItem.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestTradeOffer.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/game/TestVersionedItem.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/i18n/TestI18N.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/i18n/TestI18NGameoptScenStrings.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/message/TestConstructorParams.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/message/TestSOCChangeGameOptions.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/message/TestSOCGameStats.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/message/TestSOCKeyedMessages.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/message/TestSOCStatusMessage.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/message/TestStringConstantsAndEnums.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/message/TestTemplatesAbstracts.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/message/TestToCmdToStringParse.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/robot/TestBuildPlan.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/robot/TestGameActionExtractor.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/robot/TestPossiblePiece.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/DisplaylessTesterClient.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/TestCustomMapLoader.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/TestGameEventLog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/TestRecorder.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/TestSOCChatRecentBuffer.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/TestSOCGameHandler.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/TestSOCServerMisc.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/savegame/TestLoadgame.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/server/savegame/TestSavegame.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/util/TestDataUtils.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/util/TestFeatureSet.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/util/TestGameList.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/java/soctest/util/TestVersion.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/python/i18n/<strong>init</strong>.py</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/python/server/<strong>init</strong>.py</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/test/python/server/savegame/<strong>init</strong>.py</code> has no mapped test file in the scanned corpus.</li>
+</ul>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coverage Map: src/extraTest/python/server/test_startup_params.py</td>
+<td>Sammys-Settlers functional testing: Server startup params</td>
+<td>src/extraTest/python/server/test_startup_params.py</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Acceptance Evidence: src/extraTest/python/server/test_startup_params.py::test_run_and_get_outputs</td>
+<td>Sammys-Settlers functional testing: Server startup params</td>
+<td>src/extraTest/python/server/test_startup_params.py</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Source Linkage: src/extraTest/python/server/test_startup_params.py::test_run_and_get_outputs</td>
+<td>Basic tests for _run_and_get_outputs; expects unix-style env (runs sleep, false, etc)</td>
+<td>src/extraTest/python/server/test_startup_params.py:223-241</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Source Linkage: src/extraTest/python/server/<strong>init</strong>.py</td>
+<td>server test package</td>
+<td>linkonly: src/extraTest/python/server/<strong>init</strong>.py</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: src/extraTest/python/server/test_startup_params.py::test_params_main</td>
+<td>Main function: Check environment, set up, run tests, clean up, assert tests_failed_count==0.</td>
+<td>src/extraTest/python/server/test_startup_params.py:492-506</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/extraTest/java/soctest/game/TestBoardLayoutsRounds.java</td>
+<td></td>
+<td>linkonly: src/extraTest/java/soctest/game/TestBoardLayoutsRounds.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/extraTest/java/soctest/server/TestActionsMessages.java</td>
+<td></td>
+<td>src/extraTest/java/soctest/server/TestActionsMessages.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/extraTest/java/soctest/server/TestClientVersion.java</td>
+<td></td>
+<td>linkonly: src/extraTest/java/soctest/server/TestClientVersion.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/extraTest/python/game/<strong>init</strong>.py</td>
+<td>game test package</td>
+<td>linkonly: src/extraTest/python/game/<strong>init</strong>.py</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/client/TestDataOutputUtils.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/client/TestDataOutputUtils.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/client/TestWhatsNewInfoDialog.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/client/TestWhatsNewInfoDialog.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/db/TestBCryptMisc.java</td>
+<td></td>
+<td>src/test/java/soctest/db/TestBCryptMisc.java</td>
+<td style="text-align:right">0.60</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/db/TestProps.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/db/TestProps.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/GameTestUtils.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/game/GameTestUtils.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestBoard.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestBoard.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestBoardLarge.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestBoardLarge.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestBoardLayouts.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestBoardLayouts.java</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestCitiesAndKnights.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestCitiesAndKnights.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestDevCard.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/game/TestDevCard.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestGame.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestGame.java</td>
+<td style="text-align:right">0.48</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestGameAction.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/game/TestGameAction.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestGameOptions.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestGameOptions.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestPlayer.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestPlayer.java</td>
+<td style="text-align:right">0.56</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestPlayingPiece.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/game/TestPlayingPiece.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestResourceSet.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestResourceSet.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestScenarioOpts.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/game/TestScenarioOpts.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestScenarioRules.java</td>
+<td></td>
+<td>src/test/java/soctest/game/TestScenarioRules.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestSpecialItem.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/game/TestSpecialItem.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestTradeOffer.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/game/TestTradeOffer.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/game/TestVersionedItem.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/game/TestVersionedItem.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/i18n/TestI18N.java</td>
+<td></td>
+<td>src/test/java/soctest/i18n/TestI18N.java</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/i18n/TestI18NGameoptScenStrings.java</td>
+<td></td>
+<td>src/test/java/soctest/i18n/TestI18NGameoptScenStrings.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/message/TestConstructorParams.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/message/TestConstructorParams.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/message/TestSOCChangeGameOptions.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/message/TestSOCChangeGameOptions.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/message/TestSOCGameStats.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/message/TestSOCGameStats.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/message/TestSOCKeyedMessages.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/message/TestSOCKeyedMessages.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/message/TestSOCStatusMessage.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/message/TestSOCStatusMessage.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/message/TestStringConstantsAndEnums.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/message/TestStringConstantsAndEnums.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/message/TestTemplatesAbstracts.java</td>
+<td></td>
+<td>src/test/java/soctest/message/TestTemplatesAbstracts.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/message/TestToCmdToStringParse.java</td>
+<td></td>
+<td>src/test/java/soctest/message/TestToCmdToStringParse.java</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/robot/TestBuildPlan.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/robot/TestBuildPlan.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/robot/TestGameActionExtractor.java</td>
+<td></td>
+<td>src/test/java/soctest/robot/TestGameActionExtractor.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/robot/TestPossiblePiece.java</td>
+<td></td>
+<td>src/test/java/soctest/robot/TestPossiblePiece.java</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/DisplaylessTesterClient.java</td>
+<td></td>
+<td>src/test/java/soctest/server/DisplaylessTesterClient.java</td>
+<td style="text-align:right">0.40</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/TestCustomMapLoader.java</td>
+<td></td>
+<td>src/test/java/soctest/server/TestCustomMapLoader.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/TestGameEventLog.java</td>
+<td></td>
+<td>src/test/java/soctest/server/TestGameEventLog.java</td>
+<td style="text-align:right">0.56</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/TestRecorder.java</td>
+<td></td>
+<td>src/test/java/soctest/server/TestRecorder.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/TestSOCChatRecentBuffer.java</td>
+<td></td>
+<td>src/test/java/soctest/server/TestSOCChatRecentBuffer.java</td>
+<td style="text-align:right">0.48</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/TestSOCGameHandler.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/server/TestSOCGameHandler.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/TestSOCServerMisc.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/server/TestSOCServerMisc.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/savegame/TestLoadgame.java</td>
+<td></td>
+<td>src/test/java/soctest/server/savegame/TestLoadgame.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/server/savegame/TestSavegame.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/server/savegame/TestSavegame.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/util/TestDataUtils.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/util/TestDataUtils.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/util/TestFeatureSet.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/util/TestFeatureSet.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/util/TestGameList.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/util/TestGameList.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/java/soctest/util/TestVersion.java</td>
+<td></td>
+<td>linkonly: src/test/java/soctest/util/TestVersion.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/python/i18n/<strong>init</strong>.py</td>
+<td>i18n test package</td>
+<td>linkonly: src/test/python/i18n/<strong>init</strong>.py</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/python/server/<strong>init</strong>.py</td>
+<td>a unit test package</td>
+<td>linkonly: src/test/python/server/<strong>init</strong>.py</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/test/python/server/savegame/<strong>init</strong>.py</td>
+<td>a unit test package</td>
+<td>linkonly: src/test/python/server/savegame/<strong>init</strong>.py</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<h2>Unverified Areas</h2>
+<p>Parts of this document have limited verifiable source evidence — treat normative claims as unverified until confirmed. See <a href="../../documentation-conventions.html#unverified-areas">documentation conventions</a>.</p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="67.9"/>
+        </svg>
+        <div class="ring-num">0.70</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../../assets/zimwiki.js"></script>
+</body></html>

@@ -20,8 +20,8 @@ export interface DialogProps {
 /**
  * Accessible modal dialog (role="dialog", aria-modal). Renders into a portal
  * on document.body. Closes on Escape and (optionally) backdrop click, traps
- * focus loosely by moving initial focus into the dialog, and restores focus
- * to the previously focused element on close.
+ * focus inside the dialog, and restores focus to the previously focused element
+ * on close.
  */
 export function Dialog({
   open,
@@ -36,7 +36,7 @@ export function Dialog({
   const previouslyFocused = useRef<HTMLElement | null>(null);
   const titleId = useId();
 
-  // Escape to close.
+  // Escape to close; Tab cycles within the modal instead of escaping behind it.
   useEffect(() => {
     if (!open) {
       return;
@@ -45,6 +45,10 @@ export function Dialog({
       if (event.key === 'Escape') {
         event.stopPropagation();
         onClose();
+        return;
+      }
+      if (event.key === 'Tab') {
+        trapFocus(event, dialogRef.current);
       }
     }
     document.addEventListener('keydown', onKeyDown);
@@ -57,7 +61,11 @@ export function Dialog({
       return;
     }
     previouslyFocused.current = document.activeElement as HTMLElement | null;
-    dialogRef.current?.focus();
+    const dialog = dialogRef.current;
+    if (dialog !== null && !dialog.contains(document.activeElement)) {
+      const focusables = focusableElements(dialog);
+      (focusables[0] ?? dialog)?.focus();
+    }
     return () => {
       previouslyFocused.current?.focus?.();
     };
@@ -117,3 +125,46 @@ export function Dialog({
 
 // Alias for callers preferring the "Modal" name.
 export const Modal = Dialog;
+
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+function trapFocus(event: KeyboardEvent, dialog: HTMLElement | null): void {
+  if (dialog === null) {
+    return;
+  }
+
+  const focusables = focusableElements(dialog);
+  if (focusables.length === 0) {
+    event.preventDefault();
+    dialog.focus();
+    return;
+  }
+
+  const active = document.activeElement;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey) {
+    if (active === first || active === dialog || !dialog.contains(active)) {
+      event.preventDefault();
+      last.focus();
+    }
+  } else if (active === last || active === dialog || !dialog.contains(active)) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function focusableElements(dialog: HTMLElement | null): HTMLElement[] {
+  if (dialog === null) {
+    return [];
+  }
+  return Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+    .filter((el) => !el.hasAttribute('hidden') && el.getAttribute('aria-hidden') !== 'true');
+}

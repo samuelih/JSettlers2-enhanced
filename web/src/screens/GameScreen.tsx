@@ -9,6 +9,9 @@ import {
 } from '../board/coords';
 import {
   type BoardModel,
+  HEX_DESERT,
+  HEX_FOG,
+  HEX_GOLD,
   HEX_WATER,
   PIECE_ROAD,
   PIECE_SETTLEMENT,
@@ -446,10 +449,44 @@ function initialRouteEdges(cg: CurrentGame): number[] {
 interface Highlights {
   nodes: number[];
   edges: number[];
+  /** Hex coords made clickable for robber/pirate placement. */
+  hexes?: number[];
   onNodeClick?: (coord: number) => void;
   onEdgeClick?: (coord: number) => void;
   /** When set, hexes become clickable (robber/pirate placement). */
   onHexClick?: (coord: number) => void;
+}
+
+/** Land hexes the robber can move to, mirroring SOCGame.canMoveRobber. */
+function legalRobberHexes(cg: CurrentGame): number[] {
+  const board = cg.board;
+  if (board === null) {
+    return []; // <--- Early return: no board to target ---
+  }
+  const desertBlocked = optionEnabled(cg.options, 'RD');
+  return board.hexes
+    .filter((hex) => {
+      if (hex.coord === board.robberHex) return false;
+      if (hex.hexType === HEX_FOG || hex.hexType === HEX_WATER) return false;
+      if (hex.hexType === HEX_DESERT && desertBlocked) return false;
+      return (
+        hex.hexType === HEX_DESERT ||
+        hex.hexType === HEX_GOLD ||
+        (hex.hexType >= 1 && hex.hexType <= 5)
+      );
+    })
+    .map((hex) => hex.coord);
+}
+
+/** Water hexes the pirate can move to, mirroring SOCGame.canMovePirate. */
+function legalPirateHexes(cg: CurrentGame): number[] {
+  const board = cg.board;
+  if (board === null) {
+    return []; // <--- Early return: no board to target ---
+  }
+  return board.hexes
+    .filter((hex) => hex.hexType === HEX_WATER && hex.coord !== board.pirateHex)
+    .map((hex) => hex.coord);
 }
 
 function computeHighlights(cg: CurrentGame): Highlights {
@@ -482,10 +519,10 @@ function computeHighlights(cg: CurrentGame): Highlights {
   // Robber / pirate placement: click a hex to move it (positive coord robber,
   // negated to a pirate move by moveRobber()).
   if (st === GameState.PLACING_ROBBER) {
-    return { nodes: [], edges: [], onHexClick: (c) => moveRobber(c, false) };
+    return { nodes: [], edges: [], hexes: legalRobberHexes(cg), onHexClick: (c) => moveRobber(c, false) };
   }
   if (st === GameState.PLACING_PIRATE) {
-    return { nodes: [], edges: [], onHexClick: (c) => moveRobber(c, true) };
+    return { nodes: [], edges: [], hexes: legalPirateHexes(cg), onHexClick: (c) => moveRobber(c, true) };
   }
   return { nodes: [], edges: [] };
 }
@@ -908,7 +945,7 @@ export function GameScreen(): JSX.Element | null {
   const hl = computeHighlights(cg);
   const interactive =
     isMyTurn &&
-    (hl.nodes.length > 0 || hl.edges.length > 0 || hl.onHexClick !== undefined);
+    (hl.nodes.length > 0 || hl.edges.length > 0 || (hl.hexes?.length ?? 0) > 0);
 
   const currentColor =
     cg.currentPlayerNumber >= 0 && cg.currentPlayerNumber < cg.playerViews.length
@@ -993,6 +1030,7 @@ export function GameScreen(): JSX.Element | null {
               interactive={interactive}
               highlightNodes={hl.nodes}
               highlightEdges={hl.edges}
+              highlightHexes={hl.hexes}
               onNodeClick={hl.onNodeClick}
               onEdgeClick={hl.onEdgeClick}
               onHexClick={hl.onHexClick}
@@ -1261,6 +1299,51 @@ function GameControls({
           {gameSupportsShips(cg)
             ? 'Click a highlighted edge to place a free road or ship.'
             : 'Click a highlighted edge to place a free road.'}
+        </p>
+      </div>
+    );
+  }
+
+  if (st === GameState.WAITING_FOR_DISCARDS) {
+    return (
+      <div className={styles.controls} data-testid="game-controls">
+        <p className={styles.prompt} data-testid="controls-prompt">
+          Resolve required discards before play continues.
+        </p>
+      </div>
+    );
+  }
+
+  if (st === GameState.WAITING_FOR_ROBBER_OR_PIRATE) {
+    return (
+      <div className={styles.controls} data-testid="game-controls">
+        <p className={styles.prompt} data-testid="controls-prompt">
+          Choose whether to move the robber or the pirate.
+        </p>
+      </div>
+    );
+  }
+
+  if (st === GameState.PLACING_ROBBER || st === GameState.PLACING_PIRATE) {
+    return (
+      <div className={styles.controls} data-testid="game-controls">
+        <p className={styles.prompt} data-testid="controls-prompt">
+          {st === GameState.PLACING_ROBBER
+            ? 'Click a highlighted land hex to move the robber.'
+            : 'Click a highlighted sea hex to move the pirate.'}
+        </p>
+      </div>
+    );
+  }
+
+  if (
+    st === GameState.WAITING_FOR_ROB_CHOOSE_PLAYER ||
+    st === GameState.WAITING_FOR_ROB_CLOTH_OR_RESOURCE
+  ) {
+    return (
+      <div className={styles.controls} data-testid="game-controls">
+        <p className={styles.prompt} data-testid="controls-prompt">
+          Choose what to rob before play continues.
         </p>
       </div>
     );

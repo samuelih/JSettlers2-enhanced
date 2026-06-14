@@ -13,6 +13,7 @@
   cursor: pointer;
   user-select: none;
   text-decoration: none;
+  min-height: 2.5rem;
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast),
@@ -40,16 +41,19 @@
 .sm {
   padding: var(--space-1) var(--space-3);
   font-size: var(--font-size-sm);
+  min-height: 2.25rem;
 }
 
 .md {
   padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-md);
+  min-height: 2.5rem;
 }
 
 .lg {
   padding: var(--space-3) var(--space-5);
   font-size: var(--font-size-lg);
+  min-height: 3rem;
 }
 
 /* ---- Variants ---- */

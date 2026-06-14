@@ -8240,6 +8240,19 @@ public class SOCServer extends Server
 
                 return null;  // <---- Early return ----
             }
+
+            final String customMapPlayerCountProblem =
+                CustomMapLoader.checkGameOptionsForUnsupportedPlayerCount(gameOpts);
+            if (customMapPlayerCountProblem != null)
+            {
+                if (sendErrorViaStatus)
+                    c.put(SOCStatusMessage.buildForVersion
+                           (SOCStatusMessage.SV_NEWGAME_OPTION_UNKNOWN, cliVers, customMapPlayerCountProblem));
+                else
+                    messageToPlayer(c, connGaName, PN_NON_EVENT, customMapPlayerCountProblem);
+
+                return null;  // <---- Early return ----
+            }
         }
 
         /**

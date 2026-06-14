@@ -124,6 +124,25 @@ tasks.withType(Jar) {
     dependsOn findGitRevision
 }
 
+def runtimeClasspathJarNames = {
+    configurations.runtimeClasspath.findAll { File file -> file.name.endsWith('.jar') }
+        .collect { File file -> file.name }
+        .sort()
+        .join(' ')
+}
+
+task copyRuntimeLibs(type: Copy) {
+    group = 'build'
+    description = 'Copies runtime dependency jars to build/runtime-libs for scripts and distributions.'
+    from {
+        configurations.runtimeClasspath.findAll { File file -> file.name.endsWith('.jar') }
+    }
+    into "$buildDir/runtime-libs"
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+}
+
+assemble.dependsOn copyRuntimeLibs
+
 // prevent default jsettlers.git-<version>.{jar,zip,.tar.gz} artifact creation;
 // various tasks will build artifacts with more specific names and contents instead
 jar.enabled = false       // instead build serverJar, fullJar, i18neditorJar
@@ -138,9 +157,11 @@ task serverJar(type: Jar) {
             'Main-Class': 'soc.server.SOCServer',
             'Implementation-Version': project.version,
             'Build-Revision': project.git_revision,
-            'Class-Path': 'gson.jar Java-WebSocket-1.5.6.jar slf4j-api-2.0.6.jar',
-                // websocket + its slf4j-api transitive jar; must sit next to the server jar
         )
+    }
+    doFirst {
+        manifest.attributes('Class-Path': runtimeClasspathJarNames())
+            // runtime jars copied by copyRuntimeLibs; must sit next to the server jar
     }
     from(sourceSets.main.output) {
         include "net/nand/util/i18n/mgr/**"
@@ -167,10 +188,12 @@ task fullJar(type: Jar) {
             'Main-Class': 'soc.client.SOCPlayerClient',
             'Implementation-Version': project.version,
             'Build-Revision': project.git_revision,
-            'Class-Path': 'gson.jar Java-WebSocket-1.5.6.jar slf4j-api-2.0.6.jar',
-                // in case client launches a server, or another project uses fullJar;
-                // websocket + its slf4j-api transitive jar must sit next to the jar
         )
+    }
+    doFirst {
+        manifest.attributes('Class-Path': runtimeClasspathJarNames())
+            // in case client launches a server, or another project uses fullJar;
+            // runtime jars copied by copyRuntimeLibs must sit next to the jar
     }
     from(sourceSets.main.output) {
         include "net/nand/util/i18n/mgr/**"
@@ -225,6 +248,27 @@ task cleanRemovePyc(type: Delete) {
 // This copies everything in your "src" directory, so be sure to run on a clean repository only!
 // Includes target/lib/ to prevent eclipse ant import error
 FileTree srcTree = fileTree(dir: '.', includes: ['src/**', 'doc/**', 'build.*', 'Readme.*', '*.txt', '.gitignore', 'target/lib/.gitignore'])
+FileTree webTree = fileTree(
+    dir: '.',
+    includes: ['web/**'],
+    excludes: [
+        'web/node_modules/**',
+        'web/dist/**',
+        'web/reports/**',
+        'web/playwright-report/**',
+        'web/test-results/**',
+        'web/blob-report/**',
+        'web/coverage/**',
+        'web/.playwright-cli/**',
+        'web/.vite/**',
+        'web/playwright/.cache/**',
+        'web/scripts/.classes/**',
+        'web/**/*.tsbuildinfo',
+        'web/**/.DS_Store',
+    ])
+FileTree dockerTree = fileTree(
+    dir: '.',
+    includes: ['Dockerfile', '.dockerignore', 'docker/**', 'docker-compose.yml'])
 
 // Naming reminder: [archiveBaseName]-[archiveAppendix]-[archiveVersion]-[archiveClassifier].[archiveExtension]
 
@@ -235,27 +279,33 @@ task distSrcTar(type: Tar) {
     archiveClassifier = 'src'
     compression = Compression.GZIP
     archiveExtension = 'tar.gz'
-    from srcTree
+    from srcTree, webTree, dockerTree
     into 'sammys-settlers-' + project.version + '-src/'
 }
 
 // sammys-settlers-2.x.xx-full.tar.gz
 task distFullTar(type: Tar) {
-    dependsOn cleanRemovePyc
+    dependsOn cleanRemovePyc, copyRuntimeLibs
     archiveBaseName = 'sammys-settlers'
     archiveClassifier = 'full'
     compression = Compression.GZIP
     archiveExtension = 'tar.gz'
-    from srcTree, fullJar.outputs.files, serverJar.outputs.files
+    from srcTree, webTree, dockerTree, fullJar.outputs.files, serverJar.outputs.files
+    from("$buildDir/runtime-libs") {
+        include '*.jar'
+    }
     into 'sammys-settlers-' + project.version + '/'
 }
 
 // sammys-settlers-2.x.xx-full.zip
 task distFullZip(type: Zip) {
-    dependsOn cleanRemovePyc
+    dependsOn cleanRemovePyc, copyRuntimeLibs
     archiveBaseName = 'sammys-settlers'
     archiveClassifier = 'full'
-    from srcTree, fullJar.outputs.files, serverJar.outputs.files
+    from srcTree, webTree, dockerTree, fullJar.outputs.files, serverJar.outputs.files
+    from("$buildDir/runtime-libs") {
+        include '*.jar'
+    }
     into 'sammys-settlers-' + project.version + '/'
 }
 

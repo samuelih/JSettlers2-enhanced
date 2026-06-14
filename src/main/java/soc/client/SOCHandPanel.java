@@ -426,6 +426,12 @@ import javax.swing.UIManager;
     protected SquaresPanel sqPanel;
 
     /**
+     * Compact summary and bank/port hint for {@link #sqPanel}.
+     * @since 2.7.00
+     */
+    private JLabel tradeSummaryLab;
+
+    /**
      * Cloth count, for scenario {@link SOCGameOptionSet#K_SC_CLVI _SC_CLVI}; null otherwise.
      * Appears in same area as {@link #wonderLab}.
      * @since 2.0.00
@@ -1067,6 +1073,10 @@ import javax.swing.UIManager;
         sqPanel = new SquaresPanel(interactive, this, displayScale);
         add(sqPanel);
         sqPanel.setVisible(false); // will become visible only for seated client player
+
+        tradeSummaryLab = new JLabel();
+        tradeSummaryLab.setVisible(false);
+        add(tradeSummaryLab);
 
         if (playerTradingDisabled)
         {
@@ -1951,6 +1961,12 @@ import javax.swing.UIManager;
      */
     /* package */ void clickOfferCounterButton()
     {
+        final SOCTradeOffer offer = player.getCurrentOffer();
+        if (offer != null)
+            counterOfferPanel.setTradeResources(offer.getGetSet(), offer.getGiveSet());
+        else
+            counterOfferPanel.setTradeResources(null, null);
+
         counterOfferPanel.setVisible(true);
         offerPanel.setButtonRowVisible(false, true);
         checkTradePanelLayoutSize();
@@ -2289,6 +2305,9 @@ import javax.swing.UIManager;
         giveLab.setVisible(false);
         getLab.setVisible(false);
         sqPanel.setVisible(false);
+        tradeSummaryLab.setText("");
+        tradeSummaryLab.setToolTipText(null);
+        tradeSummaryLab.setVisible(false);
         clearOfferBut.setVisible(false);
         bankBut.setVisible(false);
         bankUndoBut.setVisible(false);
@@ -2562,6 +2581,8 @@ import javax.swing.UIManager;
             giveLab.setVisible(true);
             getLab.setVisible(true);
             sqPanel.setVisible(true);
+            tradeSummaryLab.setVisible(true);
+            updateTradeSummaryHint();
 
             clearOfferBut.setVisible(true);
             bankBut.setVisible(true);
@@ -2915,6 +2936,135 @@ import javax.swing.UIManager;
     }
 
     /**
+     * If trade resource values change, refresh the compact trade summary and bank/port hint.
+     * @since 2.7.00
+     */
+    public void sqPanelValuesChanged()
+    {
+        updateTradeSummaryHint();
+    }
+
+    /**
+     * Update the client player's compact trade summary and bank/port hint.
+     * @since 2.7.00
+     */
+    private void updateTradeSummaryHint()
+    {
+        if (! playerIsClient)
+            return;
+
+        final int[] give = new int[5], get = new int[5];
+        sqPanel.getValues(give, get);
+
+        final SOCResourceSet giveSet = new SOCResourceSet(give),
+                             getSet = new SOCResourceSet(get);
+        String bankHint = "";
+        final String text;
+        if (giveSet.isEmpty() && getSet.isEmpty())
+        {
+            text = strings.get("hpan.trade.summary.empty");
+        } else {
+            final String summary = strings.getSpecial(game, "trade.summary.you_give_get", giveSet, getSet);
+            bankHint = getBankPortTradeHint(giveSet, getSet);
+            text = ((bankHint != null) && (bankHint.length() != 0))
+                ? (summary + "  " + bankHint)
+                : summary;
+        }
+
+        tradeSummaryLab.setText(text);
+        tradeSummaryLab.setToolTipText(text);
+        bankBut.setToolTipText
+            (((bankHint != null) && (bankHint.length() != 0))
+             ? bankHint
+             : strings.get("hpan.trade.bankport.tip"));
+    }
+
+    /**
+     * Build a short bank/port hint for the resources currently in {@link #sqPanel}.
+     * @param giveSet Resources the client is giving
+     * @param getSet Resources the client is getting
+     * @return Hint text, or an empty string if no hint applies
+     * @since 2.7.00
+     */
+    private String getBankPortTradeHint(final SOCResourceSet giveSet, final SOCResourceSet getSet)
+    {
+        if (resourceTradeCost == null)
+            return "";
+
+        if (giveSet.isEmpty() || getSet.isEmpty())
+            return strings.get("hpan.trade.hint.eachside");
+
+        if (! player.getResources().contains(giveSet))
+            return strings.get("hpan.trade.hint.donthave");
+
+        final int giveType = getSingleKnownResourceType(giveSet),
+                  getType = getSingleKnownResourceType(getSet);
+        if (giveType == 0)
+            return strings.get("hpan.trade.hint.onegive");
+        if ((getType == 0) || (getSet.getTotal() != 1))
+            return strings.get("hpan.trade.hint.oneget");
+        if (giveType == getType)
+            return strings.get("hpan.trade.hint.diffget");
+
+        final int cost = resourceTradeCost[giveType],
+                  giveAmount = giveSet.getAmount(giveType);
+        if (cost == 0)
+            return "";
+        final String rateText = getBankPortRateText(cost, giveType);
+        if (giveAmount < cost)
+            return strings.getSpecial
+                (game, "hpan.trade.hint.need",
+                 Integer.valueOf(cost), Integer.valueOf(giveType), rateText);
+        if (giveAmount == cost)
+            return strings.get("hpan.trade.hint.ready", rateText);
+
+        return strings.get("hpan.trade.hint.rate", rateText);
+    }
+
+    /**
+     * Describe the best bank/port rate source for a resource type.
+     * @param cost Number of resources paid for 1 resource
+     * @param giveType Resource type being given
+     * @return Localized rate description
+     * @since 2.7.00
+     */
+    private String getBankPortRateText(final int cost, final int giveType)
+    {
+        if (cost == 2)
+            return strings.getSpecial
+                (game, "hpan.trade.hint.source.resource_port",
+                 Integer.valueOf(cost), Integer.valueOf(-2), Integer.valueOf(giveType));
+        else if (cost == 3)
+            return strings.get("hpan.trade.hint.source.port", Integer.valueOf(cost));
+        else
+            return strings.get("hpan.trade.hint.source.bank", Integer.valueOf(cost));
+    }
+
+    /**
+     * Get the resource type if a set contains exactly one known type.
+     * @param rset Resource set to inspect
+     * @return Resource type, or 0 if none or multiple types are present
+     * @since 2.7.00
+     */
+    private static int getSingleKnownResourceType(final SOCResourceSet rset)
+    {
+        int foundType = 0;
+
+        for (int res = SOCResourceConstants.CLAY; res <= SOCResourceConstants.WOOD; ++res)
+        {
+            if (rset.getAmount(res) == 0)
+                continue;
+
+            if (foundType != 0)
+                return 0;  // <--- Early return: More than one known type ---
+
+            foundType = res;
+        }
+
+        return foundType;
+    }
+
+    /**
      * Callback from {@link TradePanel} buttons when counter-offer is shown or hidden.
      * For players who aren't the client:
      * If this handpanel shows/hides the counter offer,
@@ -3186,6 +3336,8 @@ import javax.swing.UIManager;
                 }
             }
         }
+
+        updateTradeSummaryHint();
     }
 
     /**
@@ -3475,6 +3627,7 @@ import javax.swing.UIManager;
         {
             // clear the squares panel
             sqPanel.setValues(zero, zero);
+            updateTradeSummaryHint();
 
             // reset the send squares (checkboxes)
             if (updateSendCheckboxes && ! playerTradingDisabled)
@@ -4386,7 +4539,8 @@ import javax.swing.UIManager;
                 // int clearW = fm.stringWidth(CLEAR.replace(' ','_'));
                 // int bankW = fm.stringWidth(BANK.replace(' ','_'));
                 final int resCardsH = 6 * (lineH + space);   // Clay,Ore,Sheep,Wheat,Wood,Total
-                final int tradeH = sqpDim.height + space + (2 * (lineH + space));  // sqPanel + 2 rows of buttons
+                final int tradeH = sqpDim.height + space + (3 * (lineH + space));
+                    // sqPanel + summary + 2 rows of buttons
                 final int sectionSpace = (dim.height - (topFaceAreaHeight + resCardsH + tradeH + inset)) / 5;
                     // will use 1x sectionSpace above trade area, and 2x above & below resource/inventory area
                 final int tradeY = topFaceAreaHeight + sectionSpace;  // top of trade area
@@ -4404,6 +4558,8 @@ import javax.swing.UIManager;
                 giveLab.setBounds(inset, tradeY, giveW, lineH);
                 getLab.setBounds(inset, tradeY + ColorSquareLarger.HEIGHT_L * displayScale, giveW, lineH);
                 sqPanel.setLocation(inset + giveW + space, tradeY);
+                tradeSummaryLab.setBounds
+                    (inset, tradeY + sqpDim.height + space, giveW + space + sqpDim.width, lineH);
 
                 // 3 rows of buttons right below SquaresPanel:
                 // - Offer button, playerSend checkboxes (3 or 5)
@@ -4412,7 +4568,7 @@ import javax.swing.UIManager;
 
                 final int tbW = ((giveW + sqpDim.width) / 2);
                 final int tbX = inset;
-                int tbY = tradeY + sqpDim.height + space;
+                int tbY = tradeY + sqpDim.height + space + lineH + space;
                 if (offerBut != null)
                 {
                     if (game.maxPlayers == 4)

@@ -1,0 +1,201 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quality Infrastructure · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item active" href="../quality-infrastructure/quality-infrastructure.arch.html"><span class="nm">Quality Infrastructure</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../quality-infrastructure/functional-test-suite-extratest.design.html"><span class="nm">Functional Test Suite (extraTest)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/java-unit-test-suite.design.html"><span class="nm">Java Unit Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/protocol-message-sequence-consistency-tests.design.html"><span class="nm">Protocol Message-Sequence Consistency Tests</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.api-boundary.html"><span class="nm">Quality Infrastructure API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/web-client-test-suite.design.html"><span class="nm">Web Client Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.gateway.html"><span class="nm">Quality Infrastructure Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.testplan.html"><span class="nm">Quality Infrastructure Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Quality Infrastructure</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-arch">ARCH</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:55%"></i></span>
+      <span class="conf-val">0.55</span></span></div>
+        <h1 class="doc-title">Quality Infrastructure</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Quality Infrastructure</h1>
+<h2>Overview</h2>
+<p>Java Unit Test Suite — Fast, artifact-independent JUnit 4 verification mirroring the main package layout under src/test/java/soctest. Constructs core classes directly (no JAR assembly) to assert the wire protocol via a toCmd→parse→equals round-trip invariant (TestToCmdToStringParse), game options (TestGameOptions), custom-map loading (TestCustomMapLoader), and savegame round-trips (TestSavegame). Run under the fast test/testPython tasks, with SQL-template consistency checks folded into the same task. Functional Test Suite (extraTest) — A dedicated Gradle source set aggregating heavyweight, long-running end-to-end tests under src/extraTest/java/soctest and src/extraTest/python. The extraTest task depends on test so the fast unit pass gates it. Java functional classes (TestActionsMessages, TestBoardLayoutsRounds, TestClientVersion) bring up an in-JVM stringport server in @BeforeClass and tear it down in @AfterClass, then drive whole game-action flows. Wired with its own classpath and excluded from the shipped JARs. Protocol Message-Sequence Consistency Tests — Two JUnit classes guarding that the SOCMessage sequence per game action stays stable so bots and non-Java readers can recognize an action from its stream. TestRecorder boots a RecordingSOCServer on a stringport, connects DisplaylessTesterClients, drives actions, and compares recorded GameEventLog rows against expected String[][] fixtures (recipient-prefix + field-substring) via compareRecordsToExpected; TestGameActionExtractor extends the GameActionExtractor it tests, validating reconstruction against fixtures like all-basic-actions.soclog. Web Client Test Suite — The unit-level quality layer for the TypeScript/React front end, colocated as *.test.tsx beside the screens and components it exercises and run by Vitest in jsdom. Tests render real components and drive them as a user would (data-testid handles, DOM events) rather than asserting on internals; autosave is disabled under a test environment guard, and the shared validator path is exercised by importing deliberately-invalid JSON. Vitest unit tests and Playwright end-to-end tests are split into separate package.json scripts.</p>
+<ul>
+<li><a class="inv-cite" href="../invariants/INV-CL-001.invariant.html">INV-CL-001</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-002.invariant.html">INV-CL-002</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-003.invariant.html">INV-CL-003</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-004.invariant.html">INV-CL-004</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-005.invariant.html">INV-CL-005</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-006.invariant.html">INV-CL-006</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-007.invariant.html">INV-CL-007</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-008.invariant.html">INV-CL-008</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-009.invariant.html">INV-CL-009</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-010.invariant.html">INV-CL-010</a></li>
+<li>…and 1 more (see <a href="../invariants/_scope.html">invariants/_scope.md</a>)</li>
+</ul>
+<h2>Components</h2>
+<ul>
+<li><strong>Java Unit Test Suite</strong>: Verify the wire protocol, game options, map loading, and savegame round-trips through direct in-process construction of SOCMessage, SOCGameOptionSet, CustomMapLoader, and SavedGameModel classes.</li>
+<li><strong>Functional Test Suite (extraTest)</strong>: Drive whole game-action flows (build/move/trade), board-layout rounds, and client-version negotiation against a live in-process server, validating behavior that cannot be exercised by unit-level construction alone.</li>
+<li><strong>Protocol Message-Sequence Consistency Tests</strong>: Assert that per-action outgoing message sequences match recorded fixtures (e.g. recipient-prefix + field-substring rows compared by compareRecordsToExpected) and that GameActionExtractor reconstructs actions from an event log.</li>
+<li><strong>Python Companion Test Suite</strong>: Provide companion Python-based checks executed by the testPython / extraTestPython Gradle tasks in lockstep with the Java unit and functional suites.</li>
+<li><strong>Web Client Test Suite</strong>: Exercise the web front end (map editor, dialogs, screens) at the user-facing surface, including the shared map validator path via deliberately-invalid JSON import, under a jsdom Vitest environment with autosave disabled by a test guard.</li>
+<li><strong>SQL Template Consistency Checks</strong>: Fail the build when the checked-in generated SQL drifts from its template, enforcing the never-hand-edit-generated-SQL invariant.</li>
+</ul>
+<h2>Boundaries</h2>
+<ul>
+<li><strong>Java Unit Test Suite</strong> boundary: Fast, artifact-independent JUnit 4 verification rooted at src/test/java/soctest, with subpackages (soctest.message, soctest.server, soctest.server.savegame, soctest.game) mirroring the main source tree. Owns assertions that construct core server/game-model classes directly without assembling the shipped JARs. Boundary stops at the unit level: it does not boot a live server (that is the extraTest suite’s edge).</li>
+<li><strong>Functional Test Suite (extraTest)</strong> boundary: A separately-wired Gradle source set rooted at src/extraTest/java/soctest, excluded from the shipped server/full JARs and given its own classpath in build.gradle. Owns heavyweight end-to-end checks that bring up an in-JVM stringport server in @BeforeClass and tear it down in @AfterClass. Boundary edge: the extraTest Gradle task depends on the test task, so the fast unit pass gates the lengthy run.</li>
+<li><strong>Protocol Message-Sequence Consistency Tests</strong> boundary: The recording-side and extraction-side tests that guard the stability of the SOCMessage sequence emitted per game action so bots and non-Java readers can recognize an action from its stream. TestRecorder (src/test/java/soctest/server) boots a RecordingSOCServer, drives actions, and compares recorded GameEventLog rows to expected String[][] fixtures; TestGameActionExtractor exercises the extraction side. Boundary: it owns the sequence-equality assertions, not the recording/extraction machinery itself (RecordingSOCServer, GameEventLog, GameActionExtractor live in soc.extra and are integrated, not owned). <em>[unverified: no imports/calls edge src/test/java/soctest/server/TestRecorder.java::compareRecordsToExpected; src/main/java/soc/extra/robot/GameActionExtractor.java -&gt; src/main/java/soc/extra/server/GameEventLog.java (calls x29) -&gt; TestGameActionExtractor in code graph]</em></li>
+<li><strong>Python Companion Test Suite</strong> boundary: Python test code under src/test/python (run by Gradle’s testPython, folded into the fast test task) and src/extraTest/python (run by extraTestPython, part of the lengthy aggregation). Owns Python-language verification that runs alongside the JUnit suites; boundary excludes the SQL-template render tooling it may invoke.</li>
+<li><strong>Web Client Test Suite</strong> boundary: TypeScript/React unit and end-to-end tests living under web/, colocated as *.test.tsx beside the screens and components they exercise. Vitest (jsdom) drives the unit layer; Playwright drives end-to-end, split into separate package.json scripts (test vs test:e2e). Boundary: tests render the real components through their user-facing surface (data-testid handles, DOM events) rather than asserting on internals; the components under test are owned by the Web Client epics, not here.</li>
+<li><strong>SQL Template Consistency Checks</strong> boundary: Build-task-level guards (testSrcDBTemplateTokens, testSrcDBTemplates) folded into the same Gradle test task as the unit suite, enforcing that generated jsettlers-tables-*.sql files stay consistent with their src/main/bin/sql/template source. Boundary: it verifies generated-artifact consistency; it does not own the SQL schema or the <a href="http://render.py">render.py</a> generator (those belong to the Optional Database epic).</li>
+</ul>
+<h2>Integration Points</h2>
+<ul>
+<li><strong>In-process stringport server harness</strong>: The functional and recording tests boot a live server inside the test JVM over a stringport connection rather than a real socket, connecting DisplaylessTesterClients to drive game actions. This is the integration edge from the test suites into the server runtime under test. — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+<li><strong>Game model under test</strong>: Both unit and functional suites construct and assert directly against the authoritative game-model classes (SOCGame, SOCPlayer, SOCBoard, SOCGameOptionSet). These are the primary subjects of verification, owned by the Game Model epic and referenced (not owned) here. — see <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a></li>
+<li><strong>Savegame model round-trip</strong>: The savegame tests exercise the JSON savegame serialization by constructing and round-tripping SavedGameModel against SOCGame/SOCPlayer state, validating load/save fidelity. — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+<li><strong>Game-event recording &amp; extraction</strong>: The sequence-consistency tests integrate with the soc.extra recording/extraction machinery: RecordingSOCServer writes a per-game GameEventLog of EventEntry rows, and GameActionExtractor reconstructs actions from that log. The tests own the assertions; the machinery is owned externally. — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+<li><strong>Web components under test</strong>: The Vitest/Playwright suites render and drive the real web client components (MapEditorScreen, Dialog) and exercise the shared map-validator path. The components and validator are owned by the Web Client and Web Protocol &amp; Map Editor epics; this suite integrates with them from outside. — see <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></li>
+<li><strong>Gradle test-task orchestration</strong>: Gradle wires the suites together: the test task compiles and runs the JUnit unit cases plus testPython and the SQL-template checks; the extraTest task depends on test and adds the lengthy functional + extraTestPython runs. This is the build-system integration that gates and sequences the whole test surface.</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Architecture</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    Functional_Test_Suite__extraTest_["Functional Test Suite (extraTest)"]
+    Java_Unit_Test_Suite["Java Unit Test Suite"]
+    Protocol_Message_Sequence_Consistency_Tests["Protocol Message-Sequence Consistency Tests"]
+    Python_Companion_Test_Suite["Python Companion Test Suite"]
+    SQL_Template_Consistency_Checks["SQL Template Consistency Checks"]
+    Web_Client_Test_Suite["Web Client Test Suite"]
+
+    ext_Gradle_build__build_gradle_["Gradle build (build.gradle)"]:::default
+    ext_SavedGameModel__Server___Message_Protocol_["SavedGameModel (Server & Message Protocol)"]:::default
+
+    Functional_Test_Suite__extraTest_ -.->|"Gradle wires the suites together: the..."| ext_Gradle_build__build_gradle_
+    Functional_Test_Suite__extraTest_ -->|"imports (4), calls (2)"| Protocol_Message_Sequence_Consistency_Tests
+    Java_Unit_Test_Suite -->|"Both unit and functional suites const... — imports (2), cal…"| Functional_Test_Suite__extraTest_
+    Java_Unit_Test_Suite -->|"calls (1)"| Protocol_Message_Sequence_Consistency_Tests
+    Java_Unit_Test_Suite -.->|"JSON savegame"| ext_SavedGameModel__Server___Message_Protocol_
+    Protocol_Message_Sequence_Consistency_Tests -->|"imports (2), calls (3)"| Functional_Test_Suite__extraTest_
+
+
+
+
+
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Java Unit Test Suite</code></li>
+<li><code class="code-ref" title="source file in your repository">Functional Test Suite (extraTest)</code></li>
+<li><code class="code-ref" title="source file in your repository">Protocol Message-Sequence Consistency Tests</code></li>
+<li><code class="code-ref" title="source file in your repository">Web Client Test Suite</code></li>
+<li><code class="code-ref" title="source file in your repository">SQL Template Consistency Checks</code></li>
+<li><code class="code-ref" title="source file in your repository">Game model under test</code></li>
+<li><code class="code-ref" title="source file in your repository">Game-event recording &amp; extraction</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Java Unit Test Suite</td>
+<td></td>
+<td>src/test/java/soctest/message/TestToCmdToStringParse.java</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: Functional Test Suite (extraTest)</td>
+<td></td>
+<td>src/extraTest/java/soctest/server/TestActionsMessages.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Protocol Message-Sequence Consistency Tests</td>
+<td></td>
+<td>src/test/java/soctest/server/TestRecorder.java:1877-1963</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Web Client Test Suite</td>
+<td>Component test for the map editor screen (Phase 5).</td>
+<td>web/src/screens/MapEditorScreen.test.tsx</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: SQL Template Consistency Checks</td>
+<td><a href="http://render.py">render.py</a> - Simple template renderer for SQL DML/DDL to specific DBMS types.</td>
+<td>src/main/bin/sql/template/render.py:224-230</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Game model under test</td>
+<td></td>
+<td>src/test/java/soctest/game/TestGameOptions.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Game-event recording &amp; extraction</td>
+<td></td>
+<td>src/main/java/soc/extra/robot/GameActionExtractor.java:272-314</td>
+<td style="text-align:right">0.83</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../optional-database/optional-database.arch.html">Optional Database</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a>, <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a>, <a href="../web-protocol-map-editor/web-protocol-map-editor.arch.html">Web Protocol &amp; Map Editor</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="101.8"/>
+        </svg>
+        <div class="ring-num">0.55</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+      <div class="rail-card"><h4>Cited invariants</h4><div class="rail-list"><a href="../invariants/INV-CL-001.invariant.html"><span class="b">INV-CL-001</span><span>single writer next landarea</span></a><a href="../invariants/INV-CL-002.invariant.html"><span class="b">INV-CL-002</span><span>single writer desc curstrvalue</span></a><a href="../invariants/INV-CL-003.invariant.html"><span class="b">INV-CL-003</span><span>single writer parsed boolvalue</span></a><a href="../invariants/INV-CL-004.invariant.html"><span class="b">INV-CL-004</span><span>single writer parsed intvalue</span></a><a href="../invariants/INV-CL-005.invariant.html"><span class="b">INV-CL-005</span><span>single writer prevdicetotal c…</span></a><a href="../invariants/INV-CL-006.invariant.html"><span class="b">INV-CL-006</span><span>single writer prevpiececount…</span></a><a href="../invariants/INV-CL-007.invariant.html"><span class="b">INV-CL-007</span><span>single writer prevmyturn curr…</span></a><a href="../invariants/INV-CL-008.invariant.html"><span class="b">INV-CL-008</span><span>single writer viewport scroll…</span></a><a href="../invariants/INV-CL-009.invariant.html"><span class="b">INV-CL-009</span><span>single writer viewport scroll…</span></a><a href="../invariants/INV-CL-010.invariant.html"><span class="b">INV-CL-010</span><span>single writer panref current</span></a><a href="../invariants/INV-CL-011.invariant.html"><span class="b">INV-CL-011</span><span>lifecycle web src main tsx re…</span></a></div></div>
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

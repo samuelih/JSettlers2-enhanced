@@ -1,0 +1,517 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Server Runtime &amp; Request Dispatch · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../server-message-protocol/server-message-protocol.arch.html"><span class="nm">Server &amp; Message Protocol</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../server-message-protocol/browser-websocket-protocol-bridge.design.html"><span class="nm">Browser WebSocket Protocol Bridge</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../server-message-protocol/game-action-message-sequences.design.html"><span class="nm">Game-Action Message Sequences</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../server-message-protocol/contracts/server-message-protocol.api-boundary.html"><span class="nm">Server &amp; Message Protocol API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../server-message-protocol/server-runtime-request-dispatch.design.html"><span class="nm">Server Runtime &amp; Request Dispatch</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../server-message-protocol/socmessage-wire-vocabulary.design.html"><span class="nm">SOCMessage Wire Vocabulary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../server-message-protocol/contracts/server-message-protocol.gateway.html"><span class="nm">Server &amp; Message Protocol Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../server-message-protocol/contracts/server-message-protocol.testplan.html"><span class="nm">Server &amp; Message Protocol Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Server &amp; Message Protocol</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:55%"></i></span>
+      <span class="conf-val">0.55</span></span></div>
+        <h1 class="doc-title">Server Runtime &amp; Request Dispatch</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Server Runtime &amp; Request Dispatch</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Handler split exists for future game types (doc/Readme.developer.md)</strong> — Per the developer readme, the per-game glue is factored into SOCGameHandler specifically so that future game <em>types</em> could each extend GameHandler — the dispatch wiring is exercised today, but the extensibility is recorded design intent, not a test-verified requirement.</li>
+<li><strong>Bots as first-class clients (doc/Readme.developer.md)</strong> — The codebase originated as Robert S. Thomas’ AI-agent dissertation, so the robot subsystem is first-class: bots speak SOCMessage exactly like humans, which is why dispatch makes no special case for them and built-in bots run in-process.</li>
+</ul>
+<h2>Overview</h2>
+<p>SOCServer is the long-running process that owns server lifecycle: it extends the generic Server, listens on TCP port 8880 (SOC_PORT_DEFAULT) plus an optional WebSocket port (PROP_JSETTLERS_WEBSOCKET_PORT, started by serverUp() via WebSocketServerBridge), and accepts both human and robot clients. Inbound SOCMessages are marshalled through an InboundMessageQueue and routed by SOCMessageDispatcher: connection- and lobby-level messages (version, auth, channels, join/sit/start) go to SOCServerMessageHandler; messages implementing SOCMessageForGame go to SOCGameMessageHandler, which calls SOCGameHandler for per-game business logic and then back into SOCServer to broadcast results to players and observers. The server remains authoritative for the full SOCGame model, rules, scenarios, and bot players, while clients hold only partial state.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCServer</strong>: Long-running server process: owns lifecycle, binds listening transports, accepts human and robot connections, holds the authoritative game list, and exposes messageToGame/messageToPlayer send paths. Subclass of the generic Server.</li>
+<li><strong>SOCServerMessageHandler</strong>: Dispatches inbound messages NOT tied to in-game play in a specific current game: version negotiation, auth, channels, join/leave/sit-down, game-option and scenario info, board-reset voting.</li>
+<li><strong>SOCGameMessageHandler</strong>: Dispatches inbound messages implementing SOCMessageForGame (in-game player actions: roll, build, trade, discard, move robber, dev cards, undo) and delegates business logic to SOCGameHandler, then result-sending to SOCServer.</li>
+<li><strong>SOCGameHandler</strong>: Per-game logic glue (the GameMessageHandler factory, board layout, sendGameState, turn forcing, debug commands) abstracted from inbound-message parsing; the seam where a future game type would supply its own GameHandler.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>SOCMessageDispatcher</strong> (inbound) — via SOCMessageDispatcher#dispatch(SOCMessage, Connection) calls SOCServerMessageHandler.dispatch and SOCGameMessageHandler.dispatch (evidence: src/main/java/soc/server/SOCGameMessageHandler.java::dispatch javadoc (“called from SOCMessageDispatcher#dispatch”))</li>
+<li><strong>InboundMessageQueue (soc.server.genericServer)</strong> (inbound) — via import soc.server.genericServer.InboundMessageQueue; inbound messages marshalled through the queue before dispatch (evidence: src/main/java/soc/server/SOCServer.java (import soc.server.genericServer.InboundMessageQueue))</li>
+<li><strong>WebSocketServerBridge (soc.server.genericServer)</strong> (inbound) — via PROP_JSETTLERS_WEBSOCKET_PORT; serverUp() starts the bridge on that port when set (evidence: src/main/java/soc/server/SOCServer.java::PROP_JSETTLERS_WEBSOCKET_PORT)</li>
+<li><strong>Server (soc.server.genericServer)</strong> (inbound) — via SOCServer extends Server (threading/connection accept loop) (evidence: src/main/java/soc/server/SOCServer.java::SOCServer (class extends Server))</li>
+<li><strong>SOCRobotClient / SOCDisplaylessPlayerClient (soc.robot / soc.baseclient)</strong> (bidirectional) — via bots connect over the same SOCMessage path; import soc.robot.SOCRobotClient (evidence: src/main/java/soc/server/SOCServer.java (import soc.robot.SOCRobotClient))</li>
+<li><strong>SOCDBHelper (soc.server.database)</strong> (outbound) — via user lookup/auth (db.getUser) during AUTHREQUEST/account flows (evidence: src/main/java/soc/server/SOCServerMessageHandler.java::handleAUTHREQUEST_postAuth (srv.db.getUser))</li>
+<li><strong>SOCGame model (soc.game)</strong> (outbound) — via handlers operate on the authoritative SOCGame (e.g. ga.rollDice, ga.canRollDice) (evidence: src/main/java/soc/server/SOCGameMessageHandler.java::handleROLLDICE)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Split inbound dispatch three ways — SOCServerMessageHandler (lobby/connection), SOCGameMessageHandler (in-game actions), SOCGameHandler (per-game glue).</strong>: Keeps message-parsing separate from game business logic and isolates lifecycle/lobby concerns from per-turn play. The SOCGameHandler seam is deliberately designed so a future game <em>type</em> could each supply its own GameHandler without touching the dispatcher.</li>
+<li><strong>dispatch() in SOCGameMessageHandler returns false (default case) for unrecognized or non-game message types instead of erroring.</strong>: Game-vs-server message types that are handled uniformly for all game types (sit-down, board-reset voting) are intentionally left to SOCServerMessageHandler; the false return lets the dispatcher fall through cleanly rather than duplicating those handlers.</li>
+<li><strong>Robot clients (SOCRobotClient extends SOCDisplaylessPlayerClient) connect over the same SOCMessage path as human clients.</strong>: A single protocol surface means bots need no privileged in-process API, which keeps the AI/bot subsystem (the project’s dissertation origin) interoperable and testable as ordinary clients; built-in bots still run inside the server JVM.</li>
+<li><strong>Two transports (plain TCP socket and WebSocketServerBridge) share one dispatch pipeline.</strong>: Web clients reach the same authoritative server without a parallel handler stack; the WebSocket port is opt-in (disabled when PROP_JSETTLERS_WEBSOCKET_PORT is unset or 0) so the classic deployment is unchanged.</li>
+<li><strong>Server is authoritative for full game state; clients hold only partial state.</strong>: Centralizing SOCGame rule enforcement at the server prevents clients from fabricating moves and is reinforced by handlers preferring connection-derived identity over message-supplied fields.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> A client MUST send its SOCVersion before an AUTHREQUEST; an AUTHREQUEST with no known client version is rejected. — src/main/java/soc/server/SOCServerMessageHandler.java::handleAUTHREQUEST (cliVersion &lt;= 0 -&gt; SV_NOT_OK_GENERIC “AUTHREQUEST: Send version first”)</li>
+<li><strong>[HARD]</strong> AUTHREQUEST authScheme MUST be SCHEME_CLIENT_PLAINTEXT, else the request is rejected. — src/main/java/soc/server/SOCServerMessageHandler.java::handleAUTHREQUEST (rejects unknown authScheme)</li>
+<li><strong>[HARD]</strong> Account creation MUST be authorized: a non-admin requester for ROLE_USER_ADMIN is denied and audited. — src/main/java/soc/server/SOCServerMessageHandler.java::handleAUTHREQUEST_postAuth (isUserDBUserAdmin check + printAuditMessage)</li>
+<li><strong>[HARD]</strong> The bots.cookie value MUST be single-line-and-safe and MUST NOT contain ‘|’ or ‘,’ characters. — src/main/java/soc/server/SOCServer.java::PROP_JSETTLERS_BOTS_COOKIE javadoc (SOCMessage#isSingleLineAndSafe)</li>
+<li><strong>[HARD]</strong> maxConnections MUST be at least 20 more than the default robot count, reserving capacity beyond bots. — src/main/java/soc/server/SOCServer.java::SOC_MAXCONN_DEFAULT (Math.max(40, 20 + SOC_STARTROBOTS_DEFAULT))</li>
+<li><strong>[HARD]</strong> A dice-roll request MUST pass canRollDice for the requesting player before any game mutation occurs. — src/main/java/soc/server/SOCGameMessageHandler.java::handleROLLDICE (canRollDice guard -&gt; “You can’t roll right now.”)</li>
+<li><strong>[SOFT]</strong> Handlers SHOULD use local connection information (nickname from the connection) over message-supplied fields to resist spoofed actions. — src/main/java/soc/server/SOCServerMessageHandler.java::dispatch javadoc Note (“always use local information over information from the message”)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>security</strong> — Resist spoofed player actions by deriving identity from the connection, not from message fields. — src/main/java/soc/server/SOCServerMessageHandler.java::dispatch javadoc Note (use local info over message info)</li>
+<li><strong>security</strong> — Old-version clients may be asked to disconnect during version negotiation; a second differing VERSION disconnects the client. — src/main/java/soc/server/SOCServerMessageHandler.java::handleVERSION</li>
+<li><strong>reliability</strong> — Reserve SOC_MAXCONN_HUMANS_RESERVE (6) connection slots for human clients regardless of how many bots were started. — src/main/java/soc/server/SOCServer.java::SOC_MAXCONN_HUMANS_RESERVE</li>
+<li><strong>observability</strong> — Sensitive auth events (e.g. unauthorized account-creation attempts) are recorded via an audit log. — src/main/java/soc/server/SOCServerMessageHandler.java::handleAUTHREQUEST_postAuth (printAuditMessage)</li>
+<li><strong>error-handling</strong> — Dispatch methods may throw; the dispatcher caller is responsible for catching exceptions so a bad message does not crash the server thread. — src/main/java/soc/server/SOCGameMessageHandler.java::dispatch javadoc (“Caller of this method will catch any thrown Exceptions.”)</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Enforces the protocol ordering invariant that version negotiation precedes authentication.</em>
+<em>Source: <code>src/main/java/soc/server/SOCServerMessageHandler.java::handleAUTHREQUEST</code></em></p>
+<pre><code>if (cliVersion &lt;= 0)
+{
+    c.put(new SOCStatusMessage
+            (SOCStatusMessage.SV_NOT_OK_GENERIC, &quot;AUTHREQUEST: Send version first&quot;));  // I18N OK: rare error
+    return;
+}
+</code></pre>
+<p><em>Server validates turn/state authoritatively before mutating SOCGame, using connection-derived player identity.</em>
+<em>Source: <code>src/main/java/soc/server/SOCGameMessageHandler.java::handleROLLDICE</code></em></p>
+<pre><code>if ((pl == null) || ! ga.canRollDice(pl.getPlayerNumber()))
+{
+    srv.messageToPlayerKeyed
+        (c, gn,
+         (pl != null) ? pl.getPlayerNumber() : SOCServer.PN_OBSERVER,
+         &quot;reply.rolldice.cannot.now&quot;);  // &quot;You can't roll right now.&quot;
+
+    return;  // &lt;--- Early return ---
+}
+</code></pre>
+<p><em>Unrecognized/non-game messages fall through to be handled by SOCServerMessageHandler rather than erroring.</em>
+<em>Source: <code>src/main/java/soc/server/SOCGameMessageHandler.java::dispatch</code></em></p>
+<pre><code>default:
+    return false;
+
+}  // switch (mes.getType)
+
+return true;  // Message was handled in a non-default case above
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCServer {
+        +SOCServer()
+        -protected SOCGameHandler buildGameHandler()
+        -buildServerMessageHandler()
+        -initSocServer()
+        -initSocServer_DB()
+        -initSocServer_dbParamFields()
+        -initSocServer_bots_start3p()
+        -private void initSocServer_savegame()
+        -private void initSocServer_customMaps()
+        +serverUp()
+        +public final int getRobotCount()
+        +getRobotConnection()
+        +getRobotClient()
+        +getRobotParameters()
+        -private final String generateRobotCookie()
+        +public void connectToChannel(Connection c, String ch)
+        +leaveChannel()
+        -protected final void destroyChannel(final String ch)
+        +connectToGame()
+        -createGameAndBroadcast()
+        -broadcastNewGame()
+        -broadcastNewGame_toConns()
+        +leaveGame()
+        -leaveGameMemberAndCleanup()
+        -int[] robotShuffleForJoin()
+        +setupLocalRobots()
+        +public void destroyGame(String gm)
+        +destroyGameAndBroadcast()
+        +public SOCGameListAtServer getGameList()
+        +public Collection<String> getGameNames()
+        +public SOCGame getGame(final String gaName)
+        +public int getGameState(String gm)
+        +public SOCGameOptionSet getGameOptions(String gm)
+        +activateKnownOption()
+        +public final boolean isDebugUserEnabled()
+        +public final boolean hasUtilityModeProperty()
+        +public final String getUtilityModeMessage()
+        +public String getFeaturesList()
+        +localizeKnownOptions()
+        +public void leaveAllChannels(Connection c)
+        +public void leaveAllGames(Connection c)
+        +public void messageToChannel(String ch, SOCMessage mes)
+        +messageToChannelWithMon()
+        +messageToPlayer()
+        +messageToPlayerKeyed()
+        +messageToPlayerKeyedSpecial()
+        +messageToPlayerPendingKeyed()
+        +messageToGame()
+        +messageToGameKeyedType()
+        +messageToGameKeyed()
+        +messageToGameKeyedSpecial()
+        +messageToGameKeyedSpecialExcept()
+        -impl_messageToGameKeyedSpecial()
+        +messageToGameWithMon()
+        +messageToGameExcept()
+        +messageToGameForVersions()
+        +messageToGameForVersionsExcept()
+        +messageToGameForVersionsKeyed()
+        +messageToGameForVersionsKeyedExcept()
+        +messageToGameForVersionsKeyedStatus()
+        +messageToGameUrgent()
+        +@Override
+    public void leaveConnection(Connection c)
+        +@Override
+    public boolean newConnection1(Connection c)
+        -@Override
+    protected void newConnection2(Connection c)
+        +nameConnection()
+        -getConnectedClientNames()
+        +public SOCClientData getClientData(final String nickname)
+        -getConnectedRobotNames()
+        -checkNickname()
+        -checkNickname_getRetryText()
+        -checkNickname_getVersionText()
+        +processFirstCommand()
+        +processDebugCommand()
+        -processDebugCommand_connStats()
+        +public synchronized void stopServer(String stopMsg)
+        -authOrRejectClientUser()
+        -authOrRejectClientUser_postDBAuth()
+        -boolean isUserDBUserAdmin(String uname)
+        -isUserGameAdmin()
+        -checkLimitClientFeaturesForServerDisallows()
+        -getClientWelcomeMessage()
+        -setClientVersSendGamesOrReject()
+        -authOrRejectClientRobot()
+        +removeConnection()
+        -createOrJoinGameIfUserOK()
+        +createOrJoinGame()
+        +createAndJoinReloadedGame()
+        +resumeReloadedGame()
+        -startRobotOnlyGames()
+        -readyGameAskRobotsJoin()
+        -readyGameAskRobotsMix3p()
+        -debug_printPieceDiceNumbers()
+        -debug_printPieceDiceNumbers_pl()
+        -resetBoardVoteNotifyOne()
+        +localizeGameScenarios()
+        -sendGameScenarioInfo()
+        -createAccount()
+        -joinGame()
+        -sitDown()
+        -resetBoardAndNotify()
+        -resetBoardAndNotify_finish()
+        -void gameOverIncrGamesFinishedCount(final SOCGame ga)
+        -protected void storeGameScores(SOCGame ga)
+        +public boolean isRecordGameEventsActive()
+        +public boolean isRecordGameEventsFromClientsActive()
+        +startLog()
+        -startEmptyLog()
+        +recordGameEvent()
+        +recordGameEventTo()
+        +recordGameEventNotTo()
+        +recordClientMessage()
+        +endLog()
+        +checkForExpiredGames()
+        +checkForExpiredTurns()
+        +parseCmdline_GameOption()
+        +parseCmdline_DashedArgs()
+        -init_propsSetGameopts()
+        +checkScenarioOpts()
+        -init_checkScenarioOpts()
+        -private void init_resetUserPassword(final String uname)
+        -printAuditMessage()
+        +public static void printUsage(final boolean longFormat)
+        +public static void printGameOptions()
+        -private static void clearBuffer(StringBuilder sb)
+        -private static StringBuilder readPassword(String prompt)
+        +static public void main(String[] args)
+    }
+    class SOCGameHandler {
+        +public SOCGameHandler(final SOCServer server)
+        +public GameMessageHandler getMessageHandler()
+        +processDebugCommand()
+        +public final String[] getDebugCommandsHelp()
+        -processDebugCommand_freePlace()
+        -processDebugCommand_scenario()
+        +calcGameClientFeaturesRequired()
+        -final boolean checkTurn(Connection c, SOCGame ga)
+        -endGameTurn()
+        -forceEndGameTurn()
+        +joinGame()
+        +gatherBoardPotentials()
+        -joinGame_sendBoardSpecialEdgeChanges()
+        -sendGameStatsTiming()
+        +sitDown_sendPrivateInfo()
+        -sitDown_gatherInventoryContents()
+        +leaveGame()
+        +findRobotAskJoinGame()
+        -sendGameState()
+        -sendGameState_sendDiscardRequests()
+        -sendGameState_sendGoldPickAnnounceText()
+        -sendGameStateOVER()
+        +sendDecline()
+        -reportRobbery()
+        +sendTradeOffer()
+        -void reportTrade(SOCGame ga, int offering, int accepting)
+        -reportBankTrade()
+        -reportRsrcGainLoss()
+        -void reportCKKnightCounts(final SOCGame ga, final int pn)
+        -reportCKCommodityCounts()
+        -reportRsrcGainLossForVersions()
+        -reportRsrcGainGold()
+        -reportLongestRoadIfChanged()
+        +public void startGame(SOCGame ga)
+        +public void sendGameStateResumingReloaded(final SOCGame ga)
+        -sendTurnStateAtInitialPlacement()
+        -void sendTurn(final SOCGame ga, boolean sendRollPrompt)
+        +getBoardLayoutMessage()
+        -debugGiveResources()
+        -debugGiveCKCommodities()
+        -debugGiveDevCard()
+        -debugSetNextDevCard()
+        -debug_getPlayer()
+        +endTurnIfInactive()
+        +endGameTurnOrForce()
+        -forceGamePlayerDiscardOrGain()
+        +gameEvent()
+        +playerEvent()
+        -playerEvent_newSettlementIsByShip()
+        -updatePlayerSVPPendingMessage()
+        -sendGamePendingMessages()
+        -private static String formatTimeHHMMSS(Date time)
+    }
+    class SOCServerMessageHandler {
+        +SOCServerMessageHandler()
+        -dispatch()
+        -void handleVERSION(Connection c, SOCVersion mes)
+        -handleAUTHREQUEST()
+        -handleAUTHREQUEST_postAuth()
+        -handleIMAROBOT()
+        -handleSERVERPING()
+        -handleLOCALIZEDSTRINGS()
+        -handleGAMEOPTIONGETDEFAULTS()
+        -handleGAMEOPTIONGETINFOS()
+        -handleSCENARIOINFO()
+        -handleCHANGEFACE()
+        -handleSETSEATLOCK()
+        -handleCHANNELTEXTMSG()
+        -handleGAMETEXTMSG()
+        +processAdminCommand()
+        -processDebugCommand_dbSettings()
+        -processDebugCommand_connStats()
+        -processDebugCommand_gameStats()
+        -processGameMemberMuteCommand()
+        -listAddStat()
+        -getSettingsFormatted()
+        -getSettingsFormatted_freeMemory()
+        -processDebugCommand_serverStats()
+        -processDebugCommand_loadGame()
+        -processDebugCommand_resumeGame()
+        -processDebugCommand_saveGame()
+        -processDebugCommand_loadSaveGame_checkDir()
+        -processDebugCommand_who()
+        -handleJOINCHANNEL()
+        -handleJOINCHANNEL_postAuth()
+        -handleLEAVECHANNEL()
+        -handleNEWGAMEWITHOPTIONSREQUEST()
+        -private void handleJOINGAME(Connection c, SOCJoinGame mes)
+        -handleLEAVEGAME()
+        -handleLEAVEGAME_maybeGameReset_oldRobot()
+        -private void handleSITDOWN(Connection c, SOCSitDown mes)
+        -handleSTARTGAME()
+        -handleRESETBOARDREQUEST()
+        -handleRESETBOARDVOTE()
+    }
+    class SOCGameMessageHandler {
+        +SOCGameMessageHandler()
+        +dispatch()
+        -handleROLLDICE()
+        -handlePICKRESOURCETYPE_ckMonopoly()
+        -handleROLLDICE_sendCKResults()
+        -handleDISCARD()
+        -handleMOVEROBBER()
+        -handleCHOOSEPLAYER()
+        -sendUndoSideEffects()
+        -handleENDTURN()
+        -handleSIMPLEREQUEST()
+        -handleMAKEOFFER()
+        -handleCLEAROFFER()
+        -handleREJECTOFFER()
+        -handleACCEPTOFFER()
+        -executeTrade()
+        -handleBANKTRADE()
+        -handleBUILDREQUEST()
+        -handleCANCELBUILDREQUEST()
+        -handlePUTPIECE()
+        -handleMOVEPIECE()
+        -handleDEBUGFREEPLACE()
+        -handleUNDOPUTPIECE()
+        -handleBUYDEVCARDREQUEST()
+        -handlePLAYDEVCARDREQUEST()
+        -handlePICKRESOURCES()
+        -handlePICKRESOURCETYPE()
+        -handleINVENTORYITEMACTION()
+        -handleINVENTORYITEMACTION_ckEffects()
+        -handleSETSPECIALITEM()
+        -handleGAMESTATS()
+    }
+    class AuthSuccessRunnable {
+        <<interface>>
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+
+    src["src"]
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCServer runtime extends Server, accepts connections</code></li>
+<li><code class="code-ref" title="source file in your repository">Connection/lobby-level message dispatch</code></li>
+<li><code class="code-ref" title="source file in your repository">In-game player action dispatch</code></li>
+<li><code class="code-ref" title="source file in your repository">Per-game logic glue handler (future GameHandler seam)</code></li>
+<li><code class="code-ref" title="source file in your repository">Version-before-auth ordering guard</code></li>
+<li><code class="code-ref" title="source file in your repository">Version negotiation / old-version disconnect</code></li>
+<li><code class="code-ref" title="source file in your repository">Authoritative roll validation (canRollDice)</code></li>
+<li><code class="code-ref" title="source file in your repository">Optional WebSocket transport port</code></li>
+<li><code class="code-ref" title="source file in your repository">Human-connection reserve / max-connection floor</code></li>
+<li><code class="code-ref" title="source file in your repository">Server TCP/WebSocket ports exposed for deployment (8880)</code></li>
+<li><code class="code-ref" title="source file in your repository">Robot clients connect via same message path</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">server-runtime-request-dispatch.feature.md</span>
+Scope architecture: <a href="server-message-protocol.arch.html">server-message-protocol.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCServer runtime extends Server, accepts connections</td>
+<td></td>
+<td>src/main/java/soc/server/SOCServer.java:1676-1687</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Connection/lobby-level message dispatch</td>
+<td></td>
+<td>src/main/java/soc/server/SOCServerMessageHandler.java:136-324</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: In-game player action dispatch</td>
+<td></td>
+<td>src/main/java/soc/server/SOCGameMessageHandler.java:125-389</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Per-game logic glue handler (future GameHandler seam)</td>
+<td></td>
+<td>src/main/java/soc/server/SOCGameHandler.java:311-315</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Version-before-auth ordering guard</td>
+<td></td>
+<td>src/main/java/soc/server/SOCServerMessageHandler.java:364-406</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Version negotiation / old-version disconnect</td>
+<td></td>
+<td>src/main/java/soc/server/SOCServerMessageHandler.java:344-350</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Authoritative roll validation (canRollDice)</td>
+<td></td>
+<td>src/main/java/soc/server/SOCGameMessageHandler.java:402-864</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Optional WebSocket transport port</td>
+<td></td>
+<td>src/main/java/soc/server/SOCServer.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Human-connection reserve / max-connection floor</td>
+<td></td>
+<td>src/main/java/soc/server/SOCServer.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Server TCP/WebSocket ports exposed for deployment (8880)</td>
+<td>syntax=docker/dockerfile:1</td>
+<td>Dockerfile</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Robot clients connect via same message path</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotClient.java:339-342</td>
+<td style="text-align:right">0.83</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../optional-database/optional-database.arch.html">Optional Database</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="101.8"/>
+        </svg>
+        <div class="ring-num">0.55</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

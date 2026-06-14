@@ -1,0 +1,245 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Custom Map Editor Canvas &amp; Palette · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a><div class="nav-sub"><a class="nav-item" href="../web-protocol-map-editor/web-protocol-map-editor.arch.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="tt tt-arch">arch</span></a><a class="nav-item active" href="../web-protocol-map-editor/custom-map-editor-canvas-palette.design.html"><span class="nm">Custom Map Editor Canvas &amp; Palette</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-protocol-map-editor/map-schema-custom-map-json-model.design.html"><span class="nm">Map Schema &amp; Custom-Map JSON Model</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-protocol-map-editor/typescript-socmessage-protocol-layer.design.html"><span class="nm">TypeScript SOCMessage Protocol Layer</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-protocol-map-editor/contracts/web-protocol-map-editor.gateway.html"><span class="nm">Web Protocol &amp; Map Editor Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../web-protocol-map-editor/contracts/web-protocol-map-editor.testplan.html"><span class="nm">Web Protocol &amp; Map Editor Test Plan</span><span class="tt tt-testplan">test</span></a></div></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Web Protocol &amp; Map Editor</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:72%"></i></span>
+      <span class="conf-val">0.72</span></span></div>
+        <h1 class="doc-title">Custom Map Editor Canvas &amp; Palette</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Custom Map Editor Canvas &amp; Palette</h1>
+<h2>Overview</h2>
+<p>The map editor splits authoring into two stateless presentational components driven by a parent screen that owns the single CustomMap. EditorPalette selects the active EditorTool and the paint parameters (hex type, dice number, land area, port type/facing) and emits metadata edits through callbacks. EditorCanvas reads that same CustomMap, memo-indexes placed hexes and ports by integer 0xRRCC coordinate, enumerates the fixed grid via editorGrid, and renders each cell with HexCell. User clicks on cells, port slots, and markers are translated into onHexClick(coord, alt) / onPortClick(edge, alt) callbacks; the canvas itself mutates nothing. Rendering geometry is borrowed read-only from the in-game board’s coords/pieces modules so an authored map looks identical to a live game. The barrel index.ts exposes the underlying schema/validation/action layer that the parent uses to apply those callbacks back into the CustomMap.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>EditorCanvas</strong>: Renders the sea-board grid as an SVG honeycomb of placeable hex cells plus port-edge slots and robber/pirate markers; holds no map state and reports every edit upward through onHexClick/onPortClick.</li>
+<li><strong>HexCell</strong>: Draws one placed-or-empty hex: terrain texture/grain, dice token, land-area badge, coordinate label, and selection/highlight/issue/probability/area overlay state.</li>
+<li><strong>computeViewBox</strong>: Derives an SVG viewBox spanning every enumerated cell plus a one-hex pad, extending the lower bound by HEXY_OFF_SLOPE for the south apex.</li>
+<li><strong>kindForType</strong>: Lower-cases and maps a loose map-type string onto the closed HexKind motif set, defaulting to ‘unknown’ for anything unrecognized.</li>
+<li><strong>edgeMid</strong>: Re-derives an edge coordinate’s midpoint pixel from rowOf/colOf using the same linear mapping as hexToPixel, kept local to avoid an extra import.</li>
+<li><strong>EditorTool</strong>: Enumerates the editor’s interaction modes: ‘hex’ | ‘dice’ | ‘area’ | ‘port’ | ‘robber’ | ‘pirate’.</li>
+<li><strong>EditorPalette</strong>: Left-rail toolbar: selects the active tool, hex type, dice number, land area, port type/facing, expansion profile, and edits map metadata (name/description/playerCounts/shuffle) — all via lifted callbacks.</li>
+<li><strong>toolHint</strong>: Returns the short usage sentence shown under the tool row for the currently-selected EditorTool.</li>
+<li><strong>sameCounts</strong>: Order-sensitive equality on two player-count lists, used to highlight the matching expansion profile.</li>
+<li><strong>map-editor barrel (index.ts)</strong> (referenced; defined externally): Re-exports the editor data layer (schema types, validation, grid enumeration, editor actions, enhancements, sample data) as the single import boundary for consumers of the editor.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>web board geometry (board/coords.ts)</strong> (outbound) — via import { hexPolygonPoints, HALFDELTA_X, HALFDELTA_Y, HEX_CENTER_DY, HEXY_OFF_SLOPE, TOP_MARGIN } from ‘…/…/board/coords’ (evidence: web/src/map-editor/components/EditorCanvas.tsx (import block))</li>
+<li><strong>web board art (board/pieces/BoardDefs, ResourceMotif, TerrainTexture)</strong> (outbound) — via import BoardDefs/ResourceMotif/TerrainTexture from ‘…/…/board/pieces/*’ (evidence: web/src/map-editor/components/EditorCanvas.tsx; web/src/map-editor/components/EditorPalette.tsx (terrainTextureFor))</li>
+<li><strong>editor grid layer (map-editor/editorGrid)</strong> (outbound) — via import { enumerateHexCells, candidatePortEdgesWithin, boardSizeForMap, hexToPixel } (evidence: web/src/map-editor/components/EditorCanvas.tsx (import block))</li>
+<li><strong>map schema layer (map-editor/mapSchema)</strong> (outbound) — via import { CustomMap, parseCoord, encodeCoord, rowOf, colOf, HEX_TYPE_NAMES, CANONICAL_PORT_TYPE_NAMES, … } (evidence: web/src/map-editor/components/EditorCanvas.tsx; web/src/map-editor/components/EditorPalette.tsx)</li>
+<li><strong>editor enhancements (map-editor/editorEnhancements)</strong> (outbound) — via import { EditorOverlay, dicePips } (evidence: web/src/map-editor/components/EditorCanvas.tsx (import block))</li>
+<li><strong>shared UI primitives (components/index.ts)</strong> (outbound) — via import { Button, Panel } from ‘…/…/components’ (evidence: web/src/map-editor/components/EditorPalette.tsx (import block))</li>
+<li><strong>MapEditorScreen (parent screen)</strong> (inbound) — via props/callbacks: tool/map state passed down, onHexClick/onPortClick and palette on*Change callbacks passed up (evidence: web/src/map-editor/components/EditorCanvas.tsx::EditorCanvasProps; web/src/map-editor/components/EditorPalette.tsx::EditorPaletteProps)</li>
+<li><strong>editor stylesheet (screens/MapEditorScreen.module.css)</strong> (outbound) — via import styles from ‘…/…/screens/MapEditorScreen.module.css’ (evidence: web/src/map-editor/components/EditorCanvas.tsx; web/src/map-editor/components/EditorPalette.tsx)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Canvas and palette are pure/presentational with all state lifted to the parent screen</strong>: EditorCanvas holds no CustomMap state and routes every edit through onHexClick/onPortClick (and the palette through its on*Change callbacks). This keeps a single source of truth in the parent, makes both components trivially testable in isolation, and lets the same canvas serve interactive editing and read-only preview (previewMode) without branching state ownership.</li>
+<li><strong>Reuse the in-game board geometry (coords.ts, BoardDefs, ResourceMotif, TerrainTexture) read-only instead of reimplementing it</strong>: The canvas imports hexPolygonPoints, HALFDELTA_X/Y, hexToPixel and the board art pieces directly so an authored map renders pixel-identical to the live board, per the EditorCanvas docstring. Sharing one geometry source prevents the editor and the game view from drifting apart visually.</li>
+<li><strong>Normalize loose map-type strings through a closed motif set with an ‘unknown’ fallback</strong>: kindForType lower-cases input and only returns a known HexKind, falling back to ‘unknown’ for anything else, so arbitrary or future type strings in a hand-edited map never crash rendering and degrade gracefully to a neutral motif.</li>
+<li><strong>Memo-index placed hexes and ports by integer coordinate and memoize grid/viewBox derivations</strong>: placedByCoord / placedPorts are built as Maps for O(1) per-cell lookup while iterating the enumerated grid, and boardSize, cells, portEdges and viewBox are wrapped in useMemo keyed on their inputs, avoiding per-render recomputation of the whole honeycomb.</li>
+<li><strong>Expose the editor data layer through a single barrel module (index.ts)</strong>: index.ts re-exports schema types, validation, grid enumeration, editor actions, enhancements and sample data as one import surface, so components and the parent screen depend on a stable boundary rather than reaching into individual files.</li>
+<li><strong>Re-derive edge midpoints locally in edgeMid rather than importing an edge-geometry helper</strong>: edgeMid reproduces the same linear mapping as hexToPixel for the placed-port marker position, deliberately avoiding an extra import for a one-off reference point.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> The canvas MUST remain stateless with respect to the map: every hex/port/marker edit is reported upward via onHexClick/onPortClick and the parent owns the CustomMap. — web/src/map-editor/components/EditorCanvas.tsx::EditorCanvas (props onHexClick/onPortClick; docstring ‘the parent owns the CustomMap state’)</li>
+<li><strong>[SOFT]</strong> A dice token SHOULD render only for valid roll values 2–12 excluding 7. — web/src/map-editor/components/EditorCanvas.tsx::HexCell (<code>const showDice = diceNum &gt;= 2 &amp;&amp; diceNum &lt;= 12 &amp;&amp; diceNum !== 7</code>)</li>
+<li><strong>[SOFT]</strong> Unrecognized hex-type strings SHOULD normalize to the ‘unknown’ motif rather than be passed through raw. — web/src/map-editor/components/EditorCanvas.tsx::kindForType (default case returns ‘unknown’)</li>
+<li><strong>[SOFT]</strong> The active land area SHOULD be clamped to at least 1 (and bounded 1–9 in the input). — web/src/map-editor/components/EditorPalette.tsx::EditorPalette (<code>onChange={(e) =&gt; onLandAreaChange(Math.max(1, Number(e.target.value) || 1))}</code>, min=1 max=9)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>performance</strong> — Per-cell lookups are O(1) via coordinate-keyed Maps, and grid enumeration, board size, port edges and viewBox are memoized to avoid recomputation on every render. — web/src/map-editor/components/EditorCanvas.tsx::EditorCanvas (useMemo on boardSize/cells/placedByCoord/portEdges/viewBox)</li>
+<li><strong>accessibility</strong> — Interactive editor surfaces expose ARIA roles and labels: the canvas is role=‘application’ with an aria-label, and tool/profile/hex selectors use role=‘radiogroup’/‘radio’ with aria-checked. — web/src/map-editor/components/EditorCanvas.tsx::EditorCanvas (role=‘application’); web/src/map-editor/components/EditorPalette.tsx::EditorPalette (role=‘radiogroup’/‘radio’, aria-checked)</li>
+<li><strong>error-handling</strong> — Coordinate parsing failures are skipped rather than rendered: only parseCoord results that are non-null are indexed, and robber/pirate markers render only when their coord is non-null and &gt; 0. — web/src/map-editor/components/EditorCanvas.tsx::EditorCanvas (<code>if (c !== null)</code> index guard; <code>robber !== null &amp;&amp; robber &gt; 0</code>)</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Guards dice-token rendering to legal roll values, excluding the robber’s 7.</em>
+<em>Source: <code>web/src/map-editor/components/EditorCanvas.tsx:HexCell</code></em></p>
+<pre><code>const showDice = diceNum &gt;= 2 &amp;&amp; diceNum &lt;= 12 &amp;&amp; diceNum !== 7;
+</code></pre>
+<p><em>Order-sensitive player-count comparison that drives active-profile highlighting.</em>
+<em>Source: <code>web/src/map-editor/components/EditorPalette.tsx:sameCounts</code></em></p>
+<pre><code>return a.every((value, i) =&gt; value === b[i]);
+</code></pre>
+<p><em>Defensive fallback keeps rendering total over arbitrary map-type strings.</em>
+<em>Source: <code>web/src/map-editor/components/EditorCanvas.tsx:kindForType</code></em></p>
+<pre><code>default:
+      return 'unknown';
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    web_src_map_editor_components_EditorCanvas_tsx["EditorCanvas.tsx"]
+    web_src_map_editor_components_EditorPalette_tsx["EditorPalette.tsx"]
+    web_src_screens____map_editor_index_ts["index.ts"]
+
+
+    ext_web_src_map_editor_components_______board_coords_ts["coords.ts"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components_______board_coords_ts
+    ext_web_src_map_editor_components_______board_pieces_BoardDefs_tsx["BoardDefs.tsx"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components_______board_pieces_BoardDefs_tsx
+    ext_web_src_map_editor_components_______board_pieces_ResourceMotif_tsx["ResourceMotif.tsx"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components_______board_pieces_ResourceMotif_tsx
+    ext_web_src_map_editor_components_______board_pieces_TerrainTexture_tsx["TerrainTexture.tsx"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components_______board_pieces_TerrainTexture_tsx
+    web_src_map_editor_components_EditorPalette_tsx -.->|"imports"| ext_web_src_map_editor_components_______board_pieces_TerrainTexture_tsx
+    ext_web_src_map_editor_components_______board_types_ts["types.ts"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components_______board_types_ts
+    ext_web_src_map_editor_components_______components_index_ts["index.ts"]:::default
+    web_src_map_editor_components_EditorPalette_tsx -.->|"imports"| ext_web_src_map_editor_components_______components_index_ts
+    ext_web_src_map_editor_components_______screens_MapEditorScreen_module_css["MapEditorScreen.module.css"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components_______screens_MapEditorScreen_module_css
+    web_src_map_editor_components_EditorPalette_tsx -.->|"imports"| ext_web_src_map_editor_components_______screens_MapEditorScreen_module_css
+    ext_web_src_map_editor_components____editorEnhancements_ts["editorEnhancements.ts"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components____editorEnhancements_ts
+    ext_web_src_map_editor_components____editorGrid_ts["editorGrid.ts"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components____editorGrid_ts
+    ext_web_src_map_editor_components____mapSchema_ts["mapSchema.ts"]:::default
+    web_src_map_editor_components_EditorCanvas_tsx -.->|"imports"| ext_web_src_map_editor_components____mapSchema_ts
+    web_src_map_editor_components_EditorPalette_tsx -.->|"imports"| ext_web_src_map_editor_components____mapSchema_ts
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Editor canvas grid rendering/editing</code></li>
+<li><code class="code-ref" title="source file in your repository">SVG viewBox computation spanning all cells with one-hex margin</code></li>
+<li><code class="code-ref" title="source file in your repository">Single hex cell rendering</code></li>
+<li><code class="code-ref" title="source file in your repository">Map-type-to-motif normalization</code></li>
+<li><code class="code-ref" title="source file in your repository">Edge-midpoint pixel re-derivation</code></li>
+<li><code class="code-ref" title="source file in your repository">Editor placement palette and tool selection</code></li>
+<li><code class="code-ref" title="source file in your repository">Per-tool usage hint</code></li>
+<li><code class="code-ref" title="source file in your repository">Player-count list equality check</code></li>
+<li><code class="code-ref" title="source file in your repository">Editor data-layer public surface (barrel)</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">custom-map-editor-canvas-palette.feature.md</span>
+Scope architecture: <a href="web-protocol-map-editor.arch.html">web-protocol-map-editor.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Editor canvas grid rendering/editing</td>
+<td></td>
+<td>web/src/map-editor/components/EditorCanvas.tsx:223-414</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: SVG viewBox computation spanning all cells with one-hex margin</td>
+<td>/** Compute an SVG viewBox spanning all enumerated cells, with a one-hex margin. */</td>
+<td>web/src/map-editor/components/EditorCanvas.tsx:425-444</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: Single hex cell rendering</td>
+<td>/** Render a single placed-or-empty hex cell. */</td>
+<td>web/src/map-editor/components/EditorCanvas.tsx:75-211</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: Map-type-to-motif normalization</td>
+<td>/** Convert loose map type strings into known board-art motif keys. */</td>
+<td>web/src/map-editor/components/EditorCanvas.tsx:447-462</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: Edge-midpoint pixel re-derivation</td>
+<td>/** Midpoint pixel of an edge coord (re-derived locally to avoid extra imports). */</td>
+<td>web/src/map-editor/components/EditorCanvas.tsx:417-422</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: Editor placement palette and tool selection</td>
+<td>Hex-type -&gt; swatch fill CSS variable, matching the canvas/board theme tokens. */</td>
+<td>web/src/map-editor/components/EditorPalette.tsx:93-346</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Source Linkage: Per-tool usage hint</td>
+<td>/** Short usage hint per tool. */</td>
+<td>web/src/map-editor/components/EditorPalette.tsx:349-366</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Source Linkage: Player-count list equality check</td>
+<td>/** True when both player-count lists contain the same values in order. */</td>
+<td>web/src/map-editor/components/EditorPalette.tsx:369-374</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Source Linkage: Editor data-layer public surface (barrel)</td>
+<td>Public surface of the custom-map editor data layer (schema, validation, preview). */</td>
+<td>web/src/map-editor/index.ts</td>
+<td style="text-align:right">0.16</td>
+</tr>
+</tbody>
+</table>
+<h2>Unverified Areas</h2>
+<p>Parts of this document have limited verifiable source evidence — treat normative claims as unverified until confirmed. See <a href="../documentation-conventions.html#unverified-areas">documentation conventions</a>.</p>
+<p>Related scopes: <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a>, <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="63.3"/>
+        </svg>
+        <div class="ring-num">0.72</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

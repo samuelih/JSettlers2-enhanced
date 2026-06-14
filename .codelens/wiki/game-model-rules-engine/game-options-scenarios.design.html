@@ -1,0 +1,298 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Game Options &amp; Scenarios · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../game-model-rules-engine/game-model-rules-engine.arch.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../game-model-rules-engine/cities-knights-scenario-sc-ck.design.html"><span class="nm">Cities &amp; Knights Scenario (SC_CK)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/core-game-state-board-model.design.html"><span class="nm">Core Game State &amp; Board Model</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/custom-map-loading-validation.design.html"><span class="nm">Custom Map Loading &amp; Validation</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.api-boundary.html"><span class="nm">Game Model &amp; Rules Engine API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../game-model-rules-engine/game-options-scenarios.design.html"><span class="nm">Game Options &amp; Scenarios</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.gateway.html"><span class="nm">Game Model &amp; Rules Engine Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.testplan.html"><span class="nm">Game Model &amp; Rules Engine Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Game Model &amp; Rules Engine</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:70%"></i></span>
+      <span class="conf-val">0.70</span></span></div>
+        <h1 class="doc-title">Game Options &amp; Scenarios</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Game Options &amp; Scenarios</h1>
+<h2>Overview</h2>
+<p>Game rules, house rules, and scenarios are expressed as data rather than branching code: SOCGameOptionSet.getAllKnownOptions() builds the authoritative catalog of SOCGameOption objects, and SOCScenario.initAllScenarios() builds the catalog of scenarios, each carrying a scOpts string (e.g. “_SC_PIRI=t,SBL=t,VP=t10,_SC_0RVP=t”) that decomposes into option key/value pairs. Repository evidence: <code>src/main/java/soc/game/SOCVersionedItem.java</code>. At game creation the chosen scenario’s scOpts are parsed into a SOCGameOption set, then adjustOptionsToKnown normalizes them against Known Options — applying server pre-adjustment, dropping unset options flagged FLAG_DROP_IF_UNUSED/FLAG_DROP_IF_PARENT_UNUSED, and packing the surviving set to a wire string. In-game code never branches on a scenario’s name; it queries the resulting option keys, keeping scenarios purely a bundle of options over the shared board model.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCGameOption</strong></li>
+<li><strong>SOCGameOptionSet</strong></li>
+<li><strong>SOCScenario</strong></li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>SOCScenario</strong> (bidirectional) — via scOpts strings reference SOCGameOption keys (e.g. <em>SC_PIRI=t,SBL=t,VP=t10); SOCGameOptionSet defines K_SC</em>* keys cross-linked in SOCScenario javadoc (evidence: src/main/java/soc/game/SOCScenario.java initAllScenarios scOpts; SOCGameOptionSet.java K_SC_PIRI/K_SC_WOND constants)</li>
+<li><strong>SOCVersionedItem</strong> (outbound) — via class extension: SOCGameOption and SOCScenario both extend SOCVersionedItem for minVersion/lastModVersion/isKnown and isAlphanumericUpcaseAscii (evidence: src/main/java/soc/game/SOCGameOption.java class decl; src/main/java/soc/game/SOCScenario.java class decl)</li>
+<li><strong>SOCFeatureSet</strong> (outbound) — via import soc.util.SOCFeatureSet; options gate on client features (CLIENT_SEA_BOARD auto-set for <em>SC</em> options) and adjustOptionsToKnown takes a SOCFeatureSet (evidence: src/main/java/soc/game/SOCGameOption.java imports soc.util.SOCFeatureSet; SOCGameOptionSet.optionsNotSupported(SOCFeatureSet))</li>
+<li><strong>SOCMessage</strong> (outbound) — via import soc.message.SOCMessage; isSingleLineAndSafe value validation and packing options to wire strings for network negotiation (evidence: src/main/java/soc/game/SOCGameOption.java imports soc.message.SOCMessage; SOCScenario.java imports soc.message.SOCMessage)</li>
+<li><strong>SOCServer</strong> (inbound) — via import soc.server.SOCServer (javadocs); server startup activates inactive options and is authoritative for known-option negotiation (evidence: src/main/java/soc/game/SOCGameOptionSet.java imports soc.server.SOCServer and soc.server.savegame.SavedGameModel for javadocs)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Represent rules/scenarios as a convention-driven data registry keyed by short name strings, not as code branches</strong>: getAllKnownOptions() and initAllScenarios() centralize every rule toggle as a SOCGameOption/SOCScenario object queried by key. The class javadoc states all in-game code uses key strings to query and change settings, and that within SOCGame game-behavior changes are based only on the SOCGameOptions implementing a scenario, never on the scenario name. This makes options/scenarios the system’s central extensibility point: a new rule is a new catalog entry plus key, not edits scattered across game logic.</li>
+<li><strong>Encode option semantics in the keyname itself (<em>SC</em> scenario flags, leading-underscore internal, _3 third-party, <em>EXT</em> reserved)</strong>: Names starting with <em>SC</em> auto-receive CLIENT_SEA_BOARD client feature in the constructor; leading-underscore names mark server-set internal options hidden from the New Game UI; ‘3’ as the second char is reserved for third-party opts to avoid collision with built-ins; _EXT_BOT/_EXT_CLI/_EXT_GAM are pre-reserved passthrough channels. Encoding intent in the key lets the constructor and sync machinery infer behavior without a separate metadata table.</li>
+<li><strong>Extend a shared SOCVersionedItem base for both options and scenarios to drive client/server version negotiation</strong>: Both carry minVersion/lastModVersion so the authoritative server can withhold, downgrade, or trim items a client is too old to understand. The class javadoc establishes the server-authoritative rule: if the client is newer it defers to the server’s older known set. Sharing the base means options and scenarios negotiate identically (VERSION_FOR_SCENARIOS mirrors the option flow), avoiding two parallel negotiation protocols.</li>
+<li><strong>Use an optFlags bitfield with graduated drop/visibility/compat semantics instead of boolean fields</strong>: Flags like FLAG_DROP_IF_UNUSED (omit default-valued opts from the wire to cut overhead), FLAG_INACTIVE_HIDDEN/FLAG_ACTIVATED (hide developer options until server startup activation), FLAG_3RD_PARTY (forward/backward compat for fork-defined opts), and FLAG_OPPORTUNISTIC (set for new-enough clients but gracefully removed rather than blocking older clients) express orthogonal lifecycle concerns compactly and let new compat strategies be added as new bits without widening the class.</li>
+<li><em><em>Ship Cities &amp; Knights as inactive-hidden <em>CK</em></em> option groundwork plus a disabled _SC_CK scenario stub</em>*: The _CK_KNI/_CK_IMP/_CK_PROG/_CK_BARB/_CK_METR options are registered with FLAG_INACTIVE_HIDDEN | FLAG_DROP_IF_UNUSED and the SC_CK scenario references them, so the scenario cannot be selected in normal play until activated at server startup. This reserves the keyname space and lands the negotiation/groundwork incrementally without exposing an unfinished feature, per doc/Cities-and-Knights-Design.md.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> Option and scenario name keys MUST start with a letter and contain only ASCII uppercase letters and digits (underscore also allowed for options/scenarios per version), enforced in constructors. — src/main/java/soc/game/SOCGameOption.java class javadoc: enforced via SOCVersionedItem.isAlphanumericUpcaseAscii(String); SOCScenario.java constructor calls SOCGameOption.isAlphanumericUpcaseAscii</li>
+<li><strong>[HARD]</strong> Option string values and enum choices MUST NOT contain unsafe characters or span more than one line; checked in constructors and setters. — src/main/java/soc/game/SOCGameOption.java class javadoc: calls SOCMessage.isSingleLineAndSafe(String) within constructors and setters</li>
+<li><strong>[HARD]</strong> An option carrying FLAG_OPPORTUNISTIC MUST also carry FLAG_DROP_IF_UNUSED or FLAG_DROP_IF_PARENT_UNUSED so the server can gracefully remove it for older clients at game start. — src/main/java/soc/game/SOCGameOption.java FLAG_OPPORTUNISTIC javadoc: “this option must also have FLAG_DROP_IF_UNUSED or FLAG_DROP_IF_PARENT_UNUSED”</li>
+<li><strong>[SOFT]</strong> Third-party game options SHOULD use ‘3’ as the second character of their name key to avoid collision with built-in options. — src/main/java/soc/game/SOCGameOption.java FLAG_3RD_PARTY javadoc: “The game option name key should use ‘3’ as the second character”</li>
+<li><strong>[SOFT]</strong> A scenario’s declared minVersion SHOULD be &gt;= the minimum versions of any options it names in scOpts; this is not validated at runtime. — src/main/java/soc/game/SOCScenario.java initAllScenarios javadoc: “be sure the scenario’s declared minimum version is &gt;= those options’ minimum versions; this won’t be validated at runtime”</li>
+<li><strong>[HARD]</strong> A scenario’s name key and minVersion MUST NOT change once shipped; only description, long description, and scOpts may change (with lastModVersion bumped). — src/main/java/soc/game/SOCScenario.java initAllScenarios javadoc: lists key and minVersion under “Things you can’t change about a scenario, because inconsistencies would occur”</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>performance</strong> — Options whose value equals their default and carry FLAG_DROP_IF_UNUSED are dropped from game options and not sent over the network, to reduce per-game overhead and message size. — src/main/java/soc/game/SOCGameOption.java FLAG_DROP_IF_UNUSED javadoc; removal in SOCGameOptionSet.adjustOptionsToKnown</li>
+<li><strong>reliability</strong> — Client/server version mismatches are reconciled rather than failed: newer items are withheld or sent as unknown, enum/int ranges trimmed to the client’s max, and feature-unsupported options dropped, so a newer client can still join an older server’s games. — src/main/java/soc/game/SOCGameOptionSet.java: optionsNewerThanVersion, optionsForVersion, optionsTrimmedForSupport, optionsNotSupported</li>
+<li><strong>security</strong> — Option values entering from the wire must pass single-line/safe-character validation before acceptance, preventing malformed or multi-line values from corrupting network message framing. — src/main/java/soc/game/SOCGameOption.java class javadoc: SOCMessage.isSingleLineAndSafe(String) checked in constructors and setters</li>
+</ul>
+<h2>Examples</h2>
+<p><em>A scenario is defined declaratively: its scOpts string is the bundle of SOCGameOption key/value pairs that implement its rules, not custom game-logic code.</em>
+<em>Source: <code>src/main/java/soc/game/SOCScenario.java:initAllScenarios</code></em></p>
+<pre><code>allSc.put(K_SC_PIRI, new SOCScenario
+    (K_SC_PIRI, 2000, 2000,
+     &quot;Pirate Islands and Fortresses&quot;,
+     &quot;A pirate fleet patrols...&quot;,
+     &quot;_SC_PIRI=t,SBL=t,VP=t10,_SC_0RVP=t&quot;));
+</code></pre>
+<p><em>Compat lifecycle is expressed as an orthogonal optFlags bit, so new negotiation strategies are added without widening the option class.</em>
+<em>Source: <code>src/main/java/soc/game/SOCGameOption.java</code></em></p>
+<pre><code>public static final int FLAG_OPPORTUNISTIC = 0x80;
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCGameOption {
+        -SOCGameOption()
+        +public static SOCGameOption copyDefaults(SOCGameOption opt)
+        -private void copyMiscFields(final SOCGameOption copyFrom)
+        +public boolean hasValue()
+        +public boolean isSet()
+        +public boolean getBoolValue()
+        +public void setBoolValue(boolean v)
+        +public int getIntValue()
+        +public void setIntValue(int v)
+        +public String getStringValue()
+        +setStringValue()
+        +public String getClientFeature()
+        +public void setClientFeature(final String clientFeat)
+        +getMinVersion()
+        +getMaxEnumValueForVersion()
+        +getMaxIntValueForVersion()
+        +packKnownOptionsToString()
+        +packOptionsToString()
+        +public void packValue(StringBuilder sb)
+        +parseOptionsToMap()
+        +parseOptionsToSet()
+        +parseOptionNameValue()
+        +trimEnumForVersion()
+        +public SOCGameOption forClientVersion(final int clientVers)
+        +getGroupParentKey()
+        +public static String optionTypeName(final int optType)
+        +getAndClearRefreshList()
+        +public void refreshDisplay()
+        +public final boolean hasFlag(final int flagMask)
+        +public void addChangeListener(ChangeListener cl)
+        +public boolean hasChangeListener()
+        +public ChangeListener getChangeListener()
+        +public String toString()
+        +public final StringBuilder getPackedValue()
+        +public int compareTo(Object other)
+        +public boolean equals(final Object other)
+        -clone()
+    }
+    class SOCGameOptionSet {
+        +SOCGameOptionSet()
+        +public static SOCGameOptionSet getAllKnownOptions()
+        +public int size()
+        +public boolean isEmpty()
+        +contains()
+        +public boolean containsKey(final String optKey)
+        +public boolean add(final SOCGameOption opt)
+        +public SOCGameOption put(final SOCGameOption opt)
+        +public SOCGameOption get(final String optKey)
+        +public Map<String, SOCGameOption> getAll()
+        +public Collection<SOCGameOption> values()
+        +public Set<String> keySet()
+        +public Iterator<SOCGameOption> iterator()
+        +public SOCGameOption remove(final String optKey)
+        +public void clear()
+        +public boolean isOptionSet(final String optKey)
+        +setBoolOption()
+        +setIntOption()
+        +getOptionIntValue()
+        +public String getOptionStringValue(final String optKey)
+        +getKnownOption()
+        +public boolean addKnownOption(final SOCGameOption onew)
+        +activate()
+        +setKnownOptionCurrentValue()
+        +optionsNewerThanVersion()
+        +optionsForVersion()
+        -implOptionsVersionCheck()
+        +adjustOptionsToKnown()
+        +removeOpportunisticIfOlderClients()
+        +optionsNotSupported()
+        +optionsTrimmedForSupport()
+        +optionsWithFlag()
+        +@Override
+    public String toString()
+    }
+    class SOCScenario {
+        -private static Map<String, SOCScenario> initAllScenarios()
+        -findAllScenariosGreatestMinVersion()
+        -SOCScenario()
+        +getAllKnownScenarios()
+        +public static Set<String> getAllKnownScenarioKeynames()
+        +public static boolean addKnownScenario(SOCScenario scNew)
+        +removeUnknownScenario()
+        +registerCustomScenario()
+        +cloneScenarios()
+        +public static SOCScenario getScenario(String key)
+        +public static String packKnownScenariosToString()
+        +packScenariosToString()
+        +parseScenariosToMap()
+        +adjustScenariosToKnown()
+        +addScenario()
+        +public String getLongDesc()
+        +setDesc()
+        +@Override
+    public String toString()
+        +public int compareTo(Object other)
+        +@Override
+    public boolean equals(final Object other)
+        +@Override
+    public int hashCode()
+    }
+    class RemoveOpportunisticResults {
+        +RemoveOpportunisticResults()
+    }
+    class ChangeListener {
+        <<interface>>
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_game_SOCGameOption_java["SOCGameOption.java"]
+    src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]
+    src_main_java_soc_game_SOCScenario_java["SOCScenario.java"]
+
+
+    ext_src_main_java_soc_util_DataUtils_java["DataUtils.java"]:::default
+    src_main_java_soc_game_SOCGameOptionSet_java -.->|"imports"| ext_src_main_java_soc_util_DataUtils_java
+    ext_src_main_java_soc_util_SOCFeatureSet_java["SOCFeatureSet.java"]:::default
+    src_main_java_soc_game_SOCGameOption_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    src_main_java_soc_game_SOCGameOptionSet_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    ext_src_main_java_soc_util_Version_java["Version.java"]:::default
+    src_main_java_soc_game_SOCGameOption_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+    src_main_java_soc_game_SOCGameOptionSet_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Known Options registry and rule driver</code></li>
+<li><code class="code-ref" title="source file in your repository">Per-game and Known-Option model</code></li>
+<li><code class="code-ref" title="source file in your repository">Scenario definitions on the large sea board</code></li>
+<li><code class="code-ref" title="source file in your repository">Versioned-item base for options and scenarios</code></li>
+<li>optFlags compat/visibility bitfield vocabulary</li>
+<li>Cities &amp; Knights inactive-hidden groundwork keys</li>
+<li><code class="code-ref" title="source file in your repository">Scenario-to-option expansion via scOpts</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">game-options-scenarios.feature.md</span>
+Scope architecture: <a href="game-model-rules-engine.arch.html">game-model-rules-engine.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Known Options registry and rule driver</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGameOptionSet.java:546-910</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Per-game and Known-Option model</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGameOption.java:976-985</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Scenario definitions on the large sea board</td>
+<td></td>
+<td>src/main/java/soc/game/SOCScenario.java:545-575</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Scenario-to-option expansion via scOpts</td>
+<td></td>
+<td>src/main/java/soc/game/SOCScenario.java:184-295</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="67.9"/>
+        </svg>
+        <div class="ring-num">0.70</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

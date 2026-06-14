@@ -39,11 +39,14 @@
 .inline {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-3);
 }
 
 .select {
+  width: 100%;
   padding: var(--space-2) var(--space-3);
+  min-height: max(2.75rem, 44px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -68,19 +71,27 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: max(2.75rem, 44px);
   cursor: pointer;
 }
 .toggle input {
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
   accent-color: var(--color-accent);
   cursor: pointer;
 }
 
 .slider {
   flex: 1;
+  min-width: 10rem;
+  min-height: max(2.75rem, 44px);
   accent-color: var(--color-accent);
   cursor: pointer;
+}
+.slider:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-pill);
 }
 .slider:disabled {
   opacity: 0.5;
@@ -98,4 +109,8 @@
 .footerActions {
   display: flex;
   justify-content: flex-end;
+}
+
+.footerActions button {
+  min-height: max(2.75rem, 44px);
 }

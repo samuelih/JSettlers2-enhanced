@@ -1,0 +1,129 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Source Doc Redocumentation: Sammys-Settlers Improvements — June 2026 · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Source Document Redocumenta…</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:75%"></i></span>
+      <span class="conf-val">0.75</span></span></div>
+        <h1 class="doc-title">Source Doc Redocumentation: Sammys-Settlers Improvements — June 2026</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Source Doc Redocumentation: Sammys-Settlers Improvements — June 2026</h1>
+<h2>Overview</h2>
+<p>This deterministic SGD record represents one source markdown document discovered during Stage 0. It preserves the source path, section map, and bounded digest so the generated corpus can prove that the input document was seen and carried forward. It is not a ratified replacement for the source file; unresolved claims remain obligations for deeper synthesis or human review.</p>
+<h2>Source Document</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">doc/Improvements-2026-06.md</code></li>
+</ul>
+<h2>Section Inventory</h2>
+<ul>
+<li>H1 Sammys-Settlers Improvements — June 2026</li>
+<li>H2 1. Overview</li>
+<li>H2 2. Workstreams</li>
+<li>H3 2.1 Graphics &amp; themes</li>
+<li>H3 2.2 Playability &amp; UX</li>
+<li>H3 2.3 Custom maps</li>
+<li>H3 2.4 Cities &amp; Knights groundwork</li>
+<li>H3 2.5 Robot robustness</li>
+<li>H3 2.6 Build/test fixes</li>
+<li>H2 3. Verification</li>
+<li>H2 4. Honest limitations &amp; roadmap</li>
+<li>H2 5. Cross-references</li>
+<li>H2 6. Web client migration (TypeScript/React over WebSocket)</li>
+<li>H3 6.1 The seven phases</li>
+<li>H3 6.2 Architecture (verifiable)</li>
+<li>H3 6.3 What works and is Playwright-proven</li>
+<li>H3 6.4 Honest limitations / not yet at parity with the Swing client</li>
+</ul>
+<h2>Content Digest</h2>
+<pre><code># Sammys-Settlers Improvements — June 2026
+
+This is the single summary of an improvement initiative carried out on top of the
+`2.7.00`-in-development line. It is the place to read first if you want to understand
+everything that changed and why. Every claim here is verifiable in the repository;
+where something is groundwork, a limitation, or deliberately deferred, this document
+says so plainly rather than overselling it.
+
+Baseline for &quot;what changed&quot; is commit `aa68826` (&quot;Baseline: Sammys-Settlers as downloaded,
+before improvement work&quot;). All work landed in four commits on `main`, built and tested
+in waves behind green gates, plus one post-review fix commit:
+
+| Commit    | Title |
+| --------- | ----- |
+| `f3d3c91` | Add preferences dialog/registry, custom map loading, and C&amp;K design docs |
+| `6e8e54c` | Add board rendering quality prefs, themes, color-blind mode, hotkeys, C&amp;K groundwork |
+| `48c4989` | Add left-click build flow on board, robot fallback for unknown inventory items |
+| `989675a` | Fix issues found in post-implementation code review |
+
+(The earlier commit `2e0fc1d` &quot;Fix TestI18NGameoptScenStrings failure when project path
+contains spaces&quot; predates this initiative's baseline and is not part of it.)
+
+
+## 1. Overview
+
+| Workstream | What shipped | Key files | Commits |
+| ---------- | ------------ | --------- | ------- |
+| Graphics &amp; themes | Board rendering-quality preferences (antialiasing, image-scaling interpolation) actually consumed by the board; dice-number circle image caching; per-graphics-set externalized `theme.properties`; color-blind assist mode for the solid-color UI | `src/main/java/soc/client/SOCBoardPanel.java`, `src/main/java/soc/client/ColorSquare.java`, `src/main/resources/resources/hexes/pastel/theme.properties`, `src/main/resources/resources/hexes/classic/theme.properties` | `6e8e54c`, `989675a` |
+
+[...digest truncated by CodeLens...]
+</code></pre>
+<h2>Redocumentation Obligations</h2>
+<ul>
+<li>Preserve this source document’s claims in a generated feature, design, architecture, gateway, testplan, or invariant record before treating the corpus as a full semantic replacement for the original docs tree.</li>
+<li>Reconcile any conflict between this digest and direct source-code evidence through the source-truth audit, not by repeating doc-only claims as implemented behavior.</li>
+</ul>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">doc/Improvements-2026-06.md</code></li>
+</ul>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="56.5"/>
+        </svg>
+        <div class="ring-num">0.75</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -1,0 +1,867 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Core Game State &amp; Board Model · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../game-model-rules-engine/game-model-rules-engine.arch.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../game-model-rules-engine/cities-knights-scenario-sc-ck.design.html"><span class="nm">Cities &amp; Knights Scenario (SC_CK)</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../game-model-rules-engine/core-game-state-board-model.design.html"><span class="nm">Core Game State &amp; Board Model</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/custom-map-loading-validation.design.html"><span class="nm">Custom Map Loading &amp; Validation</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.api-boundary.html"><span class="nm">Game Model &amp; Rules Engine API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/game-options-scenarios.design.html"><span class="nm">Game Options &amp; Scenarios</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.gateway.html"><span class="nm">Game Model &amp; Rules Engine Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.testplan.html"><span class="nm">Game Model &amp; Rules Engine Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Game Model &amp; Rules Engine</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:50%"></i></span>
+      <span class="conf-val">0.50</span></span></div>
+        <h1 class="doc-title">Core Game State &amp; Board Model</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Core Game State &amp; Board Model</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Robot/AI subsystem is first-class, not bolted on</strong> — SOCPlayer’s ‘legal’ vs ‘potential’ road/settlement/city vocabulary is defined by reference to ‘page 61 of Robert S Thomas’ dissertation’ — the model carries the original AI-agent dissertation’s abstractions because the codebase originated as that dissertation, so the game model is shaped to feed a planning bot, not only to render a UI.</li>
+<li><strong>Network-frozen coordinate encoding constrained the model’s evolution</strong> — The classic board’s two-hex-digit coordinate format is acknowledged in-code as un-expandable because it ‘is used across the network’; the sea board therefore arrived as a new v3 encoding (added in v2.0.00) rather than a revision of v1/v2 — a superseded-design genealogy that explains why two coordinate systems coexist.</li>
+</ul>
+<h2>Overview</h2>
+<p>This feature is the model layer of the client/server game. SOCGame is the single authoritative holder of complete game state at the server; game logic advances there, and the server pushes deltas to clients (via SOCGameState, SOCSetPlayedDevCard, and similar messages) so each client’s local SOCGame carries only partial state — other players’ resources or dev cards may be of unknown type. A SOCGame owns one SOCBoard (constructed through SOCBoard.BoardFactory.createBoard and initialized in makeNewBoard(SOCGameOptionSet)) and an array of SOCPlayer objects, each scoped to that game. The board is purely geometric/topological: it resolves coordinates to adjacent hexes, nodes, and edges but never mutates game state, while SOCGame and SOCPlayer enforce the rules on top of it. Turn flow is driven by the integer game-state machine inside SOCGame, advanced by putPiece, advanceTurn, updateAtTurn, and endTurn.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCGame</strong></li>
+<li><strong>SOCPlayer</strong></li>
+<li><strong>SOCBoard</strong></li>
+<li><strong>SOCBoardLarge</strong></li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>soc.util (DataUtils, IntPair, SOCFeatureSet, SOCGameBoardReset)</strong> (outbound) — via import in SOCGame.java (evidence: src/main/java/soc/game/SOCGame.java imports soc.util.DataUtils, soc.util.IntPair, soc.util.SOCFeatureSet, soc.util.SOCGameBoardReset)</li>
+<li><strong>soc.server.SOCBoardAtServer</strong> (outbound) — via import for server-only methods such as distributeClothFromRoll (evidence: src/main/java/soc/game/SOCGame.java: <code>import soc.server.SOCBoardAtServer;  // For calling server-only methods</code>)</li>
+<li><strong>soc.message.SOCMessage</strong> (outbound) — via import for static calls only (SOCGame does not handle network messages) (evidence: src/main/java/soc/game/SOCGame.java: <code>import soc.message.SOCMessage;  // For static calls only</code>)</li>
+<li><strong>soc.util.NodeLenVis</strong> (outbound) — via import in SOCPlayer.java for longest-road tracing state (evidence: src/main/java/soc/game/SOCPlayer.java imports soc.util.NodeLenVis)</li>
+<li><strong>soc.server.savegame.SavedGameModel</strong> (outbound) — via import (javadoc reference) for save/load persistence of game and player data (evidence: src/main/java/soc/game/SOCPlayer.java: <code>import soc.server.savegame.SavedGameModel;  // for javadocs only</code>)</li>
+<li><strong>soc.client.SOCPlayerInterface / SOCBoardPanel</strong> (inbound) — via client UI switches on SOCGame state constants (updateAtGameState, updateMode) (evidence: src/main/java/soc/game/SOCGame.java::NEW (javadoc ‘main places to check’ list))</li>
+<li><strong>soc.robot.SOCRobotBrain</strong> (inbound) — via bot decision loop reacts to SOCGame state in run() (evidence: src/main/java/soc/game/SOCGame.java::NEW (javadoc lists SOCRobotBrain.run()))</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Server holds complete state; clients hold partial state</strong>: SOCGame’s javadoc fixes the model: ‘The SOCGame at server contains the game’s complete state information, and game logic advances there’ while each client’s local SOCGame contains only partial state. This keeps the server authoritative over hidden information (opponent resources/dev-card types) and reduces the client to a view updated by messages, rather than trusting clients with rules enforcement.</li>
+<li><strong>Board holds no back-reference to game or players</strong>: SOCBoard’s javadoc states the board ‘does not hold a reference to the game or players, to enforce layering and keep the board logic simple. Game rules should be enforced at the game, not the board.’ This one-directional dependency (game → board) keeps coordinate geometry reusable and side-effect-free; calling board methods cannot change game state.</li>
+<li><strong>Explicit monitor instead of implicit thread-safety</strong>: Most SOCGame methods are documented as not implicitly thread-safe; callers must wrap them in takeMonitor()/releaseMonitor(). Pushing locking to the caller lets multi-step game mutations be made atomic as a unit rather than paying per-method synchronization that still wouldn’t compose across a multi-method action.</li>
+<li><strong>Separate subclass (SOCBoardLarge) for the sea board rather than parameterizing SOCBoard</strong>: The classic v1/v2 encodings hardcode land/water/port positions inside two-hex-digit coordinates, which ‘means the board can’t be expanded without changing its encoding, which is used across the network.’ Rather than retrofit, the v3 large encoding was added as a subclass with its own 2-D hexLayoutLg, up to 127×127 hexes and runtime-variable land/water — isolating the differing coordinate system from the legacy fixed layout.</li>
+<li><strong>Game options drive board construction</strong>: makeNewBoard takes a SOCGameOptionSet, so house rules and scenarios (keys like ‘SBL’, ‘_BHW’, and ‘<em>SC</em>*’) select board size, encoding, and scenario features at construction time instead of via separate board classes per ruleset — the same extensibility mechanism used across the codebase.</li>
+<li><strong>Game state modeled as documented integer constants with explicit ‘where-used’ checklists</strong>: Game phases are dense integer constants (NEW=0…OVER) whose javadoc enumerates every site that must switch on state when a new state is added (SOCBoardPanel.updateMode, SOCRobotBrain.run, SOCGameHandler.sendGameState, etc.). The trade-off accepts maintenance discipline (a manually-curated list) in exchange for a compact, serializable, network-cheap representation shared by client, server, and bots.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> STARTS_WAITING_FOR_PICK_GOLD_RESOURCE MUST equal ROLL_OR_CARD - 1, so it remains the highest-numbered starting state. — src/main/java/soc/game/SOCGame.java: <code>public static final int STARTS_WAITING_FOR_PICK_GOLD_RESOURCE = 14;  // value must be 1 less than ROLL_OR_CARD</code></li>
+<li><strong>[HARD]</strong> MISC_PORT MUST be 0 and equal WATER_HEX; the CLAY_PORT…WOOD_PORT range MUST be 1…5 and CLAY_HEX MUST equal CLAY_PORT — these numeric identities are hardcoded in board-drawing code. — src/main/java/soc/game/SOCBoard.java::MISC_PORT (<code>Must be 0 (hardcoded in places here)</code>) and the MISC_PORT/WATER_HEX equivalence note</li>
+<li><strong>[SOFT]</strong> Callers MUST wrap most SOCGame mutating methods in takeMonitor()/releaseMonitor(); the methods are not implicitly thread-safe. — src/main/java/soc/game/SOCGame.java::SOCGame (class javadoc: ‘Most methods are not implicitly thread-safe’)</li>
+<li><strong>[SOFT]</strong> Callers SHOULD check a can* guard (e.g. canPlayKnight(int)) before invoking the corresponding action method (playKnight()); action methods assume validity and do not re-check. — src/main/java/soc/game/SOCGame.java::SOCGame (class javadoc: ‘Many methods assume you’ve already checked whether the move is valid’)</li>
+<li><strong>[HARD]</strong> Port-type integers MUST be contiguous with MISC_PORT first and WOOD_PORT last; port-hextype integers MUST run MISC_PORT_HEX(7) first through WOOD_PORT_HEX(12) last. — src/main/java/soc/game/SOCBoard.java::MISC_PORT / WOOD_PORT / MISC_PORT_HEX / WOOD_PORT_HEX (<code>Must be first/last port-type integer</code>)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — Multi-step game mutations are guarded by an explicit caller-held monitor (takeMonitor/releaseMonitor) rather than per-method synchronization, so a composite action stays atomic against concurrent access. — src/main/java/soc/game/SOCGame.java::takeMonitor / releaseMonitor</li>
+<li><strong>reliability</strong> — Games are created with a 120-minute expiration (GAME_TIME_EXPIRE_MINUTES) and expose getExpiration/setExpiration/hasWarnedExpiration so the server can reclaim abandoned games. — src/main/java/soc/game/SOCGame.java::SOCGame (class javadoc) / getExpiration</li>
+<li><strong>security</strong> — Hidden information (opponent resource/dev-card types) is withheld from clients: the authoritative complete state exists only at the server and clients receive partial state via messages. — src/main/java/soc/game/SOCGame.java::isAtServer (class javadoc)</li>
+<li><strong>compatibility</strong> — SOCGame persistence is version-tracked via serialVersionUID (2700L, last structural change v2.7.00); cross-version persistence is delegated to SavedGameModel rather than raw serialization. — src/main/java/soc/game/SOCGame.java::serialVersionUID</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Shows that game-state constant values encode an ordering invariant, not arbitrary labels.</em>
+<em>Source: <code>src/main/java/soc/game/SOCGame.java</code></em></p>
+<pre><code>public static final int STARTS_WAITING_FOR_PICK_GOLD_RESOURCE = 14;  // value must be 1 less than ROLL_OR_CARD
+</code></pre>
+<p><em>Documents the one-directional game→board dependency that keeps board geometry rule-free.</em>
+<em>Source: <code>src/main/java/soc/game/SOCBoard.java</code></em></p>
+<pre><code>A {@link SOCGame} uses this board; the board does not hold a reference to the game or players, to enforce layering
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCGame {
+        +SOCGame()
+        +public synchronized void takeMonitor()
+        +public synchronized void releaseMonitor()
+        +public final boolean[] getFlagFieldsForSave()
+        +setFieldsForLoad()
+        +public boolean allOriginalPlayers()
+        +public boolean hasHumanPlayers()
+        +public Date getStartTime()
+        +public int getDurationSeconds()
+        +setTimeSinceCreated()
+        +setDurationSecondsFinished()
+        +public long getExpiration()
+        +public boolean hasWarnedExpiration()
+        +public void setWarnedExpiration()
+        +setGameEventListener()
+        +public boolean hasGameEventListener()
+        +public void setExpiration(final long ex)
+        +public String getOwner()
+        +setOwner()
+        +public final String getOwnerLocale()
+        +addPlayer()
+        +removePlayer()
+        +public boolean isSeatVacant(final int pn)
+        +public int getAvailableSeatCount()
+        +public SeatLockState getSeatLock(final int pn)
+        +public SeatLockState[] getSeatLocks()
+        +setSeatLock()
+        +setSeatLocks()
+        +public int getPlayerCount()
+        +public SOCPlayer getPlayer(final String nn)
+        +public boolean isMemberChatAllowed(final String memberName)
+        +setMemberChatAllowed()
+        +public Set<String> getMemberChatAllowList()
+        +public boolean isCurrentPlayerStubbornRobot()
+        +public String getName()
+        +setName()
+        +public SOCGameOptionSet getGameOptions()
+        +public boolean isGameOptionDefined(final String optKey)
+        +public boolean isGameOptionSet(final String optKey)
+        +getGameOptionIntValue()
+        +public String getGameOptionStringValue(final String optKey)
+        +public int getClientVersionMinRequired()
+        +public int getClientVersionMinSitDown()
+        +public SOCFeatureSet getClientFeaturesRequired()
+        +public void setClientFeaturesRequired(SOCFeatureSet feats)
+        +public boolean canClientJoin(final SOCFeatureSet cliFeats)
+        +checkClientFeatures()
+        +public boolean isBoardReset()
+        +public SOCBoard getBoard()
+        +public SOCPlayer[] getPlayers()
+        -protected void setPlayer(final int pn, SOCPlayer pl)
+        +public int getCurrentPlayerNumber()
+        +public void setCurrentPlayerNumber(final int pn)
+        +public int getSpecialBuildingPlayerNumberAfter()
+        +setSpecialBuildingPlayerNumberAfter()
+        +public int getRoundCount()
+        +public void setRoundCount(final int count)
+        +public boolean hasBuiltCity()
+        +public void setHasBuiltCity(final boolean hasBuilt)
+        +public int getCurrentDice()
+        +public void setCurrentDice(final int dr)
+        +public boolean hasRolledSeven()
+        +public int getBarbarianStrength()
+        +public void setBarbarianStrength(final int strength)
+        +public int advanceBarbarianStrength()
+        +public void ckResolveBarbarianAttack(final RollResult rr)
+        +public void ckDowngradeCity(final SOCCity city)
+        +public int getCKMetropolisOwner(final int track)
+        +setCKMetropolisOwner()
+        +public int ckCheckMetropolis(final int track)
+        +ckGetImprovementLevel()
+        +public boolean canCKBuyKnight(final int pn)
+        +public void ckBuyKnight(final int pn)
+        +public boolean canCKActivateKnight(final int pn)
+        +public void ckActivateKnight(final int pn)
+        +public boolean canCKPromoteKnight(final int pn)
+        +public void ckPromoteKnight(final int pn)
+        -private void ckInitProgressDecks()
+        +ckDrawProgressCard()
+        -private void ckReturnProgressCard(final int itype)
+        +canCKPlayProgressCard()
+        +ckPlayProgressCard()
+        -ckGainPerAdjacentHex()
+        -private int ckPickRandomResource(final SOCResourceSet rs)
+        +public int getCKMonopolyCardInPlay()
+        +public CKCardEffect getCKLastCardEffect()
+        +public int[] ckDoMonopolyAction(final int ptype)
+        +ckGetCommoditiesGainedFromRoll()
+        -ckGetCommoditiesGainedFromRollNumber()
+        -ckDrawProgressCardsFromRoll()
+        +public int getGameState()
+        +public void setGameState(final int gs)
+        -private void setGameStateOVER()
+        +getResetOldGameState()
+        +public int getOldGameState()
+        +public final boolean isInitialPlacement()
+        +isInitialPlacementRoundDone()
+        +public boolean isForcingEndTurn()
+        +isPickResourceIncludingPirateFleet()
+        +public int getNumDevCards()
+        +public void setNumDevCards(final int nd)
+        +public int[] getDevCardDeck()
+        +shuffleDevCardDeck()
+        +public Set<String> getSpecialItemTypes()
+        +getSpecialItems()
+        +getSpecialItem()
+        +setSpecialItem()
+        +public SOCInventoryItem getPlacingItem()
+        +public void setPlacingItem(SOCInventoryItem item)
+        +public SOCPlayer getPlayerWithLargestArmy()
+        +public void setPlayerWithLargestArmy(SOCPlayer pl)
+        +public SOCPlayer getPlayerWithLongestRoad()
+        +public void setPlayerWithLongestRoad(SOCPlayer pl)
+        +public SOCPlayer getPlayerWithWin()
+        +setPlayersLandHexCoordinates()
+        +gameOverMessageToPlayer()
+        -protected boolean advanceTurnBackwards()
+        -protected boolean advanceTurn()
+        -private boolean advanceTurnToSpecialBuilding()
+        +revealFogHiddenHex()
+        +canRemovePort()
+        +removePort()
+        +canPlacePort()
+        +placePort()
+        +canPlaceShip()
+        +public List<Integer> getShipsPlacedThisTurn()
+        +public void addShipPlacedThisTurn(final int edge)
+        +public void putPiece(SOCPlayingPiece pp)
+        -putPieceCommon()
+        -putPieceCommon_checkFogHexes()
+        -private boolean advanceTurnStateAfterPutPiece()
+        +public void putTempPiece(SOCPlayingPiece pp)
+        +canMoveShip()
+        +public void moveShip(SOCShip sh, final int toEdge)
+        +canUndoMoveShip()
+        +undoMoveShip()
+        +public void removeShip(SOCShip sh)
+        +canUndoPutPiece()
+        +undoPutPiece()
+        -undoPutPieceCommon()
+        +public void undoPutTempPiece(SOCPlayingPiece pp)
+        +public void undoPutInitSettlement(SOCPlayingPiece pp)
+        -undoActionSideEffects_pre()
+        +setLastActionCannotUndo()
+        -undoActionSideEffects_post()
+        +public void initAtServer()
+        +startGame()
+        -private final void startGame_setupDevCards()
+        +public void setFirstPlayer(final int pn)
+        +public int getFirstPlayer()
+        +public boolean canEndTurn(final int pn)
+        +public void endTurn()
+        +public void updateAtBoardLayout()
+        -private void updateAtGameFirstTurn()
+        +public void updateAtTurn()
+        +forceEndTurn()
+        -forceEndTurnStartState()
+        -forceEndTurnChkDiscardOrGain()
+        +discardOrGainPickRandom()
+        +playerDiscardOrGainRandom()
+        +public boolean canRollDice(int pn)
+        +public RollResult rollDice()
+        -private final void rollDice_update7gameState()
+        +getResourcesGainedFromRoll()
+        -private int getDice2And12PairedRoll(final int roll)
+        -getResourcesGainedFromRollPieces()
+        +public boolean canDiscard(final int pn, ResourceSet rs)
+        +public void discard(final int pn, ResourceSet rs)
+        +canPickGoldHexResources()
+        +pickGoldHexResources()
+        +public boolean canChooseMovePirate()
+        +chooseMovePirate()
+        +public boolean canMoveRobber(final int pn, final int co)
+        +moveRobber()
+        +public boolean canMovePirate(final int pn, final int hco)
+        +movePirate()
+        +public boolean canChoosePlayer(final int pn)
+        +public int choosePlayerForRobbery(final int pn)
+        +public boolean canChooseRobClothOrResource(final int pn)
+        +canAttackPirateFortress()
+        +public int[] attackPirateFortress(final SOCShip adjacent)
+        +getPlayersOnHex()
+        +public List<SOCPlayer> getPlayersShipsOnHex(final int hex)
+        +public SOCFortress getFortress(final int node)
+        +public GameAction getLastAction()
+        +public void setLastAction(final GameAction act)
+        +public boolean isPlacingRobberForKnightCard()
+        +setPlacingRobberForKnightCard()
+        +public SOCMoveRobberResult getRobberyResult()
+        +public boolean getRobberyPirateFlag()
+        +public List<SOCPlayer> getPossibleVictims()
+        +stealFromPlayer()
+        -stealFromPlayerPirateFleet()
+        +public boolean hasTradeOffers()
+        +rejectTradeOffersTo()
+        +canMakeTrade()
+        +makeTrade()
+        +canUndoBankTrade()
+        +canMakeBankTrade()
+        +makeBankTrade()
+        +public boolean couldBuildRoad(final int pn)
+        +public boolean couldBuildSettlement(final int pn)
+        +public boolean couldBuildCity(final int pn)
+        +public boolean couldBuyDevCard(final int pn)
+        +public boolean couldBuildShip(final int pn)
+        +public void buyRoad(final int pn)
+        +public void buySettlement(final int pn)
+        +public void buyCity(final int pn)
+        +public void buyShip(final int pn)
+        +public boolean canCancelBuildPiece(final int buildType)
+        +public boolean doesCancelRoadBuildingReturnCard()
+        +public boolean cancelBuildRoad(final int pn)
+        +public void cancelBuildSettlement(int pn)
+        +public void cancelBuildCity(final int pn)
+        +public boolean cancelBuildShip(final int pn)
+        +cancelPlaceInventoryItem()
+        +public boolean isShipWarship(final SOCShip sh)
+        +setNextDevCard()
+        +public int buyDevCard()
+        +public boolean canPlayKnight(final int pn)
+        +public boolean canPlayRoadBuilding(final int pn)
+        +public boolean canPlayDiscovery(final int pn)
+        +public boolean canPlayMonopoly(final int pn)
+        +canPlayInventoryItem()
+        +public SOCInventoryItem playInventoryItem(final int itype)
+        +public void playKnight()
+        +public void playRoadBuilding()
+        +public void playDiscovery()
+        +public void playMonopoly()
+        +public boolean canCancelPlayCurrentDevCard()
+        +cancelPlayCurrentDevCard()
+        +public boolean canDoDiscoveryAction(ResourceSet pick)
+        +public boolean canDoMonopolyAction()
+        +public void doDiscoveryAction(SOCResourceSet pick)
+        +public int[] doMonopolyAction(final int rtype)
+        +public void updateLargestArmy()
+        +public void saveLargestArmyState()
+        +public void restoreLargestArmyState()
+        +public void updateLongestRoad(final int pn)
+        +public void checkForWinner()
+        -private final boolean checkForWinner_SC_CLVI()
+        +public void destroyGame()
+        +public SOCGame resetAsCopy()
+        +resetVoteBegin()
+        +public int getResetVoteRequester()
+        +public boolean getResetVoteActive()
+        +resetVoteRegister()
+        +public int getResetPlayerVote(final int pn)
+        +public void resetVoteClear()
+        +getResetVoteResult()
+        +public boolean canBuyOrAskSpecialBuild(final int pn)
+        +public boolean isSpecialBuilding()
+        +canAskSpecialBuild()
+        +askSpecialBuild()
+        +public boolean isDebugFreePlacement()
+        +setDebugFreePlacement()
+        +public int getTurnCount()
+        +@Override
+    public String toString()
+    }
+    class SOCPlayer {
+        +SOCPlayer()
+        +public void clearPotentialSettlements()
+        -void updateAtTurn()
+        -void updateAtOurTurn()
+        +setName()
+        +public String getName()
+        +public int getPlayerNumber()
+        +public SOCGame getGame()
+        +public boolean hasPlayedDevCard()
+        +public void setPlayedDevCard(boolean value)
+        +updateDevCardsPlayed()
+        +public List<Integer> getDevCardsPlayed()
+        +public boolean hasAskedBoardReset()
+        +public void setAskedBoardReset(boolean value)
+        +public boolean hasAskedSpecialBuild()
+        +public void setAskedSpecialBuild(boolean set)
+        +public boolean hasSpecialBuilt()
+        +public void setSpecialBuilt(boolean set)
+        +public void setNeedToDiscard(boolean value)
+        +public boolean getNeedToDiscard()
+        +public int getCountToDiscard()
+        +public void setNeedToPickGoldHexResources(final int numRes)
+        +public int getNeedToPickGoldHexResources()
+        +setRobotFlag()
+        +public boolean isRobot()
+        +public boolean isBuiltInRobot()
+        +public boolean isStubbornRobot()
+        +public void addForcedEndTurn()
+        +public void setFaceId(int id)
+        +public int getFaceId()
+        +public SOCPlayerNumbers getNumbers()
+        +public boolean hasAskedDiscardTwiceThisTurn()
+        +public void setAskedDiscardTwiceThisTurn()
+        +getNumPieces()
+        +public void setNumPieces(int ptype, int amt)
+        +public int getNumWarships()
+        +public void setNumWarships(final int count)
+        +public Vector<SOCPlayingPiece> getPieces()
+        +public Vector<SOCRoutePiece> getRoadsAndShips()
+        +public SOCRoutePiece getRoadOrShip(final int edge)
+        +public SOCShip getMostRecentShip()
+        +public Vector<SOCSettlement> getSettlements()
+        +getSettlementOrCityAtNode()
+        +public Vector<SOCCity> getCities()
+        +getSpecialItems()
+        +getSpecialItem()
+        +setSpecialItem()
+        +public SOCFortress getFortress()
+        +public int getCloth()
+        +public void setCloth(final int numCloth)
+        +getCKCommodity()
+        +setCKCommodity()
+        +getCKKnights()
+        +setCKKnights()
+        +getCKActiveKnights()
+        +setCKActiveKnights()
+        +public int getCKTotalKnightStrength()
+        +public int getCKTotalKnights()
+        +public boolean canMoveShip(SOCShip sh)
+        -doesTradeRouteContinuePastEdge()
+        -doesTradeRouteContinuePastNode()
+        -checkTradeRouteFarEndClosed()
+        -isTradeRouteFarEndClosed()
+        +public int getLastSettlementCoord()
+        +public int getLastRoadCoord()
+        +public int getLongestRoadLength()
+        +public Vector<SOCLRPathData> getLRPaths()
+        +public void setLRPaths(List<SOCLRPathData> lrList)
+        +public void setLastSettlementCoord(final int node)
+        +public void setLongestRoadLength(int len)
+        +public SOCResourceSet getResources()
+        +public int[] getResourceRollStats()
+        +setResourceRollStats()
+        +public void addRolledResources(SOCResourceSet rolled)
+        +public SOCResourceSet getRolledResources()
+        +public SOCResourceSet[][] getResourceTradeStats()
+        +public void setResourceTradeStats(ResourceSet[][] stats)
+        +public SOCInventory getInventory()
+        +public boolean hasUnplayedDevCards()
+        +public int getNumKnights()
+        +public void setNumKnights(int nk)
+        +public void incrementNumKnights()
+        +public boolean hasLongestRoad()
+        +public boolean hasLargestArmy()
+        +public int getUndosRemaining()
+        +public void setUndosRemaining(final int newRemain)
+        +decrementUndosRemaining()
+        +public int getSpecialVP()
+        +public void setSpecialVP(int svp)
+        +public int getPublicVP()
+        +public int getTotalVP()
+        +public void forceFinalVP(int score)
+        +addSpecialVPInfo()
+        +public ArrayList<SpecialVPInfo> getSpecialVPInfo()
+        +public void setSpecialVPInfo(ArrayList<SpecialVPInfo> info)
+        +public int getPlayerEvents()
+        +public void setPlayerEvents(final int events)
+        +hasPlayerEvent()
+        -setPlayerEvent()
+        -clearPlayerEvent()
+        +public int getScenarioSVPLandAreas()
+        +public void setScenarioSVPLandAreas(final int las)
+        +public int getStartingLandAreasEncoded()
+        +public void setStartingLandAreasEncoded(final int slas)
+        +public Vector<Integer> getRoadNodes()
+        +public SOCTradeOffer getCurrentOffer()
+        +public void setCurrentOffer(final SOCTradeOffer offer)
+        +public long getCurrentOfferTime()
+        +makeTrade()
+        +makeBankTrade()
+        +isConnectedByRoad()
+        +canPlaceShip_debugFreePlace()
+        +putPiece()
+        -putPiece_roadOrShip()
+        -putPiece_roadOrShip_checkNewShipTradeRouteAndSpecialEdges()
+        -putPiece_settlement_checkTradeRoutes()
+        -putPiece_settlement_checkScenarioSVPs()
+        +undoPutPiece()
+        -undoPutPieceAuxSettlement()
+        +removePiece()
+        -removePieceUpdateSpecialVP()
+        -updatePortFlagsAfterRemove()
+        -void updateLegalShipsAddHex(final int hexCoord)
+        -updatePotentialsAndLegalsAroundRevealedHex()
+        +public void updatePotentials(SOCPlayingPiece piece)
+        +public HashSet<Integer> getPotentialSettlements()
+        +public int[] getPotentialSettlements_arr()
+        +setPotentialAndLegalSettlements()
+        +public boolean hasPotentialSettlementsInitialInFog()
+        +public Set<Integer> getLegalSettlements()
+        +addLegalSettlement()
+        +public boolean canPlaceSettlement(final int node)
+        +public boolean isPotentialSettlement(final int node)
+        +public void clearPotentialSettlement(final int node)
+        +public boolean isLegalSettlement(final int node)
+        +public int getAddedLegalSettlement()
+        +public boolean isPotentialCity(final int node)
+        +public void clearPotentialCity(final int node)
+        +public boolean isPotentialRoad(int edge)
+        +public void clearPotentialRoad(int edge)
+        +public boolean isLegalRoad(int edge)
+        +isPotentialShipMoveTo()
+        +public boolean isPotentialShip(int edge)
+        +public void clearPotentialShip(int edge)
+        +public boolean isLegalShip(final int edge)
+        +public HashSet<Integer> getRestrictedLegalShips()
+        +public void setRestrictedLegalShips(final int[] edgeList)
+        +public boolean hasPotentialRoad()
+        +public boolean hasTwoPotentialRoads()
+        +public boolean hasPotentialSettlement()
+        +public boolean hasPotentialCity()
+        +public boolean hasPotentialShip()
+        +canBuildInitialPieceType()
+        +public int calcLongestRoad2()
+        +getPortMovePotentialLocations()
+        +public void setPortFlag(int portType, boolean value)
+        +public boolean getPortFlag(int portType)
+        +public boolean[] getPortFlags()
+        +public StringBuffer numpieces(StringBuffer sb)
+        +public boolean hasSettlementOrCityAtNode(final int node)
+        +public boolean hasSettlementAtNode(final int node)
+        +public boolean hasCityAtNode(final int node)
+        +public boolean hasRoadOrShipAtEdge(final int edge)
+        +public void destroyPlayer()
+        +@Override
+    public String toString()
+    }
+    class SOCBoard {
+        -SOCBoard()
+        -private void initNodesOnLand()
+        -private void initHexIDtoNumAux(int begin, int end, int num)
+        +public void makeNewBoard(final SOCGameOptionSet opts)
+        -makeNewBoard_placeHexes()
+        -makeNewBoard_checkLandHexResourceClumps()
+        -makeNewBoard_shufflePorts()
+        -placePort()
+        +public HashSet<Integer> initPlayerLegalRoads()
+        +public HashSet<Integer> initPlayerLegalSettlements()
+        +getHexLayout()
+        +public abstract int[] getLandHexCoords();
+        +public boolean isHexOnLand(final int hexCoord)
+        +public boolean isHexOnWater(final int hexCoord)
+        +getNumberLayout()
+        +public int[] getPortsLayout()
+        +public abstract int[] getPortsFacing();
+        +public abstract int[] getPortsEdges();
+        +public int getRobberHex()
+        +public int getPreviousRobberHex()
+        +setHexLayout()
+        +public void setPortsLayout(int[] portTypes)
+        -private int getPortTypeFromHexType(final int hexType)
+        +setNumberLayout()
+        +setRobberHex()
+        +public abstract int getPortsCount();
+        +public List<Integer> getPortCoordinates(int portType)
+        +public int getPortTypeFromNodeCoord(final int nodeCoord)
+        +getPortDescForType()
+        +public int getNumberOnHexFromCoord(final int hex)
+        +public int getNumberOnHexFromNumber(final int hex)
+        +getHexNumFromCoord()
+        +public int getHexTypeFromCoord(final int hex)
+        +public int getHexTypeFromNumber(final int hex)
+        +public void putPiece(SOCPlayingPiece pp)
+        +public void removePiece(SOCPlayingPiece piece)
+        +public List<SOCRoutePiece> getRoadsAndShips()
+        +public List<SOCSettlement> getSettlements()
+        +public List<SOCCity> getCities()
+        +public int getBoardWidth()
+        +public int getBoardHeight()
+        -setBoardBounds()
+        +public int getBoardEncodingFormat()
+        +getAdjacentNodesToEdge()
+        +public int[] getAdjacentNodesToEdge_arr(final int coord)
+        +getAdjacentNodeFarEndOfEdge()
+        +getNodeBetweenAdjacentEdges()
+        +isEdgeSameOrAdjacent()
+        +public List<Integer> getAdjacentEdgesToEdge(int coord)
+        +getAdjacentHexesToNode()
+        +getAdjacentEdgesToNode()
+        +getAdjacentEdgesToNode_arr()
+        +getAdjacentEdgeToNode()
+        +getEdgeBetweenAdjacentNodes()
+        +isEdgeAdjacentToNode()
+        +isNodeSameOrAdjacent()
+        +getAdjacentNodesToNode()
+        +getAdjacentNodesToNode_arr()
+        +isNodeAdjacentToNode()
+        +getAdjacentNodeToNode()
+        +getAdjacentNodeToNode2Away()
+        +isNode2AwayFromNode()
+        +getAdjacentEdgeToNode2Away()
+        +getAdjacentHexesToHex()
+        -getAdjacentHexes_AddIfOK()
+        +getAdjacentNodeToHex()
+        +getAdjacentNodesToHex()
+        +public int[] getAdjacentNodesToHex_arr(final int hexCoord)
+        +getAdjacentHexToEdge()
+        +settlementAtNode()
+        +public SOCRoutePiece roadOrShipAtEdge(int edgeCoord)
+        +public boolean isNodeOnLand(int node)
+        +public String nodeCoordToString(int node)
+        +public String edgeCoordToString(int edge)
+    }
+    class SpecialVPInfo {
+        +public SpecialVPInfo(final int svp, final String desc)
+    }
+    class SOCBoardLarge {
+        +SOCBoardLarge()
+        +@Override
+    public int getBoardEncodingFormat()
+        +getBoardSize()
+        +makeNewBoard()
+        -initLegalRoadsFromLandNodes()
+        +addLegalNodes()
+        -protected void initLegalShipEdges()
+        +revealFogHiddenHexPrep()
+        -revealFogHiddenHex()
+        +getHexLayout()
+        +setHexLayout()
+        +getNumberLayout()
+        +setNumberLayout()
+        +public HashMap<String, int[]> getAddedLayoutParts()
+        +public int[] getAddedLayoutPart(final String key)
+        +setAddedLayoutParts()
+        +setAddedLayoutPart()
+        +drawItemFromStack()
+        +putItemInStackRandomly()
+        -placePort()
+        +movePirateHexAlongPath()
+        +setPirateHex()
+        +public int getPirateHex()
+        +public int getPreviousPirateHex()
+        +public int[] getPlayerExcludedLandAreas()
+        +public void setPlayerExcludedLandAreas(final int[] px)
+        +public int[] getRobberExcludedLandAreas()
+        +public void setRobberExcludedLandAreas(final int[] rx)
+        +getNumberOnHexFromCoord()
+        +getNumberOnHexFromNumber()
+        +getHexNumFromCoord()
+        +@Override
+    public int getHexTypeFromCoord(final int hex)
+        +getHexTypeFromNumber()
+        +public SOCVillage getVillageAtNode(final int nodeCoord)
+        +public final boolean isEdgeCoastline(final int edge)
+        +public final boolean isEdgeLegalRoad(final int edge)
+        +public HashSet<Integer> getLandHexCoordsSet()
+        +@Override
+    public int[] getLandHexCoords()
+        +@Override
+    public void putPiece(SOCPlayingPiece pp)
+        +setShipsClosed()
+        +addLoneLegalSettlements()
+        +public boolean hasSpecialEdges()
+        +public int getSpecialEdgeType(final int edge)
+        +getSpecialEdges()
+        +setSpecialEdge()
+        +setSpecialEdges()
+        +public void clearSpecialEdges(final int seType)
+        +public int[] getVillageAndClothLayout()
+        +setVillageAndClothLayout()
+        +public HashMap<Integer, SOCVillage> getVillages()
+        +public int getCloth()
+        +public void setCloth(final int numCloth)
+        +public int takeCloth(int numTake)
+        +isHexOnLand()
+        +isHexOnWater()
+        +isHexCoastline()
+        +isHexInLandAreas()
+        +isNodeInLandAreas()
+        +public int getNodeLandArea(final int nodeCoord)
+        +public final boolean isNodeCoastline(final int node)
+        +public int[] getLandHexLayout()
+        +public void setLandHexLayout(final int[] lh)
+        +public final HashMap<Integer, Integer> getFogHiddenHexes()
+        +setFogHiddenHexes()
+        +public int getStartingLandArea()
+        +public HashSet<Integer>[] getLandAreasLegalNodes()
+        +public HashSet<Integer> getLegalSettlements()
+        +setLegalSettlements()
+        +initPlayerLegalRoads()
+        -HashSet<Integer> initPlayerLegalShips()
+        +getAdjacentHexesToHex()
+        -getAdjacentHexes2Hex_AddIfOK()
+        +getAdjacentHexToHex()
+        +isHexAdjacentToHex()
+        +getAdjacentEdgesToHex()
+        +public int[] getAdjacentEdgesToHex_arr(final int hexCoord)
+        +isEdgeAdjacentToHex()
+        +getAdjacentNodeToHex()
+        +getAdjacentNodesToHex_arr()
+        +getAdjacentHexToEdge()
+        +getAdjacentHexesToEdge_arr()
+        +getAdjacentHexesToEdgeEnds()
+        +getAdjacentEdgesToEdge()
+        +getAdjacentNodeToEdge()
+        +getAdjacentNodesToEdge()
+        +getAdjacentNodesToEdge_arr()
+        +getNodeBetweenAdjacentEdges()
+        +getAdjacentHexesToNode()
+        +getAdjacentEdgeToNode()
+        +getEdgeBetweenAdjacentNodes()
+        +isEdgeAdjacentToNode()
+        +getAdjacentEdgesToNode_coastal()
+        +getAdjacentNodeToNode()
+        +getAdjacentEdgeToNode2Away()
+        +getAdjacentNodeToNode2Away()
+        +isNode2AwayFromNode()
+        +isHexInBounds()
+        +public final boolean isHexAtBoardMargin(final int hexCoord)
+        +isNodeInBounds()
+        +isEdgeInBounds()
+        +@Override
+    public int getPortsCount()
+        +setPortsLayout()
+        +@Override
+    public int[] getPortsEdges()
+        +@Override
+    public int[] getPortsFacing()
+        +public int getPortEdgeFromNode(final int node)
+        -getPortFacingFromEdge()
+        +public boolean canRemovePort(final int edge)
+        +removePort()
+        +edgeCoordToString()
+    }
+    class BoardFactory {
+        <<interface>>
+    }
+    class RollResult {
+        +public void update(final int dA, final int dB)
+    }
+    class CKCardEffect {
+        +public CKCardEffect(final int itype)
+    }
+    class DefaultBoardFactory {
+        +staticCreateBoard()
+        +createBoard()
+    }
+
+    SOCBoardLarge --|> SOCBoard : extends
+    DefaultBoardFactory ..|> BoardFactory : implements
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_game_SOCBoard_java["SOCBoard.java"]
+    src_main_java_soc_game_SOCBoardLarge_java["SOCBoardLarge.java"]
+    src_main_java_soc_game_SOCGame_java["SOCGame.java"]
+    src_main_java_soc_game_SOCPlayer_java["SOCPlayer.java"]
+
+
+    ext_src_main_java_soc_util_DataUtils_java["DataUtils.java"]:::default
+    src_main_java_soc_game_SOCGame_java -.->|"imports"| ext_src_main_java_soc_util_DataUtils_java
+    ext_src_main_java_soc_util_IntPair_java["IntPair.java"]:::default
+    src_main_java_soc_game_SOCBoardLarge_java -.->|"imports"| ext_src_main_java_soc_util_IntPair_java
+    src_main_java_soc_game_SOCGame_java -.->|"imports"| ext_src_main_java_soc_util_IntPair_java
+    src_main_java_soc_game_SOCPlayer_java -.->|"imports"| ext_src_main_java_soc_util_IntPair_java
+    ext_src_main_java_soc_util_NodeLenVis_java["NodeLenVis.java"]:::default
+    src_main_java_soc_game_SOCPlayer_java -.->|"imports"| ext_src_main_java_soc_util_NodeLenVis_java
+    ext_src_main_java_soc_util_SOCFeatureSet_java["SOCFeatureSet.java"]:::default
+    src_main_java_soc_game_SOCGame_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    ext_src_main_java_soc_util_SOCGameBoardReset_java["SOCGameBoardReset.java"]:::default
+    src_main_java_soc_game_SOCGame_java -.->|"imports"| ext_src_main_java_soc_util_SOCGameBoardReset_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Game state container and turn/phase flow</code></li>
+<li><code class="code-ref" title="source file in your repository">Per-player state, scoped to one game and non-persistent</code></li>
+<li><code class="code-ref" title="source file in your repository">Abstract board model by integer coordinates</code></li>
+<li><code class="code-ref" title="source file in your repository">Sea board large layout for all scenarios</code></li>
+<li><code class="code-ref" title="source file in your repository">Board initialization driven by game options</code></li>
+<li><code class="code-ref" title="source file in your repository">Caller-held monitor for game mutations</code></li>
+<li><code class="code-ref" title="source file in your repository">Board-encoding format constants (v1/v2/v3)</code></li>
+<li><code class="code-ref" title="source file in your repository">Container build/runtime configuration</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">core-game-state-board-model.feature.md</span>
+Scope architecture: <a href="game-model-rules-engine.arch.html">game-model-rules-engine.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Game state container and turn/phase flow</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java:1637-1732</td>
+<td style="text-align:right">0.95</td>
+</tr>
+<tr>
+<td>Source Linkage: Per-player state, scoped to one game and non-persistent</td>
+<td></td>
+<td>src/main/java/soc/game/SOCPlayer.java:944-1027</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Abstract board model by integer coordinates</td>
+<td></td>
+<td>src/main/java/soc/game/SOCBoard.java:753-786</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Sea board large layout for all scenarios</td>
+<td></td>
+<td>src/main/java/soc/game/SOCBoardLarge.java:686-724</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Board initialization driven by game options</td>
+<td></td>
+<td>src/main/java/soc/game/SOCBoard.java:875-920</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Caller-held monitor for game mutations</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java:1738-1754</td>
+<td style="text-align:right">0.95</td>
+</tr>
+<tr>
+<td>Source Linkage: Board-encoding format constants (v1/v2/v3)</td>
+<td></td>
+<td>src/main/java/soc/game/SOCBoard.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Container build/runtime configuration</td>
+<td></td>
+<td>web/package.json</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a>, <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="113.1"/>
+        </svg>
+        <div class="ring-num">0.50</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

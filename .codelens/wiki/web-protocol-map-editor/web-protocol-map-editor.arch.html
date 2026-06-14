@@ -1,0 +1,384 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web Protocol &amp; Map Editor · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a><div class="nav-sub"><a class="nav-item active" href="../web-protocol-map-editor/web-protocol-map-editor.arch.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../web-protocol-map-editor/custom-map-editor-canvas-palette.design.html"><span class="nm">Custom Map Editor Canvas &amp; Palette</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-protocol-map-editor/map-schema-custom-map-json-model.design.html"><span class="nm">Map Schema &amp; Custom-Map JSON Model</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-protocol-map-editor/typescript-socmessage-protocol-layer.design.html"><span class="nm">TypeScript SOCMessage Protocol Layer</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-protocol-map-editor/contracts/web-protocol-map-editor.gateway.html"><span class="nm">Web Protocol &amp; Map Editor Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../web-protocol-map-editor/contracts/web-protocol-map-editor.testplan.html"><span class="nm">Web Protocol &amp; Map Editor Test Plan</span><span class="tt tt-testplan">test</span></a></div></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Web Protocol &amp; Map Editor</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-arch">ARCH</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:50%"></i></span>
+      <span class="conf-val">0.50</span></span></div>
+        <h1 class="doc-title">Web Protocol &amp; Map Editor</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Web Protocol &amp; Map Editor</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li>
+<p><strong>Protocol parity over reinvention</strong> — Per <a href="http://Readme.md">Readme.md</a>, the web client re-implements the Java SOCMessage string wire format verbatim — one existing SOCMessage string per WebSocket text frame — specifically so the authoritative SOCServer, the rules engine, and the robot subsystem stay unchanged and only the front end is replaced. A binary or JSON protocol was deliberately not introduced; the distinctive constraint of this scope is byte-for-byte fidelity to a wire format owned by another epic.</p>
+</li>
+<li>
+<p><strong>Custom maps as server-loadable scenarios</strong> — Per doc/Custom-Maps.md, the in-browser editor targets the same *.map.json structure the server loads at startup and registers as custom scenarios, so a layout authored in the browser is playable by any current client without client-specific support. This is why mapSchema mirrors the Java CustomMapLoader’s GSON-permissive deserialization rather than defining its own model — the on-disk document, not the editor, is the integration contract.</p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-001.invariant.html">INV-CL-001</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-002.invariant.html">INV-CL-002</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-003.invariant.html">INV-CL-003</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-004.invariant.html">INV-CL-004</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-005.invariant.html">INV-CL-005</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-006.invariant.html">INV-CL-006</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-007.invariant.html">INV-CL-007</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-008.invariant.html">INV-CL-008</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-009.invariant.html">INV-CL-009</a></p>
+</li>
+<li>
+<p><a class="inv-cite" href="../invariants/INV-CL-010.invariant.html">INV-CL-010</a></p>
+</li>
+<li>
+<p>…and 1 more (see <a href="../invariants/_scope.html">invariants/_scope.md</a>)</p>
+</li>
+</ul>
+<h2>Overview</h2>
+<p>TypeScript SOCMessage Protocol Layer (web/src/protocol): re-implements the Java SOCMessage string wire protocol in TypeScript so the browser speaks the exact SEP-delimited unicode-string format the Java SOCServer uses, one toCmd() string per WebSocket text frame. encode(msg) is a thin wrapper over msg.toCmd(); decode(raw) reads the type id to the first SEP, guards it with a regex (not JS Number.parseInt), looks it up in a self-registering parserRegistry keyed by type id, and returns null (never throws) on unknown/malformed input. Decisions: port the Java format verbatim rather than invent a binary/JSON protocol; registry over a central switch; const objects with derived literal-union types instead of enums. Custom Map Editor Canvas &amp; Palette (web/src/map-editor/components): authoring splits into two stateless presentational components driven by a parent screen owning the single CustomMap. EditorPalette selects the active EditorTool and paint parameters (hex type, dice number, land area, port type/facing) and emits metadata edits via callbacks; EditorCanvas reads the same CustomMap, memo-indexes placed hexes and ports by integer 0xRRCC coordinate, enumerates the fixed grid via editorGrid, and renders each cell with HexCell. Decisions: pure/presentational with all state lifted; reuse in-game board geometry (coords.ts, board defs/textures) read-only; normalize loose map-type strings through a closed motif set with an ‘unknown’ fallback; memo-index and memoize grid/viewBox derivations; expose the data layer through one barrel module. Map Schema &amp; Custom-Map JSON Model (web/src/map-editor/mapSchema.ts): the data-model spine. Repository evidence: <code>web/src/map-editor/mapSchema.ts</code>, <code>web/src/protocol/messages/SOCJoinGameAuth.ts</code>. Repository evidence: <code>web/src/map-editor/mapSchema.ts</code>.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>Protocol Codec &amp; Parser Registry</strong>: Serialize outbound model messages to SEP-delimited unicode strings and parse one inbound WebSocket text frame into a typed message object.</li>
+<li><strong>Protocol Message Catalog</strong>: Define the field-level layout and parser for every supported SOCMessage type and register it with the codec.</li>
+<li><strong>Game Option Discovery</strong>: Parse and represent server-advertised game options/scenarios for the client connection layer.</li>
+<li><strong>Custom-Map Schema &amp; Codec</strong>: Own the in-memory CustomMap model and the bidirectional codec between .map.json text and that model.</li>
+<li><strong>Editor Operations</strong>: Apply paint/edit/enhancement operations as pure functions over the CustomMap model.</li>
+<li><strong>Editor Grid Geometry</strong>: Provide the cell enumeration and coordinate/size geometry the canvas and operations draw against.</li>
+<li><strong>Editor Canvas &amp; Palette</strong>: Render the authoring surface and translate user clicks/tool selection into edit callbacks; hold no authoritative state.</li>
+<li><strong>Map Validation</strong>: Gate a CustomMap as structurally valid before export/use.</li>
+<li><strong>Map Editor Barrel</strong>: Publish the editor data layer’s public API.</li>
+</ul>
+<h2>Boundaries</h2>
+<ul>
+<li><strong>Protocol Codec &amp; Parser Registry</strong> boundary: Owns the encode/decode spine of the browser wire layer: encode(msg) returns msg.toCmd(); decode(raw) reads the integer type id up to the first SEP, guards it with a regex (rather than trusting JS Number.parseInt), looks it up in a module-level self-registering parserRegistry keyed by type id, and dispatches. decode never throws — it returns null on unknown or malformed input. Does NOT own per-message field semantics; those live in the Message Catalog.</li>
+<li><strong>Protocol Message Catalog</strong> boundary: Owns one TypeScript class per SOCMessage type — including the high-centrality SOCScenarioInfo, SOCSetSeatLock, and SOCStatusMessage — plus the shared resourceSet encoder reused by resource-bearing trade/pick messages (SOCAcceptOffer, SOCBankTrade, SOCMakeOffer, SOCPickResources). Each class self-registers its parser into the registry and implements toCmd(); the catalog is the black box for each message type’s field layout.</li>
+<li><strong>Game Option Discovery</strong> boundary: web/src/protocol/gameOptions.ts — owns the TypeScript representation and parsing of the server’s game-option / scenario discovery used by the client to negotiate game options before joining. Boundary edge is the parsed option model; does not own the connection or store state that drives discovery.</li>
+<li><strong>Custom-Map Schema &amp; Codec</strong> boundary: web/src/map-editor/mapSchema.ts — the data-model spine. Repository evidence: <code>web/src/map-editor/mapSchema.ts</code>, <code>web/src/protocol/messages/SOCJoinGameAuth.ts</code>. Coordinates are kept as on-disk “0xRRCC” strings inside the model rather than parsed to ints at load. <em>[unverified: no imports/calls edge web/src/map-editor/mapSchema.ts -&gt; CustomMapLoader in code graph]</em></li>
+<li><strong>Editor Operations</strong> boundary: web/src/map-editor/editorActions.ts and web/src/map-editor/editorEnhancements.ts — stateless transformations that take a CustomMap plus a tool action and return a new CustomMap; editorEnhancements layers higher-level composite operations on top of editorActions. No UI state is held here; all editor state is owned by the parent screen.</li>
+<li><strong>Editor Grid Geometry</strong> boundary: web/src/map-editor/editorGrid.ts — enumerates the fixed sea-board authoring grid, clamps requested board dimensions (clampBoardSize), and maps grid cells to integer 0xRRCC coordinates. Consumes in-game board geometry read-only rather than reimplementing it.</li>
+<li><strong>Editor Canvas &amp; Palette</strong> boundary: web/src/map-editor/components/* (EditorCanvas, EditorPalette, HexCell, ImportExportPanel) — pure presentational components with all state lifted to the parent screen. EditorPalette selects the active EditorTool and paint parameters (hex type, dice number, land area, port type/facing) and emits edits via callbacks; EditorCanvas reads the same CustomMap, memo-indexes placed hexes and ports by integer 0xRRCC coordinate, enumerates the grid via editorGrid, and renders each cell with HexCell. Cross-document reconciliation verified <code>web/src/map-editor/components/EditorCanvas.tsx</code>: the previously-disclaimed behavior is present in the retrieved code.</li>
+<li><strong>Map Validation</strong> boundary: web/src/map-editor/validation.ts — validates a CustomMap against the schema’s structural rules (via mapSchema) before a map is exported or offered to the server. Owns the validation rule set; does not own the model definition.</li>
+<li><strong>Map Editor Barrel</strong> boundary: web/src/map-editor/index.ts — single public surface exposing the editor data layer (schema, operations, grid, validation) to consuming screens, so callers depend on one module rather than reaching into internals.</li>
+</ul>
+<h2>Integration Points</h2>
+<ul>
+<li><strong>Editor edits flow to server inbound queue</strong>: Editor Operations ultimately drive messages into the authoritative server. The code graph reports editorActions.ts calling the server’s InboundMessageQueue (x7); the realized mechanism is the SOCMessage WebSocket protocol plus the server’s CustomMapLoader reading the authored *.map.json at startup (per doc/Custom-Maps.md). — see <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a></li>
+<li><strong>Validation gate to server inbound queue</strong>: Map Validation is reported by the code graph as the heaviest TS-&gt;server edge (validation.ts -&gt; InboundMessageQueue, x23), corresponding to validated maps/messages being admitted to the server runtime over the WebSocket protocol. — see <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a></li>
+<li><strong>Map editor data layer driven by editor screen</strong>: The MapEditorScreen (sibling Web Client epic) owns editor state and drives this epic’s data layer: it calls editorActions (x27), mapSchema (x10), editorEnhancements (x5), and editorGrid (x4). All authoring state lives in the screen; this epic supplies pure operations and the model. <em>[unverified: no imports/calls edge web/src/screens/MapEditorScreen.tsx -&gt; web/src/map-editor/editorActions.ts -&gt; web/src/screens/MapEditorScreen.tsx in code graph]</em> — see <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></li>
+<li><strong>Board geometry reuse</strong>: Editor Grid Geometry, Editor Operations, and Editor Canvas consume the in-game board coordinate helpers read-only (editorActions x4, editorGrid x3, EditorCanvas x2 against coords.ts) instead of reimplementing hex geometry. — see <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></li>
+<li><strong>Game option discovery consumed by game store</strong>: The Zustand game store reads this epic’s Game Option Discovery to negotiate options on connect (gameStore.ts -&gt; gameOptions.ts, x3). The store also consumes the protocol codec to serialize/parse frames over its WebSocket connection. <em>[unverified: no imports/calls edge web/src/store/gameStore.ts -&gt; web/src/protocol/gameOptions.ts -&gt; web/src/store/gameStore.ts::connectStore in code graph]</em> — see <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Architecture</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+
+    subgraph group_web["web"]
+        Custom_Map_Schema___Codec["Custom-Map Schema & Codec"]
+        Editor_Canvas___Palette["Editor Canvas & Palette"]
+        Editor_Grid_Geometry["Editor Grid Geometry"]
+        Editor_Operations["Editor Operations"]
+        Game_Option_Discovery["Game Option Discovery"]
+        Map_Editor_Barrel["Map Editor Barrel"]
+        Map_Validation["Map Validation"]
+        Protocol_Codec___Parser_Registry["Protocol Codec & Parser Registry"]
+        Protocol_Message_Catalog["Protocol Message Catalog"]
+    end
+
+    Editor_Canvas___Palette -->|"imports (2), calls (3)"| Custom_Map_Schema___Codec
+    Editor_Canvas___Palette -->|"imports (1), calls (3)"| Editor_Grid_Geometry
+    Editor_Canvas___Palette -->|"imports (1), calls (1)"| Editor_Operations
+    Editor_Grid_Geometry -->|"imports (1), calls (1)"| Custom_Map_Schema___Codec
+    Editor_Operations -->|"imports (7), calls (24)"| Custom_Map_Schema___Codec
+    Editor_Operations -->|"Function calls into the editor barrel... (unverified)"| Editor_Canvas___Palette
+    Editor_Operations -->|"imports (8), calls (10)"| Editor_Grid_Geometry
+    Editor_Operations -->|"imports (2), calls (1)"| Map_Validation
+    Editor_Operations -->|"WebSocket (SOCMessage text frames)"| Protocol_Codec___Parser_Registry
+    Game_Option_Discovery -->|"imports (2)"| Protocol_Codec___Parser_Registry
+    Map_Validation -->|"imports (5), calls (13)"| Custom_Map_Schema___Codec
+    Map_Validation -->|"WebSocket (SOCMessage text frames)"| Protocol_Codec___Parser_Registry
+    Protocol_Message_Catalog -->|"imports (7)"| Protocol_Codec___Parser_Registry
+
+
+
+
+
+
+
+
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Protocol Codec &amp; Parser Registry</code></li>
+<li><code class="code-ref" title="source file in your repository">Protocol type-id constants</code></li>
+<li><code class="code-ref" title="source file in your repository">Protocol public barrel</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCScenarioInfo message</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCSetSeatLock message</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCStatusMessage message</code></li>
+<li><code class="code-ref" title="source file in your repository">resourceSet shared encoder</code></li>
+<li><code class="code-ref" title="source file in your repository">Game Option Discovery</code></li>
+<li><code class="code-ref" title="source file in your repository">Custom-Map Schema &amp; Codec</code></li>
+<li><code class="code-ref" title="source file in your repository">Editor Operations (actions)</code></li>
+<li><code class="code-ref" title="source file in your repository">Editor Operations (enhancements)</code></li>
+<li><code class="code-ref" title="source file in your repository">Editor Grid Geometry</code></li>
+<li><code class="code-ref" title="source file in your repository">Editor Canvas</code></li>
+<li><code class="code-ref" title="source file in your repository">Editor Palette</code></li>
+<li><code class="code-ref" title="source file in your repository">Map Validation</code></li>
+<li><code class="code-ref" title="source file in your repository">Map Editor Barrel</code></li>
+<li><code class="code-ref" title="source file in your repository">Server inbound queue (cross-epic target)</code></li>
+<li><code class="code-ref" title="source file in your repository">Web client build/runtime config</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Protocol Codec &amp; Parser Registry</td>
+<td>Base SOCMessage type, parser registry, and encode/decode helpers.</td>
+<td>web/src/protocol/SOCMessage.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Protocol type-id constants</td>
+<td>Protocol constants ported from soc.message.SOCMessage (Java).</td>
+<td>web/src/protocol/constants.ts</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Protocol public barrel</td>
+<td>Public surface of the protocol core.</td>
+<td>web/src/protocol/index.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCScenarioInfo message</td>
+<td>SOCScenarioInfo — scenario info request (client) / reply (server).</td>
+<td>web/src/protocol/messages/SOCScenarioInfo.ts:66-318</td>
+<td style="text-align:right">0.95</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCSetSeatLock message</td>
+<td>SOCSetSeatLock — set the lock state of one seat, or all seats at once.</td>
+<td>web/src/protocol/messages/SOCSetSeatLock.ts:42-162</td>
+<td style="text-align:right">0.51</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCStatusMessage message</td>
+<td>SOCStatusMessage — status text shown in the client’s main window, with an</td>
+<td>web/src/protocol/messages/SOCStatusMessage.ts:16-81</td>
+<td style="text-align:right">0.19</td>
+</tr>
+<tr>
+<td>Source Linkage: resourceSet shared encoder</td>
+<td>Shared resource-set encoding helpers for the trade / pick / robbery messages.</td>
+<td>web/src/protocol/messages/resourceSet.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Game Option Discovery</td>
+<td>Shared game-option descriptor types + protocol (de)serialization.</td>
+<td>web/src/protocol/gameOptions.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Custom-Map Schema &amp; Codec</td>
+<td></td>
+<td>web/src/map-editor/mapSchema.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Editor Operations (actions)</td>
+<td></td>
+<td>web/src/map-editor/editorActions.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Editor Operations (enhancements)</td>
+<td></td>
+<td>web/src/map-editor/editorEnhancements.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Editor Grid Geometry</td>
+<td></td>
+<td>web/src/map-editor/editorGrid.ts:61-66</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Editor Canvas</td>
+<td></td>
+<td>web/src/map-editor/components/EditorCanvas.tsx</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: Editor Palette</td>
+<td>Hex-type -&gt; swatch fill CSS variable, matching the canvas/board theme tokens. */</td>
+<td>web/src/map-editor/components/EditorPalette.tsx</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Source Linkage: Map Validation</td>
+<td></td>
+<td>web/src/map-editor/validation.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Map Editor Barrel</td>
+<td>Public surface of the custom-map editor data layer (schema, validation, preview). */</td>
+<td>web/src/map-editor/index.ts</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Source Linkage: Server inbound queue (cross-epic target)</td>
+<td></td>
+<td>src/main/java/soc/server/genericServer/InboundMessageQueue.java:126-134</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Web client build/runtime config</td>
+<td></td>
+<td>web/package.json</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../optional-database/optional-database.arch.html">Optional Database</a>, <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a>, <a href="../web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a></p>
+<h2>Contract Gaps Detected</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Declared Field</th>
+<th>Accepting Function</th>
+<th>Gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>web/src/map-editor/validation.ts</code></td>
+<td><code>ValidationIssue.message</code></td>
+<td><code>validateSortRankPrefix(issues: ValidationIssue)</code></td>
+<td>No same-file read of <code>issues.message</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/map-editor/validation.ts</code></td>
+<td><code>ValidationIssue.message</code></td>
+<td><code>validateDescription(issues: ValidationIssue)</code></td>
+<td>No same-file read of <code>issues.message</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/map-editor/validation.ts</code></td>
+<td><code>ValidationIssue.message</code></td>
+<td><code>validatePlayerCounts(issues: ValidationIssue)</code></td>
+<td>No same-file read of <code>issues.message</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/map-editor/validation.ts</code></td>
+<td><code>ValidationIssue.message</code></td>
+<td><code>validateBoardDimension(issues: ValidationIssue)</code></td>
+<td>No same-file read of <code>issues.message</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/map-editor/validation.ts</code></td>
+<td><code>ValidationIssue.message</code></td>
+<td><code>validateHexDiceNum(issues: ValidationIssue)</code></td>
+<td>No same-file read of <code>issues.message</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/map-editor/validation.ts</code></td>
+<td><code>ValidationIssue.message</code></td>
+<td><code>validateLandAreas(issues: ValidationIssue)</code></td>
+<td>No same-file read of <code>issues.message</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/map-editor/validation.ts</code></td>
+<td><code>ValidationIssue.message</code></td>
+<td><code>checkPortFacingGeometry(issues: ValidationIssue)</code></td>
+<td>No same-file read of <code>issues.message</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/map-editor/validation.ts</code></td>
+<td><code>ValidationIssue.message</code></td>
+<td><code>checkPortFacesLand(issues: ValidationIssue)</code></td>
+<td>No same-file read of <code>issues.message</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="113.1"/>
+        </svg>
+        <div class="ring-num">0.50</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+      <div class="rail-card"><h4>Cited invariants</h4><div class="rail-list"><a href="../invariants/INV-CL-001.invariant.html"><span class="b">INV-CL-001</span><span>single writer next landarea</span></a><a href="../invariants/INV-CL-002.invariant.html"><span class="b">INV-CL-002</span><span>single writer desc curstrvalue</span></a><a href="../invariants/INV-CL-003.invariant.html"><span class="b">INV-CL-003</span><span>single writer parsed boolvalue</span></a><a href="../invariants/INV-CL-004.invariant.html"><span class="b">INV-CL-004</span><span>single writer parsed intvalue</span></a><a href="../invariants/INV-CL-005.invariant.html"><span class="b">INV-CL-005</span><span>single writer prevdicetotal c…</span></a><a href="../invariants/INV-CL-006.invariant.html"><span class="b">INV-CL-006</span><span>single writer prevpiececount…</span></a><a href="../invariants/INV-CL-007.invariant.html"><span class="b">INV-CL-007</span><span>single writer prevmyturn curr…</span></a><a href="../invariants/INV-CL-008.invariant.html"><span class="b">INV-CL-008</span><span>single writer viewport scroll…</span></a><a href="../invariants/INV-CL-009.invariant.html"><span class="b">INV-CL-009</span><span>single writer viewport scroll…</span></a><a href="../invariants/INV-CL-010.invariant.html"><span class="b">INV-CL-010</span><span>single writer panref current</span></a><a href="../invariants/INV-CL-011.invariant.html"><span class="b">INV-CL-011</span><span>lifecycle web src main tsx re…</span></a></div></div>
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

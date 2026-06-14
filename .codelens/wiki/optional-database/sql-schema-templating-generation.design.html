@@ -1,0 +1,185 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL Schema Templating &amp; Generation · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><div class="nav-sub"><a class="nav-item" href="../optional-database/optional-database.arch.html"><span class="nm">Optional Database</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../optional-database/jdbc-persistence-helper-schema-upgrades.design.html"><span class="nm">JDBC Persistence Helper &amp; Schema Upgrades</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../optional-database/player-accounts-game-stats-persistence.design.html"><span class="nm">Player Accounts &amp; Game Stats Persistence</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../optional-database/sql-schema-templating-generation.design.html"><span class="nm">SQL Schema Templating &amp; Generation</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../optional-database/contracts/optional-database.gateway.html"><span class="nm">Optional Database Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../optional-database/contracts/optional-database.testplan.html"><span class="nm">Optional Database Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Optional Database</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:40%"></i></span>
+      <span class="conf-val">0.40</span></span></div>
+        <h1 class="doc-title">SQL Schema Templating &amp; Generation</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>SQL Schema Templating &amp; Generation</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Vendor neutrality as the reason templating exists</strong> — Per <a href="http://CLAUDE.md">CLAUDE.md</a>’s Database section, the optional DB layer must remain portable across MySQL, PostgreSQL, SQLite, and Oracle. This portability mandate is what makes a template-plus-render pipeline worthwhile here specifically: the schema is expressed once and specialized per dialect, rather than being one hand-tuned file.</li>
+<li><strong>Database is optional, so schema tooling must be low-friction</strong> — <a href="http://CLAUDE.md">CLAUDE.md</a> states the server runs fully without a database. Because the DB is an opt-in feature, its DDL generation is deliberately kept out of the runtime path and confined to build/dev tooling, so users who never enable persistence pay no cost and contributors who do touch the schema have a single guarded entry point.</li>
+</ul>
+<h2>Overview</h2>
+<p>This feature is a single-source-of-truth code-generation pipeline for the optional database’s table and index DDL. A developer edits only the vendor-neutral template jsettlers-tables-tmpl.sql; <a href="http://render.py">render.py</a> reads that template (parse_cmdline selects a target DBMS, render_one reads the input, sets up tokens, and renders the output) and emits one concrete jsettlers-tables-*.sql script per supported vendor (MySQL, PostgreSQL, SQLite, Oracle). Those generated scripts are checked into src/main/bin/sql and ship with the server, where SOCDBHelper executes them to create the schema on a fresh database. Because the outputs are derived, they are never hand-edited; instead the Gradle <code>test</code> task re-runs <a href="http://render.py">render.py</a> through testSrcDBTemplateTokens and testSrcDBTemplates and fails the build whenever a checked-in script no longer matches what the template would produce, keeping every vendor variant in lockstep with one canonical definition.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>jsettlers-tables-tmpl.sql</strong> (referenced; defined externally): Authoritative, vendor-neutral definition of the user/score/bot-params table and index DDL; the only file a developer edits when the schema changes.</li>
+<li><strong><a href="http://render.py">render.py</a></strong> (referenced; defined externally): Renders the template into each per-vendor jsettlers-tables-*.sql script; the sequence diagram shows its internal flow (parse_cmdline -&gt; render_one -&gt; read/render/setup_tokens, print_usage for usage).</li>
+<li><strong>jsettlers-tables-*.sql</strong> (referenced; defined externally): Checked-in, ship-with-the-server output artifacts (one per supported DBMS) produced from the template; treated as read-only/derived and never hand-edited.</li>
+<li><strong>testSrcDBTemplateTokens / testSrcDBTemplates</strong> (referenced; defined externally): Build-time guards wired into the <code>test</code> task that re-render the template and fail the build if the checked-in scripts have drifted from it.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>SOCDBHelper (Optional Database runtime)</strong> (outbound) — via Generated src/main/bin/sql/jsettlers-tables-*.sql scripts executed to create the schema (evidence: <a href="http://CLAUDE.md">CLAUDE.md</a> (‘Schema lives in soc.server.database.SOCDBHelper’); generated scripts ship with the server)</li>
+<li><strong>Gradle build (<code>test</code> task)</strong> (inbound) — via testSrcDBTemplateTokens / testSrcDBTemplates re-render the template and compare against checked-in scripts (evidence: <a href="http://CLAUDE.md">CLAUDE.md</a> (‘The <code>test</code> task also runs testSrcDBTemplateTokens and testSrcDBTemplates’); build.gradle)</li>
+<li><strong>Python interpreter (python3/python)</strong> (outbound) — via <a href="http://render.py">render.py</a> is shelled out to via python3/python during codegen/test tasks (evidence: <a href="http://CLAUDE.md">CLAUDE.md</a> (‘Gradle build also shells out to python3/python for several test/codegen tasks’))</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Generate per-vendor SQL from one template rather than maintaining each script by hand</strong>: The codebase must stay vendor-neutral across MySQL, PostgreSQL, SQLite, and Oracle; hand-maintaining four parallel DDL files invites silent divergence. A single template with a render step makes the canonical schema authoritative and the vendor files mechanical, derived artifacts.</li>
+<li><strong>Ship the generated .sql files in the repo instead of rendering them at runtime/install</strong>: Server deployment must not depend on a Python toolchain being present on the production host; checking in the rendered scripts keeps the runtime dependency surface to just the JVM and the DB driver, while Python is needed only at development/build time.</li>
+<li><strong>Enforce template/output consistency as a hard build gate, not a manual convention</strong>: Because the generated files are editable text in the repo, nothing physically prevents a hand-edit that the template can’t reproduce. Wiring testSrcDBTemplateTokens/testSrcDBTemplates into <code>test</code> converts ‘don’t hand-edit’ from a documentation request into a fail-closed CI guard that catches drift on every build.</li>
+<li><strong>Implement the renderer in Python rather than in the Java build</strong>: Token-substitution templating over text is lightweight and lives next to the SQL it transforms; keeping it as a standalone <a href="http://render.py">render.py</a> invoked by Gradle avoids coupling schema generation to the Java compilation graph and lets it be run on demand from the command line.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> Generated jsettlers-tables-*.sql scripts MUST NOT be hand-edited; schema changes MUST be made in jsettlers-tables-tmpl.sql and regenerated via <a href="http://render.py">render.py</a>. — build.gradle (testSrcDBTemplates / testSrcDBTemplateTokens wired into the <code>test</code> task); <a href="http://CLAUDE.md">CLAUDE.md</a> Database section</li>
+<li><strong>[HARD]</strong> The checked-in per-vendor scripts MUST stay consistent with the template or the build fails. — build.gradle::testSrcDBTemplates (consistency verification in the <code>test</code> task)</li>
+<li><strong>[SOFT]</strong> Schema DDL SHOULD remain vendor-neutral across MySQL, PostgreSQL, SQLite, and Oracle. — <a href="http://CLAUDE.md">CLAUDE.md</a> Database section (vendor-neutral requirement)</li>
+<li><strong>[HARD]</strong> Rendering and the template-consistency tests require a python3/python interpreter on PATH. — <a href="http://CLAUDE.md">CLAUDE.md</a> (‘Gradle build also shells out to python3/python for several test/codegen tasks’)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — Drift between the SQL template and the generated per-vendor scripts is detected automatically and fails the build, preventing inconsistent schema artifacts from shipping. — build.gradle (testSrcDBTemplateTokens, testSrcDBTemplates run by <code>test</code>)</li>
+<li><strong>maintainability</strong> — Schema DDL has a single editable source (the template); all vendor variants are derived, eliminating multi-file hand-synchronization. — <a href="http://CLAUDE.md">CLAUDE.md</a> Database section (template + <a href="http://render.py">render.py</a> single-source workflow)</li>
+<li><strong>error-handling</strong> — <a href="http://render.py">render.py</a> exposes command-line usage handling (print_usage) for invalid/missing arguments when invoked. — .diagram_sequence_0 (parse_cmdline -&gt; print_usage)</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Sequence 0</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}, 'sequence': {'mirrorActors': false, 'useMaxWidth': true, 'wrap': true, 'actorMargin': 40}}}%%
+sequenceDiagram
+    autonumber
+    participant main as main
+    participant render_one as render_one
+    participant parse_cmdline as parse_cmdline
+    participant read as read
+    participant render as render
+    participant setup_tokens as setup_tokens
+    participant print_usage as print_usage
+    participant len as len
+    participant getResourceRollStats as getResourceRollStats
+
+    main ->> render_one: render_one(dbtype, infile, outfile, compfile)
+    main ->> parse_cmdline: parse_cmdline()
+    render_one ->> read: public ArrayList<Integer> read(final JsonReader…
+    render_one ->> render: render(in_str)
+    render_one ->> setup_tokens: setup_tokens(dbtype, infile_name)
+    parse_cmdline ->> print_usage: print_usage()
+    parse_cmdline ->> len: private static final int len(final SOCPlayer pl,…
+    len ->> getResourceRollStats: public int[] getResourceRollStats()
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Template-driven SQL generation (single source of truth)</code></li>
+<li><code class="code-ref" title="source file in your repository">Template render script</code></li>
+<li><code class="code-ref" title="source file in your repository">render.py entry/render flow</code></li>
+<li><code class="code-ref" title="source file in your repository">Generated per-vendor schema scripts</code></li>
+<li><code class="code-ref" title="source file in your repository">Consistency-enforcing build tasks</code></li>
+<li><code class="code-ref" title="source file in your repository">Runtime schema consumer</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">sql-schema-templating-generation.feature.md</span>
+Scope architecture: <a href="optional-database.arch.html">optional-database.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Template-driven SQL generation (single source of truth)</td>
+<td></td>
+<td>src/main/bin/sql/template/jsettlers-tables-tmpl.sql</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Template render script</td>
+<td><a href="http://render.py">render.py</a> - Simple template renderer for SQL DML/DDL to specific DBMS types.</td>
+<td>src/main/bin/sql/template/render.py</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Generated per-vendor schema scripts</td>
+<td></td>
+<td>src/main/bin/sql/jsettlers-tables-mysql.sql</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Consistency-enforcing build tasks</td>
+<td>Sammys-Settlers build script for gradle 6 or 7</td>
+<td>build.gradle</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Runtime schema consumer</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+<h2>Unverified Areas</h2>
+<p>Parts of this document have limited verifiable source evidence — treat normative claims as unverified until confirmed. See <a href="../documentation-conventions.html#unverified-areas">documentation conventions</a>.</p>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="135.7"/>
+        </svg>
+        <div class="ring-num">0.40</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -26,6 +26,8 @@ export interface BoardSVGProps {
   highlightNodes?: number[];
   /** Edge coords to render as clickable targets (e.g. legal roads). */
   highlightEdges?: number[];
+  /** Hex coords to make clickable (e.g. legal robber / pirate destinations). */
+  highlightHexes?: number[];
   onNodeClick?: (coord: number) => void;
   onEdgeClick?: (coord: number) => void;
   onHexClick?: (coord: number) => void;
@@ -75,6 +77,7 @@ export function BoardSVG({
   playerColors,
   highlightNodes,
   highlightEdges,
+  highlightHexes,
   onNodeClick,
   onEdgeClick,
   onHexClick,
@@ -95,6 +98,7 @@ export function BoardSVG({
   const edgePieces = pieces.filter((p) => p.ptype === PIECE_ROAD || p.ptype === PIECE_SHIP);
   const structurePieces = pieces.filter((p) => p.ptype === PIECE_SETTLEMENT || p.ptype === PIECE_CITY);
   const robberHex = board.hexes.find((hex) => hex.coord === board.robberHex);
+  const clickableHexes = highlightHexes !== undefined ? new Set(highlightHexes) : null;
 
   return (
     <svg
@@ -124,7 +128,13 @@ export function BoardSVG({
           <HexTile
             key={hex.coord}
             hex={hex}
-            onClick={interactive && onHexClick ? onHexClick : undefined}
+            onClick={
+              interactive &&
+              onHexClick &&
+              (clickableHexes === null || clickableHexes.has(hex.coord))
+                ? onHexClick
+                : undefined
+            }
           />
         ))}
       </g>

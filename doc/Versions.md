@@ -34,6 +34,11 @@ JARs for recent Sammys-Settlers versions can be downloaded from
 - I18N:
 	- Added German translation (thank you Eudoxia and Quasigroup)
 	- Updated Polish translation (thank you KotCzarny)
+	- Python i18n properties tests now validate translated-key placeholder parity against base bundles:
+	    - Catches missing argument indexes and mismatched SoC-special placeholders such as `{0,rsrcs}`, `{0,list}`, and `{0,dcards}`
+	    - Allows normal MessageFormat pluralization differences such as `number` versus `choice`
+	    - Also reports locale keys absent from the base bundle
+	- Bugfix: Spanish and French client strings for `account.msg.applet_destroyed` now preserve required argument `{0}`
 - Client:
 	- Game window:
 	    - For visibility when a player builds, highlight most recently placed piece until end of their turn
@@ -63,6 +68,15 @@ JARs for recent Sammys-Settlers versions can be downloaded from
 	        - Ctrl/Cmd-B: Buy a Development Card, only in games of 4 or fewer players; in 6-player games Ctrl/Cmd-B stays the existing "Ask Special Build" shortcut
 	        - Existing shortcuts unchanged: Ctrl-R Roll, Ctrl-D Done; new build shortcuts are no-ops unless the action is currently legal
 	    - Bot trade auto-reject countdown timer text is now always shown on its own line below the Accept/Reject/Counter buttons (previously could overlap them in the compact narrow layout)
+	    - Trade composer now shows a compact summary of selected give/get resources and live bank/port hints based on the player's current 4:1 bank, 3:1 port, or 2:1 resource-port rate; the Bank/Port button tooltip shows the same live hint
+	    - Incoming trade offer and counteroffer panels now include compact human-readable resource summaries
+	    - Counteroffers now start from the original offer, mirrored from the client's point of view, and show a live "Change" line while editing so players can compare the counteroffer quickly
+	    - New non-modal Event Timeline window for the game window:
+	        - Shows recent game-action text separately from chat, with a longer 500-line history than the visible game text area
+	        - Open from the game text area's context menu or with Ctrl/Cmd-T
+	        - Search with Previous/Next and match count
+	        - Auto-scroll can be paused while reading older events; Latest jumps back to the end
+	        - Copy All button copies the current timeline for debugging, teaching, or manual replay review
 	    - Board rendering quality and accessibility (set in the new Preferences dialog):
 	        - Optional antialiasing (smooth board drawing) and selectable board image scaling quality (Nearest / Bilinear / Bicubic)
 	        - Color-blind assist mode (Off / Deuteranopia / Protanopia / Tritanopia) remaps the solid-color UI: resource counters, trade dialogs, building costs, dice-number circles on hexes, piece fallback colors, and the pirate-path line

@@ -7,9 +7,10 @@ import {
   type PortTypeName,
   type FacingName,
   HEX_TYPE_NAMES,
-  PORT_TYPE_NAMES,
+  CANONICAL_PORT_TYPE_NAMES,
   FACING_NAMES,
   SUPPORTED_PLAYER_COUNTS,
+  canonicalPortTypeName,
 } from '../mapSchema';
 import type { EditorTool } from './EditorCanvas';
 import type { HexKind } from '../../board/types';
@@ -235,12 +236,12 @@ export function EditorPalette(props: EditorPaletteProps): JSX.Element {
             data-testid="editor-port-type"
             aria-label="Port type"
             className={styles.select}
-            value={portType}
-            onChange={(e) => onPortTypeChange(e.target.value as PortTypeName)}
+            value={canonicalPortTypeName(portType)}
+            onChange={(e) => onPortTypeChange(canonicalPortTypeName(e.target.value))}
           >
-            {PORT_TYPE_NAMES.map((t) => (
+            {CANONICAL_PORT_TYPE_NAMES.map((t) => (
               <option key={t} value={t}>
-                {t === 'misc' || t === '3:1' ? '3:1 (misc)' : t}
+                {t === 'misc' ? '3:1 (misc)' : t}
               </option>
             ))}
           </select>

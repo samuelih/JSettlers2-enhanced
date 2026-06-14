@@ -1,0 +1,144 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Source Doc Redocumentation: Cities &amp; Knights Design · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Source Document Redocumenta…</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:75%"></i></span>
+      <span class="conf-val">0.75</span></span></div>
+        <h1 class="doc-title">Source Doc Redocumentation: Cities &amp; Knights Design</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Source Doc Redocumentation: Cities &amp; Knights Design</h1>
+<h2>Overview</h2>
+<p>This deterministic SGD record represents one source markdown document discovered during Stage 0. It preserves the source path, section map, and bounded digest so the generated corpus can prove that the input document was seen and carried forward. It is not a ratified replacement for the source file; unresolved claims remain obligations for deeper synthesis or human review.</p>
+<h2>Source Document</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">doc/Cities-and-Knights-Design.md</code></li>
+</ul>
+<h2>Section Inventory</h2>
+<ul>
+<li>H1 Cities &amp; Knights Design</li>
+<li>H2 1. Honest verdict up front</li>
+<li>H2 2. Scope &amp; phasing</li>
+<li>H3 Phase 0 — Groundwork (this release)</li>
+<li>H3 Phase 1 — Non-commodity mechanics</li>
+<li>H3 Phase 2 — Commodity / 6th-resource refactor</li>
+<li>H3 Phase 3 — Progress cards + knights + client UI</li>
+<li>H3 Phase 4 — Bot competence</li>
+<li>H2 3. Key representation decisions (with rationale and cited patterns)</li>
+<li>H3 3.1 Knights are city-linked player state, NOT a new <code>SOCPlayingPiece</code></li>
+<li>H3 3.2 City improvements are <code>SOCSpecialItem</code> typed entries with levels 1-5 per track</li>
+<li>H3 3.3 Progress cards are a <code>SOCInventoryItem</code> subclass, following <code>SC_FTRI</code></li>
+<li>H3 3.4 Barbarian attack is a <code>SOCGame</code> counter advanced in <code>rollDice()</code>, following <code>SC_PIRI</code></li>
+<li>H3 3.5 Metropolis is an automatic VP award to the track leader</li>
+<li>H3 3.6 VP target 13 via the existing <code>VP</code> option</li>
+<li>H2 4. Bot impact summary</li>
+<li>H2 5. The commodity problem, honestly</li>
+<li>H3 5.1 Why the constants break</li>
+<li>H3 5.2 Blast radius (verified)</li>
+<li>H3 5.3 Migration plan</li>
+<li>H2 6. Game option &amp; scenario surface</li>
+<li>H3 6.1 Reserved <code>_CK_*</code> options</li>
+<li>H3 6.2 <code>K_SC_CK</code> scenario stub</li>
+<li>H2 7. Cross-references</li>
+</ul>
+<h2>Content Digest</h2>
+<pre><code># Cities &amp; Knights Design
+
+&gt; **Status update:** Phases 1–3 of this design are now **implemented** — the `SC_CK`
+&gt; scenario is playable. See Cities-and-Knights-Implemented.md (Cities-and-Knights-Implemented.md)
+&gt; for the shipped rules, wire protocol, and the simplifications relative to the boxed game.
+&gt; Commodities shipped as separate per-player counters (the &quot;separate optional dimension&quot; of
+&gt; section 5.3) rather than the full `SOCResourceSet` refactor; Phase 4 (bot competence)
+&gt; remains future work. The rest of this document is the original design rationale.
+
+This is a **decision-complete design document** for adding *Cities &amp; Knights*-style rules
+to Sammys-Settlers. It was written before implementation so that the groundwork
+(reserved game options, a disabled scenario stub, two flag-hidden prototypes, and proposed
+message sequences) was built against an agreed plan, and so the multi-release roadmap that
+follows could be picked up one independently-shippable phase at a time.
+
+It replaces and expands the one-line TODO entry &quot;Cities &amp; Knights support&quot; in
+Readme.developer.md (Readme.developer.md). Proposed network message sequences for the new
+actions live in the clearly-marked PROPOSED section at the end of
+Message-Sequences-for-Game-Actions.md (Message-Sequences-for-Game-Actions.md); protocol
+review should happen against that section before any of those messages are implemented.
+
+Throughout, every design decision cites the existing Sammys-Settlers pattern it reuses, so that
+the eventual implementation imitates proven code rather than inventing new mechanisms.
+
+
+## 1. Honest verdict up front
+
+A playable Cities &amp; Knights is **not** achievable in a single initiative, and this document
+does not pretend otherwise. The blocking item is structural, not just effort: Cities &amp; Knights
+adds three commodities (cloth, coin, paper) on top of the five base resources, and the entire
+Sammys-Settlers codebase assumes exactly five resources. See section 5 (#5-the-commodity-problem-honestly)
+for the full analysis. On top of commodities, Cities &amp; Knights needs knight semantics that
+conflict with the existing meaning of &quot;knight&quot; (dev-card count feeding Largest Army), a
+progress-card deck, a barbarian state machine, metropolis tracking, client UI, and bot strategy.
+
+What *is* realistic now, and what the groundwork in this release commits to:
+
+[...digest truncated by CodeLens...]
+</code></pre>
+<h2>Redocumentation Obligations</h2>
+<ul>
+<li>Preserve this source document’s claims in a generated feature, design, architecture, gateway, testplan, or invariant record before treating the corpus as a full semantic replacement for the original docs tree.</li>
+<li>Reconcile any conflict between this digest and direct source-code evidence through the source-truth audit, not by repeating doc-only claims as implemented behavior.</li>
+</ul>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">doc/Cities-and-Knights-Design.md</code></li>
+</ul>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="56.5"/>
+        </svg>
+        <div class="ring-num">0.75</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

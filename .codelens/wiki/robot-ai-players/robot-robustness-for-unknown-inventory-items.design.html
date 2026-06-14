@@ -1,0 +1,313 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Robot robustness for unknown inventory items · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../robot-ai-players/robot-ai-players.arch.html"><span class="nm">Robot / AI Players</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.api-boundary.html"><span class="nm">Robot / AI Players API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-client-networking-socrobotclient.design.html"><span class="nm">Robot client networking (SOCRobotClient)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-decision-loop-socrobotbrain.design.html"><span class="nm">Robot decision loop (SOCRobotBrain)</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../robot-ai-players/robot-robustness-for-unknown-inventory-items.design.html"><span class="nm">Robot robustness for unknown inventory items</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/third-party-bot-extension-framework-sample3p.design.html"><span class="nm">Third-party bot extension framework (sample3p)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.gateway.html"><span class="nm">Robot / AI Players Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.testplan.html"><span class="nm">Robot / AI Players Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Robot / AI Players</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:50%"></i></span>
+      <span class="conf-val">0.50</span></span></div>
+        <h1 class="doc-title">Robot robustness for unknown inventory items</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Robot robustness for unknown inventory items</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Forward-compat for Cities &amp; Knights / custom-scenario item types</strong> — doc/Improvements-2026-06.md (commits 48c4989, 989675a) records that C&amp;K and custom-scenario groundwork can surface inventory items a built-in bot was never coded to place, and that the bot previously hung on them. The graceful-cancel path exists so new scenario item types can be added without first teaching every bot a placement strategy — the distinctive driver for this component, beyond the platform’s general bot-extensibility goal.</li>
+</ul>
+<h2>Overview</h2>
+<p>The feature lives entirely inside SOCRobotBrain, the per-game bot decision thread whose run() loop consumes server messages from gameEventQ and reacts through its expect/waitingFor flag fields. When the game reaches the inventory-item placement state — tracked by expectPLACING_INV_ITEM — the brain tries to place the pending SOCInventoryItem via planAndPlaceInvItem, where scenario-specific handlers such as planAndPlaceInvItemPlacement_SC_FTRI cover item types the bot knows. For an item type the bot has no strategy for, the hypothesized fallbackUnknownInvItemPlacement issues a cancellation so the placement is declined rather than left pending, and rejectedPlayInvItem records the item so the same itype is not retried this turn. Bounded retry counters (failedBuildingAttempts vs MAX_DENIED_BUILDING_PER_TURN) and the per-second counter watchdog ensure the bot yields its turn rather than blocking the game.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCRobotBrain.run() message loop</strong> (referenced; defined externally): Per-game bot decision thread; consumes server messages from gameEventQ and reacts via the expect/waitingFor flag fields. Hosts the dispatch that drives all bot placement, including the PLACING_INV_ITEM path.</li>
+<li><strong>planAndPlaceInvItem / planAndPlaceInvItemPlacement_SC_FTRI</strong> (referenced; defined externally): Plans and emits placement for a pending inventory item; scenario-specific handlers (e.g. SC_FTRI) cover the item types the built-in bot recognizes.</li>
+<li><strong>fallbackUnknownInvItemPlacement</strong>: Default path (hypothesized) for an inventory-item type with no matching placement strategy: cancels the placement so play continues instead of the brain hanging waiting to act.</li>
+<li><strong>rejectedPlayInvItem field</strong> (referenced; defined externally): Per-turn memory of a SOCInventoryItem whose play the server rejected, so the bot does not loop re-attempting the same itype that turn.</li>
+<li><strong>expectPLACING_INV_ITEM flag</strong> (referenced; defined externally): State-expectation flag marking that an inventory-item placement is pending, mirrored into debugPrintBrainStatus for inspection.</li>
+<li><strong>SOCInventoryItem</strong>: The item being placed; carries the itype the brain branches on. Imported, not owned here.</li>
+<li><strong>SOCGame</strong>: Authoritative game/turn/placement state the brain reads and mutates. Imported, not owned here.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>SOCGame</strong> (outbound) — via import soc.game.SOCGame; protected SOCGame game field drives turn/placement state (evidence: src/main/java/soc/robot/SOCRobotBrain.java imports SOCGame and holds <code>protected SOCGame game</code>)</li>
+<li><strong>SOCInventoryItem</strong> (inbound) — via import soc.game.SOCInventoryItem; rejectedPlayInvItem field holds the item type branched on (evidence: src/main/java/soc/robot/SOCRobotBrain.java::rejectedPlayInvItem)</li>
+<li><strong>SOCRobotClient</strong> (inbound) — via constructor SOCRobotBrain(SOCRobotClient rc, …); client field; server messages delivered through gameEventQ (evidence: src/main/java/soc/robot/SOCRobotBrain.java constructor and <code>protected SOCRobotClient client</code>)</li>
+<li><strong>soc.server.SOCForceEndTurnThread</strong> (inbound) — via server-side forced turn-end backstops an inactive bot (evidence: SOCRobotBrain class javadoc (“the server may force an inactive bot to end its turn”))</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Provide a generic fallback-cancel path for unrecognized inventory items rather than requiring a placement strategy per item type.</strong>: A built-in bot cannot enumerate every future inventory-item type that Cities &amp; Knights or custom scenarios may introduce. A default decline keeps the bot forward-compatible: new item types can ship before any bot learns to play them, without stalling games that seat built-in bots.</li>
+<li><strong>Track a single rejectedPlayInvItem per turn instead of counting inventory-item rejections.</strong>: The field’s own TODO comment reasons that a rejection counter is unnecessary because the bot will run out of other things to build/play and thus cannot loop forever; remembering the offending itype is enough to avoid immediate re-attempts.</li>
+<li><strong>Enforce liveness with bounded retries and the per-second counter watchdog rather than blocking until a valid action exists.</strong>: Robustness here means the game keeps moving: declining to act must never hang the thread. Capped denied-build attempts plus a counter that abandons the game when it grows too high make giving up the safe default.</li>
+<li><strong>Route the cancel through the normal SOCMessage protocol used by all clients.</strong>: Bots connect and speak exactly like human clients, so a declined placement needs no special server path; the cancel reuses existing cancel/decline message handling.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> The brain MUST stop attempting builds/placements after MAX_DENIED_BUILDING_PER_TURN (3) server-denied requests in a turn, preventing an infinite retry loop on a placement it cannot complete. — src/main/java/soc/robot/SOCRobotBrain.java::MAX_DENIED_BUILDING_PER_TURN (=3), counted via failedBuildingAttempts</li>
+<li><strong>[SOFT]</strong> After the server rejects play of an inventory item, the brain SHOULD NOT re-attempt the same itype during the same turn. — src/main/java/soc/robot/SOCRobotBrain.java::rejectedPlayInvItem (javadoc: “Should not attempt to play an item of the same itype again this turn”)</li>
+<li><strong>[HARD]</strong> The bot MUST NOT block the game indefinitely while unable to act; the brain abandons the game (alive=false) once its activity counter grows too high. — src/main/java/soc/robot/SOCRobotBrain.java::counter (“If counter gets too high, we assume a bug and leave the game”)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — The bot thread self-terminates if its counter (incremented once per second by SOCTimingPing) grows too high, assuming a bug, so a stuck inventory-item placement cannot permanently stall the game. — src/main/java/soc/robot/SOCRobotBrain.java::counter</li>
+<li><strong>reliability</strong> — The server can force an inactive bot to end its turn, providing a second line of defense so a non-responding bot cannot block the game. — SOCRobotBrain class javadoc references soc.server.SOCForceEndTurnThread</li>
+<li><strong>observability</strong> — The brain exposes its full expect/waitingFor state — including expectPLACING_INV_ITEM and rejectedPlayInvItem — through debugPrintBrainStatus for diagnosing stuck or cancelled placements. — src/main/java/soc/robot/SOCRobotBrain.java::debugPrintBrainStatus</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Per-turn memory of a server-rejected inventory item so the bot won’t loop on the same unplaceable itype.</em>
+<em>Source: <code>src/main/java/soc/robot/SOCRobotBrain.java</code></em></p>
+<pre><code>protected SOCInventoryItem rejectedPlayInvItem;
+</code></pre>
+<p><em>State-expectation flag the run() loop uses to recognize that an inventory-item placement is pending.</em>
+<em>Source: <code>src/main/java/soc/robot/SOCRobotBrain.java</code></em></p>
+<pre><code>protected boolean expectPLACING_INV_ITEM;
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCRobotBrain {
+        +SOCRobotBrain()
+        +public SOCRobotParameters getRobotParameters()
+        +public SOCRobotClient getClient()
+        +public SOCPlayerTracker[] getPlayerTrackers()
+        +public SOCPlayerTracker getOurPlayerTracker()
+        +public void addPlayerTracker(int pn)
+        +public SOCGame getGame()
+        +public SOCPlayer getOurPlayerData()
+        +public final int getOurPlayerNumber()
+        +public SOCBuildPlanStack getBuildingPlan()
+        +public void resetBuildingPlan()
+        +public SOCRobotDM getDecisionMaker()
+        +public OpeningBuildStrategy getOpeningBuildStrategy()
+        +public void turnOnDRecorder()
+        +public void turnOffDRecorder()
+        +public DebugRecorder getDRecorder()
+        +public DebugRecorder getOldDRecorder()
+        +public SOCPossiblePiece getLastMove()
+        +public SOCPossiblePiece getLastTarget()
+        +public void setOurPlayerData()
+        -protected void setStrategyFields()
+        +debugPrintBrainStatus()
+        -debugPrintTurnMessages()
+        +@Override
+    public void run()
+        -protected void handleGAMESTATE(final int newState)
+        -handleBOTGAMEDATACHECK()
+        -handleDECLINEPLAYERREQUEST()
+        -protected void resetFieldsAndBuildingPlan()
+        -protected void resetFieldsAtEndTurn()
+        -protected boolean considerScenarioTurnFinalActions()
+        -protected void planAndDoActionForPLAY1()
+        -protected void handleDICERESULT(SOCDiceResult mes)
+        -protected void robberMoved(final int newHex)
+        -protected void handleROBBERYRESULT(SOCRobberyResult mes)
+        -protected void tradeStopWaitingClearOffer()
+        -private void playKnightCardIfShould()
+        -protected void placeIfExpectPlacing()
+        -private void playKnightCard()
+        -protected void rollOrPlayKnightOrExpectDice()
+        -buildOrGetResourceByTradeOrCard()
+        -planAndPlaceInvItem()
+        -fallbackUnknownInvItemPlacement()
+        -planAndPlaceInvItemPlacement_SC_FTRI()
+        -handlePUTPIECE_updateGameData()
+        -handleCANCELBUILDREQUEST()
+        -private void handleUNDOPUTPIECE(final SOCUndoPutPiece mes)
+        -handleTradeResponse()
+        -protected void handleMAKEOFFER(SOCMakeOffer mes)
+        -protected void handleREJECTOFFER(SOCRejectOffer mes)
+        -protected void handleDEVCARDACTION(SOCDevCardAction mes)
+        +handlePUTPIECE_updateTrackers()
+        -protected void buildRequestPlannedPiece()
+        -protected void planBuilding()
+        -protected void handlePLAYERELEMENTS(SOCPlayerElements mes)
+        -@SuppressWarnings(
+        -handlePLAYERELEMENT_numRsrc()
+        -trackNewSettlement()
+        -trackNewCity()
+        -trackNewRoadOrShip()
+        -cancelWrongPiecePlacement()
+        -cancelWrongPiecePlacementLocal()
+        +public void kill()
+        +public void pause(int msec)
+        -placeFirstSettlement()
+        -placeInitSettlement()
+        -protected void planAndPlaceInitRoad()
+        -protected void moveRobber()
+        -protected void discard(final int numDiscards)
+        -protected boolean tradeWithBank(SOCBuildPlan buildPlan)
+        -protected int considerOffer(SOCTradeOffer offer)
+        -protected boolean makeOffer(SOCBuildPlan buildPlan)
+        -protected boolean makeCounterOffer(SOCTradeOffer offer)
+        +clearTradingFlags()
+        +public void setDoneTrading(final boolean isDone)
+        -handleResources()
+        -protected SOCRobotDM createDM()
+        +public void recreateDM()
+        -protected SOCRobotNegotiator createNegotiator()
+        -createEstimatorFactory()
+        -protected void startTurnMainActions()
+        -protected boolean endTurnActions()
+        -protected void handleGAMESTATS(SOCGameStats message)
+        +public SOCBuildingSpeedEstimate getEstimator()
+        +getEstimatorFactory()
+        -protected void debugInfo()
+        -protected void printResources()
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_robot_SOCRobotBrain_java["SOCRobotBrain.java"]
+
+
+    ext_src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java["SOCDisplaylessPlayerClient.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java
+    ext_src_main_java_soc_game_SOCBoard_java["SOCBoard.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoard_java
+    ext_src_main_java_soc_game_SOCBoardLarge_java["SOCBoardLarge.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoardLarge_java
+    ext_src_main_java_soc_game_SOCCity_java["SOCCity.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCCity_java
+    ext_src_main_java_soc_game_SOCDevCardConstants_java["SOCDevCardConstants.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCDevCardConstants_java
+    ext_src_main_java_soc_game_SOCGame_java["SOCGame.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    ext_src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    ext_src_main_java_soc_game_SOCInventory_java["SOCInventory.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCInventory_java
+    ext_src_main_java_soc_game_SOCInventoryItem_java["SOCInventoryItem.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCInventoryItem_java
+    ext_src_main_java_soc_game_SOCPlayer_java["SOCPlayer.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayer_java
+    ext_src_main_java_soc_game_SOCPlayerNumbers_java["SOCPlayerNumbers.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayerNumbers_java
+    ext_src_main_java_soc_game_SOCPlayingPiece_java["SOCPlayingPiece.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayingPiece_java
+    ext_src_main_java_soc_game_SOCResourceConstants_java["SOCResourceConstants.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceConstants_java
+    ext_src_main_java_soc_game_SOCResourceSet_java["SOCResourceSet.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceSet_java
+    ext_src_main_java_soc_game_SOCRoad_java["SOCRoad.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoad_java
+    ext_src_main_java_soc_game_SOCRoutePiece_java["SOCRoutePiece.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoutePiece_java
+    ext_src_main_java_soc_game_SOCSettlement_java["SOCSettlement.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCSettlement_java
+    ext_src_main_java_soc_game_SOCShip_java["SOCShip.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCShip_java
+    ext_src_main_java_soc_game_SOCSpecialItem_java["SOCSpecialItem.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCSpecialItem_java
+    ext_src_main_java_soc_game_SOCTradeOffer_java["SOCTradeOffer.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCTradeOffer_java
+    ext_src_main_java_soc_message_SOCBotGameDataCheck_java["SOCBotGameDataCheck.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_message_SOCBotGameDataCheck_java
+    ext_src_main_java_soc_message_SOCUndoPutPiece_java["SOCUndoPutPiece.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_message_SOCUndoPutPiece_java
+    ext_src_main_java_soc_util_CappedQueue_java["CappedQueue.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_util_CappedQueue_java
+    ext_src_main_java_soc_util_DebugRecorder_java["DebugRecorder.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_util_DebugRecorder_java
+    ext_src_main_java_soc_util_SOCRobotParameters_java["SOCRobotParameters.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_util_SOCRobotParameters_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Bot decision loop dispatching placement requests</code></li>
+<li><code class="code-ref" title="source file in your repository">Graceful cancel of unknown inventory-item placement in bot brain</code></li>
+<li><code class="code-ref" title="source file in your repository">Per-turn rejected inventory-item guard</code></li>
+<li><code class="code-ref" title="source file in your repository">PLACING_INV_ITEM state expectation flag</code></li>
+<li><code class="code-ref" title="source file in your repository">Denied-build/placement retry cap</code></li>
+<li><code class="code-ref" title="source file in your repository">Inventory item presented to the bot for placement</code></li>
+<li><code class="code-ref" title="source file in your repository">Game state driving placement/turn flow</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">robot-robustness-for-unknown-inventory-items.feature.md</span>
+Scope architecture: <a href="robot-ai-players.arch.html">robot-ai-players.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Bot decision loop dispatching placement requests</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java:838-901</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Inventory item presented to the bot for placement</td>
+<td></td>
+<td>src/main/java/soc/game/SOCInventoryItem.java:223-234</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Game state driving placement/turn flow</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java:1637-1732</td>
+<td style="text-align:right">0.95</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="113.1"/>
+        </svg>
+        <div class="ring-num">0.50</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

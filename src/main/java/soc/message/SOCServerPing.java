@@ -104,7 +104,14 @@ public class SOCServerPing extends SOCMessage
      */
     public static SOCServerPing parseDataStr(String s)
     {
-        return new SOCServerPing(Integer.parseInt(s));
+        try
+        {
+            return new SOCServerPing(Integer.parseInt(s));
+        }
+        catch (NumberFormatException e)
+        {
+            return null;
+        }
     }
 
     /**

@@ -89,6 +89,18 @@ describe('LobbyScreen game-list loading state', () => {
     expect(screen.queryByTestId('game-list-loading')).not.toBeInTheDocument();
     expect(screen.getByTestId('game-list')).toBeInTheDocument();
   });
+
+  it('labels join buttons with their game names', () => {
+    renderLobby();
+    act(() => {
+      useGameStore.getState().setGames([
+        { name: 'Harbor Table', options: 'PL=4', started: false },
+      ]);
+    });
+    expect(
+      screen.getByRole('button', { name: 'Join game Harbor Table' }),
+    ).toBeInTheDocument();
+  });
 });
 
 describe('LobbyScreen expansion choices', () => {

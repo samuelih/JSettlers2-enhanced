@@ -5,11 +5,11 @@
 #
 # Usage:
 #   web/scripts/start-test-server.sh [--tcp PORT] [--ws PORT] [--bots N] [--foreground]
-# Env overrides: JS_TCP_PORT, JS_WS_PORT, JS_BOTS, JAVA_BIN
+# Env overrides: JS_TCP_PORT, JS_WS_PORT, JS_BOTS, JAVA_BIN, JS_SERVER_CLASSPATH
 #
 # Defaults: TCP 8881, WS 8888, 7 bots. Writes a log to /tmp/js-web-server.log and prints
 # the PID. Requires the project to have been compiled at least once:
-#   JAVA_HOME=/opt/homebrew/opt/openjdk@17 gradle compileJava processResources
+#   JAVA_HOME=/opt/homebrew/opt/openjdk@17 gradle compileJava processResources copyRuntimeLibs
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -32,16 +32,34 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-find_jar() { find "$HOME/.gradle/caches" -name "$1" 2>/dev/null | head -1; }
-GSON="$(find_jar 'gson-2.8.6.jar')"
-JWS="$(find_jar 'Java-WebSocket-1.5.6.jar')"
-SLF4J="$(find_jar 'slf4j-api-2.0.6.jar')"
-if [ -z "$JWS" ]; then
-  echo "Java-WebSocket jar not found in gradle cache. Run: gradle compileJava (downloads deps)." >&2
+MAIN_CLASSES="build/classes/java/main"
+MAIN_RES="build/resources/main"
+RUNTIME_LIB_DIR="build/runtime-libs"
+
+if [ ! -d "$MAIN_CLASSES" ] || [ ! -d "$MAIN_RES" ]; then
+  echo "Compiled server classes/resources not found under build/." >&2
+  echo "Run: JAVA_HOME=/opt/homebrew/opt/openjdk@17 gradle compileJava processResources copyRuntimeLibs" >&2
   exit 1
 fi
 
-CP="build/classes/java/main:build/resources/main:src/main/resources:$GSON:$JWS:$SLF4J"
+runtime_classpath() {
+  if [ -n "${JS_SERVER_CLASSPATH:-}" ]; then
+    printf '%s\n' "$JS_SERVER_CLASSPATH"
+    return
+  fi
+
+  local runtime_jars=("$RUNTIME_LIB_DIR"/*.jar)
+  if [ ! -e "${runtime_jars[0]}" ]; then
+    echo "Runtime jars not found in $RUNTIME_LIB_DIR." >&2
+    echo "Run: JAVA_HOME=/opt/homebrew/opt/openjdk@17 gradle copyRuntimeLibs" >&2
+    echo "Or set JS_SERVER_CLASSPATH to a colon-separated runtime classpath." >&2
+    exit 1
+  fi
+
+  printf '%s\n' "$RUNTIME_LIB_DIR/*"
+}
+
+CP="$MAIN_CLASSES:$MAIN_RES:src/main/resources:$(runtime_classpath)"
 LOG=/tmp/js-web-server.log
 : > "$LOG"
 
@@ -61,7 +79,9 @@ if [ "$FOREGROUND" = "1" ]; then
   exec "$JAVA_BIN" "${JVM_ARGS[@]}" -cp "$CP" "${ARGS[@]}"
 fi
 
-"$JAVA_BIN" "${JVM_ARGS[@]}" -cp "$CP" "${ARGS[@]}" > "$LOG" 2>&1 &
+# Use nohup so the documented background mode survives non-interactive shells
+# such as CI steps and Codex command sessions.
+nohup "$JAVA_BIN" "${JVM_ARGS[@]}" -cp "$CP" "${ARGS[@]}" > "$LOG" 2>&1 < /dev/null &
 PID=$!
 echo "PID=$PID  log=$LOG"
 

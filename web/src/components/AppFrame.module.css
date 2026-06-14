@@ -93,6 +93,10 @@
   gap: var(--space-1);
 }
 
+.nav button {
+  min-height: max(2.75rem, 44px);
+}
+
 .divider {
   width: 1px;
   height: 1.5rem;
@@ -105,8 +109,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: max(2.75rem, 44px);
+  height: max(2.75rem, 44px);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
@@ -175,8 +179,8 @@
   }
 
   .themeToggle {
-    width: 2rem;
-    height: 2rem;
+    width: max(2.75rem, 44px);
+    height: max(2.75rem, 44px);
     font-size: var(--font-size-md);
   }
 

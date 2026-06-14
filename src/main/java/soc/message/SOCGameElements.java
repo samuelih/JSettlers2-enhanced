@@ -131,7 +131,7 @@ public class SOCGameElements extends SOCMessageTemplateMi
          *<P>
          * Not sent to clients over network; used only by {@link soc.server.savegame.SavedGameModel}
          * when gameState is {@link SOCGame#SPECIAL_BUILDING}.
-         * 
+         *
          * @since 2.3.00
          */
         SPECIAL_BUILDING_AFTER_PLAYER(7),
@@ -420,7 +420,7 @@ public class SOCGameElements extends SOCMessageTemplateMi
         for (int i = 0; i < pieces.length; ++i)
         {
             String piece = pieces[i];  // "e5=9"
-            if (piece.charAt(0) != 'e')
+            if (piece.isEmpty() || (piece.charAt(0) != 'e'))
                 return null;
 
             int j = piece.indexOf('=');

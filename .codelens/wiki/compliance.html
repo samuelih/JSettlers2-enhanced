@@ -1,0 +1,2297 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compliance · ZimWiki</title>
+<link rel="stylesheet" href="assets/zimwiki.css">
+</head><body>
+<script src="assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item active" href="compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="index.html">Overview</a><span class="sep">/</span>Compliance</div>
+      <div class="doc-head"><div class="doc-kicker"><span class="badge t-scope">Honesty report</span></div>
+        <h1 class="doc-title">Compliance &amp; honesty</h1>
+        <p class="doc-intent">CodeLens records every SGD law your repository's structure could not honestly satisfy. It never fabricates compliance — “accurate, never forced.”</p></div>
+      <div class="compgrid" style="max-width:560px">
+        <div class="compstat fail"><div class="n">59</div><div class="t">Gate failures</div></div>
+        <div class="compstat disc"><div class="n">176</div><div class="t">Disclosures</div></div>
+        <div class="compstat info"><div class="n">45</div><div class="t">Informational</div></div>
+      </div>
+      <div class="prose"><h1>SGD Compliance Report</h1>
+<p>CodeLens records here any SGD law the analyzed repo’s structure could not honestly satisfy — it never fabricates compliance (the “accurate, never forced” principle).</p>
+<h2>Result: 59 gate-failure(s), 176 recorded disclosure(s), 45 informational</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Code</th>
+<th>Law</th>
+<th>Posture</th>
+<th>Docs</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>SGD-UNVERIFIED-DEPENDENCY</code></td>
+<td>Dependency-claim grounding (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>—</td>
+<td>Server &amp; Message Protocol: 1 dependency claim(s) with no backing graph edge — genericServer transport layer: no imports/calls edge src/main/java/soc/server/genericServer/Connection.java::Connection; SOCServerMessageHandler -&gt; Connection (calls x30); SOCGameMessageHandler -&gt; Connection (calls x25) -&gt; WebSocketServerBridge, src/main/java/soc/server/genericServer/Connection.java::Connection; SOCServerMessageHandler -&gt; Connection (calls x30); SOCGameMessageHandler -&gt; Connection (calls x25) -&gt; InboundMessageQueue in code graph</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>SGD-UNVERIFIED-DEPENDENCY</code></td>
+<td>Dependency-claim grounding (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>—</td>
+<td>Desktop Swing Client: 5 dependency claim(s) with no backing graph edge — SOCPlayerClient: no imports/calls edge src/main/java/soc/client/SOCPlayerClient.java::SOCPlayerClient -&gt; MessageHandler, src/main/java/soc/client/SOCPlayerClient.java::SOCPlayerClient -&gt; GameMessageSender, src/main/java/soc/client/SOCPlayerClient.java::SOCPlayerClient -&gt; MainDisplay in code graph; MessageHandler: no imports/calls edge src/main/java/soc/client/MessageHandler.java -&gt; PlayerClientListener, src/main/java/soc/client/MessageHandler.java -&gt; MainDisplay in code graph; GameMessageSender: no imports/calls edge src/main/java/soc/client/GameMessageSender.java::GameMessageSender -&gt; MessageHandler in code graph</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>SGD-UNVERIFIED-DEPENDENCY</code></td>
+<td>Dependency-claim grounding (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>—</td>
+<td>Optional Database: 1 dependency claim(s) with no backing graph edge — Server → persistence facade: no imports/calls edge SOCDBHelper -&gt; SOCServer in code graph</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>SGD-UNVERIFIED-DEPENDENCY</code></td>
+<td>Dependency-claim grounding (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>—</td>
+<td>Web Client &amp; Board Rendering: 3 dependency claim(s) with no backing graph edge — Protocol &amp; WebSocket Connectivity: no imports/calls edge web/src/protocol/SOCMessage.ts::decode, web/src/protocol/SOCMessage.ts::encode, web/src/protocol/SOCMessage.ts::registerParser, web/src/protocol/messages/resourceSet.ts, web/src/protocol/messages/SOCScenarioInfo.ts -&gt; GameConnection in code graph; Board Geometry &amp; SVG Rendering: no imports/calls edge web/src/board/coords.ts::hexToPixel, web/src/board/coords.ts::getAdjacentNodesToHex, web/src/board/BoardSVG.tsx, web/src/board/pieces/HexTile.tsx, web/src/board/pieces/RobberPirate.tsx -&gt; BoardSVG.tsx in code graph; Custom Map Editor: no imports/calls edge web/src/map-editor/mapSchema.ts::fromRaw, web/src/map-editor/mapSchema.ts::serializeMapJson, web/src/map-editor/editorGrid.ts::clampBoardSize, web/src/map-editor/editorActions.ts, web/src/map-editor/validation.ts -&gt; editorActions.ts, web/src/map-editor/mapSchema.ts::fromRaw, web/src/map-editor/mapSchema.ts::serializeMapJson, web/src/map-editor/editorGrid.ts::clampBoardSize, web/src/map-editor/editorActions.ts, web/src/map-editor/validation.ts -&gt; editorGrid.ts, web/src/map-editor/mapSchema.ts::fromRaw, web/src/map-editor/mapSchema.ts::serializeMapJson, web/src/map-editor/editorGrid.ts::clampBoardSize, web/src/map-editor/editorActions.ts, web/src/map-editor/validation.ts -&gt; editorEnhancements.ts in code graph</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>SGD-COMPONENT-COVERAGE-GAP</code></td>
+<td>Architecture-completeness convention (disclosure; not a law breach)</td>
+<td>informational</td>
+<td>web-client-board-rendering/web-client-board-rendering.arch.md</td>
+<td>web-client-board-rendering/web-client-board-rendering.arch.md: 5 high-centrality component(s) not accounted for: push, SOCSetSeatLock, arg_test, SOCStatusMessage, _run_and_get_outputs</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>SGD-UNVERIFIED-DEPENDENCY</code></td>
+<td>Dependency-claim grounding (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>—</td>
+<td>Web Protocol &amp; Map Editor: 4 dependency claim(s) with no backing graph edge — Custom-Map Schema &amp; Codec: no imports/calls edge web/src/map-editor/mapSchema.ts -&gt; CustomMapLoader in code graph; Editor Canvas &amp; Palette: no imports/calls edge web/src/map-editor/components/EditorCanvas.tsx, web/src/map-editor/components/EditorPalette.tsx -&gt; EditorCanvas, web/src/map-editor/components/EditorCanvas.tsx, web/src/map-editor/components/EditorPalette.tsx -&gt; HexCell, web/src/map-editor/components/EditorCanvas.tsx, web/src/map-editor/components/EditorPalette.tsx -&gt; ImportExportPanel in code graph; Map editor data layer driven by editor screen: no imports/calls edge web/src/screens/MapEditorScreen.tsx -&gt; web/src/map-editor/editorActions.ts -&gt; web/src/screens/MapEditorScreen.tsx in code graph</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>SGD-COMPONENT-COVERAGE-GAP</code></td>
+<td>Architecture-completeness convention (disclosure; not a law breach)</td>
+<td>informational</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md: 4 high-centrality component(s) not accounted for: resourceCount, hexToPixel, arg_test, _run_and_get_outputs</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>SGD-UNVERIFIED-DEPENDENCY</code></td>
+<td>Dependency-claim grounding (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>—</td>
+<td>Quality Infrastructure: 1 dependency claim(s) with no backing graph edge — Protocol Message-Sequence Consistency Tests: no imports/calls edge src/test/java/soctest/server/TestRecorder.java::compareRecordsToExpected; src/main/java/soc/extra/robot/GameActionExtractor.java -&gt; src/main/java/soc/extra/server/GameEventLog.java (calls x29) -&gt; TestGameActionExtractor in code graph</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>SGD-UNVERIFIED-DEPENDENCY</code></td>
+<td>Dependency-claim grounding (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>—</td>
+<td>Sammys-Settlers — Client-Server Settlers of Catan Platform: 3 dependency claim(s) with no backing graph edge — Web Client (TypeScript/React): no imports/calls edge web/src/protocol/SOCMessage.ts, web/src/board/coords.ts, web/src/store/gameStore.ts, web/src/map-editor/mapSchema.ts -&gt; protocol/SOCMessage.ts, web/src/protocol/SOCMessage.ts, web/src/board/coords.ts, web/src/store/gameStore.ts, web/src/map-editor/mapSchema.ts -&gt; constants.ts, web/src/protocol/SOCMessage.ts, web/src/board/coords.ts, web/src/store/gameStore.ts, web/src/map-editor/mapSchema.ts -&gt; board/coords.ts in code graph; Optional Database &amp; Persistence: no imports/calls edge soc.server.database.SOCDBHelper, src/main/bin/sql/template/jsettlers-tables-tmpl.sql, src/main/bin/sql/template/render.py -&gt; AuthPasswordRunnable in code graph; Quality &amp; Verification Infrastructure: no imports/calls edge src/test/java/soctest/message/TestToCmdToStringParse.java, src/test/java/soctest/server/TestCustomMapLoader.java, src/extraTest/java/soctest, web/src/screens/MapEditorScreen.test.tsx -&gt; TestToCmdToStringParse, src/test/java/soctest/message/TestToCmdToStringParse.java, src/test/java/soctest/server/TestCustomMapLoader.java, src/extraTest/java/soctest, web/src/screens/MapEditorScreen.test.tsx -&gt; TestCustomMapLoader, src/test/java/soctest/message/TestToCmdToStringParse.java, src/test/java/soctest/server/TestCustomMapLoader.java, src/extraTest/java/soctest, web/src/screens/MapEditorScreen.test.tsx -&gt; TestSavegame in code graph</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>SGD-GOVERNS-OVERLAP</code></td>
+<td>Governs disjointness (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>7 dual-governed FILEs were arbitrated to a single primary owner (each was claimed by &gt;1 epic): <code>web/src/protocol/SOCMessage.ts</code> → owner <code>Web Client &amp; Board Rendering</code> (stripped from Server &amp; Message Protocol, Web Protocol &amp; Map Editor); <code>web/src/protocol/constants.ts</code> → owner <code>Web Protocol &amp; Map Editor</code> (stripped from Server &amp; Message Protocol, Web Client &amp; Board Rendering); <code>web/src/protocol/index.ts</code> → owner <code>Web Protocol &amp; Map Editor</code> (stripped from Server &amp; Message Protocol, Web Client &amp; Board Rendering); <code>src/test/java/soctest/robot/TestGameActionExtractor.java</code> → owner <code>Quality Infrastructure</code> (stripped from Server &amp; Message Protocol); <code>src/test/java/soctest/server/TestRecorder.java</code> → owner <code>Quality Infrastructure</code> (stripped from Server &amp; Message Protocol); <code>web/src/map-editor/index.ts</code> → owner <code>Web Protocol &amp; Map Editor</code> (stripped from Web Client &amp; Board Rendering); <code>web/src/map-editor/mapSchema.ts</code> → owner <code>Web Client &amp; Board Rendering</code> (stripped from Web Protocol &amp; Map Editor). The assignment is DISCLOSED — every multiply-claimed path (file OR directory) surfaces with all its claimants named, so a contested file cannot be silently reassigned</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>SGD-TEST-EVIDENCE-OUT-OF-SCOPE</code></td>
+<td>Test-evidence scope containment (cross-epic test dropped + disclosed — accurate-not-forced; not a law breach)</td>
+<td>informational</td>
+<td>src/test/java/soctest/robot/TestGameActionExtractor.java, src/test/java/soctest/server/TestRecorder.java, web/src/protocol/SOCMessage.ts, web/src/protocol/constants.ts, web/src/protocol/index.ts</td>
+<td>‘Server &amp; Message Protocol’: dropped 5 contract-sidecar input path(s) outside this epic’s governs: membership (cross-epic schema/contract sprawl): src/test/java/soctest/robot/TestGameActionExtractor.java, src/test/java/soctest/server/TestRecorder.java, web/src/protocol/SOCMessage.ts, web/src/protocol/constants.ts, web/src/protocol/index.ts</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>SGD-TEST-EVIDENCE-OUT-OF-SCOPE</code></td>
+<td>Test-evidence scope containment (cross-epic test dropped + disclosed — accurate-not-forced; not a law breach)</td>
+<td>informational</td>
+<td>web/src/protocol/SOCGameState.test.ts, web/src/protocol/SOCVersion.test.ts</td>
+<td>‘Server &amp; Message Protocol’: dropped 2 name-matched test file(s) that live outside this scope’s governs: / code_area boundary (cross-epic test evidence): web/src/protocol/SOCGameState.test.ts, web/src/protocol/SOCVersion.test.ts</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>SGD-TAXONOMY-GRAMMAR-ADOPTED</code></td>
+<td>SGD namespace taxonomy (nested grammar)</td>
+<td>informational</td>
+<td>_scope.md</td>
+<td>per-epic sub-scope charters emitted under the nested grammar <code>sgd:codelens/{projectId}/{epic_slug}</code> (ratified in docs/concept/sgd/sgd-namespace-taxonomy.design.md)</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>SGD-INVARIANT-OBLIGATIONS</code></td>
+<td>Invariant obligations (detected but not promoted)</td>
+<td>informational</td>
+<td>—</td>
+<td>5 invariant obligation(s) were detected but not emitted as INV-CL records because their specificity score did not clear the candidate threshold: fail-closed 0.920: [REQUIRES] python 3, or 2.6 or later; fail-closed 0.920: [REQUIRES] at least 12 + maxIntValue fields.; fail-closed 0.920: [REQUIRES] coord &gt;= 0; parse returns null otherwise. Parsing reads four SEP2 tokens; garbled -&gt; null.; fail-closed 0.920: [MUST] be called before any early return to obey the Rules of Hooks; it tolerates a null game internally.; contract 0.580: [NEVER] appear on the wire). playerNumber may be -1 for some element types. Parsing reads 5 or 6 SEP2 tokens; garbled -&gt; null.</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>SGD-INVARIANTS-BELOW-QUALIFYING-BAR</code></td>
+<td>Invariant qualifying bar (registry charter decision ladder)</td>
+<td>informational</td>
+<td>invariants/_scope.md</td>
+<td>9 detection(s) fell below the qualifying bar and were NOT emitted as records (9 single-file, 0 single-package-multi-file); 91 dropped by the detection-quality gates (6 test-only evidence, 0 claim contradicted by own citations, 85 non-normative keyword position). Per the registry charter’s qualifying decision ladder (specs/invariants/_scope.md): single-file rules belong to types/tests; single-package rules to contract tests/lints; only multi-package rules with silent-drift risk and a dispatchable oracle query enter as candidates.</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>SGD-MAX-CHILDREN</code></td>
+<td>Scope headroom (≤10 direct children)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>root scope has 11 direct children (desktop-swing-client/, game-model-rules-engine/, i18n-translation-tooling/, invariants/, optional-database/, quality-infrastructure/, robot-ai-players/, <a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a>, server-message-protocol/, web-client-board-rendering/, web-protocol-map-editor/); the SGD headroom convention is ≤10. All charters were emitted anyway — epics are NOT force-merged (accurate-not-forced)</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>SGD-GROUNDING-EVIDENCE-OUT-OF-SCOPE</code></td>
+<td>Grounding-audit scope containment (out-of-scope evidence emits a review row instead of rewriting prose — recorded, not a law breach)</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md: an absence claim is contradicted by repository evidence OUTSIDE this doc’s epic scope; the prose was left unchanged (no ghost cross-epic rewrite) and flagged for review: src/main/java/soc/message/SOCMessage.java</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>optional-database/optional-database.arch.md</td>
+<td>optional-database/optional-database.arch.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: src/main/java/soc/server/database/SOCDBHelper.java</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: web/src/map-editor/mapSchema.ts, web/src/protocol/messages/SOCJoinGameAuth.ts</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: web/src/map-editor/mapSchema.ts</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>game-model-rules-engine/game-options-scenarios.design.md</td>
+<td>game-model-rules-engine/game-options-scenarios.design.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: src/main/java/soc/game/SOCVersionedItem.java</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>game-model-rules-engine/custom-map-loading-validation.design.md</td>
+<td>game-model-rules-engine/custom-map-loading-validation.design.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: src/main/java/soc/server/CustomMapValidator.java</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>optional-database/player-accounts-game-stats-persistence.design.md</td>
+<td>optional-database/player-accounts-game-stats-persistence.design.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: src/main/java/soc/server/database/SOCDBHelper.java</td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: web/src/protocol/SOCMessage.ts</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>web-client-board-rendering/custom-map-editor.design.md</td>
+<td>web-client-board-rendering/custom-map-editor.design.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: web/src/map-editor/mapSchema.ts</td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>SGD-SOURCE-CONTRADICTION</code></td>
+<td>Source-truth contradiction</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/map-schema-custom-map-json-model.design.md</td>
+<td>web-protocol-map-editor/map-schema-custom-map-json-model.design.md: recorded a generated absence/unconfirmed claim contradicted by source evidence: web/src/map-editor/mapSchema.ts</td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web/src/map-editor/validation.ts: <code>ValidationIssue.message</code> is declared, but <code>validateSortRankPrefix</code> does not read <code>issues.message</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web/src/map-editor/validation.ts: <code>ValidationIssue.message</code> is declared, but <code>validateDescription</code> does not read <code>issues.message</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>29</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web/src/map-editor/validation.ts: <code>ValidationIssue.message</code> is declared, but <code>validatePlayerCounts</code> does not read <code>issues.message</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web/src/map-editor/validation.ts: <code>ValidationIssue.message</code> is declared, but <code>validateBoardDimension</code> does not read <code>issues.message</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>31</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web/src/map-editor/validation.ts: <code>ValidationIssue.message</code> is declared, but <code>validateHexDiceNum</code> does not read <code>issues.message</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>32</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web/src/map-editor/validation.ts: <code>ValidationIssue.message</code> is declared, but <code>validateLandAreas</code> does not read <code>issues.message</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>33</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web/src/map-editor/validation.ts: <code>ValidationIssue.message</code> is declared, but <code>checkPortFacingGeometry</code> does not read <code>issues.message</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>34</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web/src/map-editor/validation.ts: <code>ValidationIssue.message</code> is declared, but <code>checkPortFacesLand</code> does not read <code>issues.message</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>35</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>robot-ai-players/robot-decision-loop-socrobotbrain.design.md</td>
+<td>web/src/protocol/messages/SOCMakeOffer.ts: <code>TradeOffer.get</code> is declared, but <code>constructor</code> does not read <code>offer.get</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>36</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>robot-ai-players/robot-client-networking-socrobotclient.design.md</td>
+<td>web/src/protocol/messages/SOCMakeOffer.ts: <code>TradeOffer.to</code> is declared, but <code>constructor</code> does not read <code>offer.to</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>37</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>robot-ai-players/robot-client-networking-socrobotclient.design.md</td>
+<td>web/src/protocol/messages/SOCMakeOffer.ts: <code>TradeOffer.get</code> is declared, but <code>constructor</code> does not read <code>offer.get</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>38</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web/src/store/gameStore.ts: <code>CurrentGame.gameState</code> is declared, but <code>applyRobberyResultToViews</code> does not read <code>cg.gameState</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>39</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web/src/store/gameStore.ts: <code>CurrentGame.mySeat</code> is declared, but <code>seatLabel</code> does not read <code>cg.mySeat</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>40</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web/src/store/gameStore.ts: <code>CurrentGame.gameState</code> is declared, but <code>seatLabel</code> does not read <code>cg.gameState</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>41</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web/src/store/gameStore.ts: <code>CurrentGame.mySeat</code> is declared, but <code>guardGame</code> does not read <code>cg.mySeat</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>42</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web/src/store/gameStore.ts: <code>CurrentGame.gameState</code> is declared, but <code>guardGame</code> does not read <code>cg.gameState</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>43</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web/src/store/gameStore.ts: <code>CurrentGame.mySeat</code> is declared, but <code>isGameStarted</code> does not read <code>cg.mySeat</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>44</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web/src/store/gameStore.ts: <code>CurrentGame.gameState</code> is declared, but <code>isMyTurn</code> does not read <code>cg.gameState</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>45</td>
+<td><code>SGD-CONTRACT-GAP</code></td>
+<td>Declared-vs-enforced contract gap</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/map-schema-custom-map-json-model.design.md</td>
+<td>web/src/map-editor/mapSchema.ts: <code>CustomMap.name</code> is declared, but <code>inferAreaByHexIndex</code> does not read <code>map.name</code> in the same file; generated docs must describe this as a contract gap, not enforced behavior.</td>
+</tr>
+<tr>
+<td>46</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>game-model-rules-engine/game-model-rules-engine.arch.md</td>
+<td>game-model-rules-engine/game-model-rules-engine.arch.md: 6 components named in the architecture document received no <code>.design.md</code>: <code>Game Options &amp; Scenario Registry</code>, <code>Server game logic drives the game model</code>, <code>Server queries the option/scenario registry at game creation</code>, <code>Clients and robots mirror partial game state</code>, <code>Custom-map ingestion registers into the scenario registry</code>, <code>Saved-game persistence reads/writes the game model</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>47</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>server-message-protocol/server-message-protocol.arch.md</td>
+<td>server-message-protocol/server-message-protocol.arch.md: 7 components named in the architecture document received no <code>.design.md</code>: <code>genericServer transport layer</code>, <code>SavedGameModel (savegame snapshot)</code>, <code>Authoritative rule application</code>, <code>Game option &amp; scenario resolution</code>, <code>Optional persistence</code>, <code>Desktop &amp; robot client connections</code>, <code>Protocol conformance recording</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>48</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>desktop-swing-client/desktop-swing-client.arch.md</td>
+<td>desktop-swing-client/desktop-swing-client.arch.md: 4 components named in the architecture document received no <code>.design.md</code>: <code>SOCHandPanel</code>, <code>SnippingTextArea</code>, <code>Partial client-side game-model reads</code>, <code>Inbound dispatch via PlayerClientListener / GameDisplay seam</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>49</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>robot-ai-players/robot-ai-players.arch.md</td>
+<td>robot-ai-players/robot-ai-players.arch.md: 7 components named in the architecture document received no <code>.design.md</code>: <code>SOCRobotDM (decision-maker / build planner)</code>, <code>SOCRobotNegotiator (trade evaluation)</code>, <code>Robot strategy objects</code>, <code>sample3p third-party bot extension framework</code>, <code>Local game-state mirror</code>, <code>Planning over the game model</code>, <code>Decision trace recording</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>50</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>optional-database/optional-database.arch.md</td>
+<td>optional-database/optional-database.arch.md: 9 components named in the architecture document received no <code>.design.md</code>: <code>Runtime Schema Upgrade</code>, <code>Async Password Verification</code>, <code>Persisted-Settings Guard</code>, <code>SQL Schema Template &amp; Generator</code>, <code>Template Consistency Build Gate</code>, <code>Server → persistence facade</code>, <code>Facade → relational database</code>, <code>Generated DDL → runtime schema</code>, <code>Build gate → generated SQL</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>51</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>web-client-board-rendering/web-client-board-rendering.arch.md</td>
+<td>web-client-board-rendering/web-client-board-rendering.arch.md: 7 components named in the architecture document received no <code>.design.md</code>: <code>Client State Stores</code>, <code>Network Transport (GameConnection)</code>, <code>Game action dispatch to server</code>, <code>Server-side custom-map validation</code>, <code>Decoded message dispatch into stores</code>, <code>Store-driven rendering</code>, <code>Editor coordinate translation</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>52</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md: 12 components named in the architecture document received no <code>.design.md</code>: <code>Protocol Codec &amp; Parser Registry</code>, <code>Protocol Message Catalog</code>, <code>Game Option Discovery</code>, <code>Custom-Map Schema &amp; Codec</code>, <code>Editor Operations</code>, <code>Editor Grid Geometry</code>, <code>Map Validation</code>, <code>Editor edits flow to server inbound queue</code>, <code>Validation gate to server inbound queue</code>, <code>Map editor data layer driven by editor screen</code>, <code>Board geometry reuse</code>, <code>Game option discovery consumed by game store</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>53</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>quality-infrastructure/quality-infrastructure.arch.md</td>
+<td>quality-infrastructure/quality-infrastructure.arch.md: 7 components named in the architecture document received no <code>.design.md</code>: <code>SQL Template Consistency Checks</code>, <code>In-process stringport server harness</code>, <code>Game model under test</code>, <code>Savegame model round-trip</code>, <code>Game-event recording &amp; extraction</code>, <code>Web components under test</code>, <code>Gradle test-task orchestration</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>54</td>
+<td><code>SGD-ARCH-COMPONENT-UNDESIGNED</code></td>
+<td>Component design coverage (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a>: 14 components named in the architecture document received no <code>.design.md</code>: <code>Game Model &amp; Rules Engine</code>, <code>Wire Protocol &amp; Message Vocabulary</code>, <code>Server Runtime &amp; Dispatch</code>, <code>Desktop Swing Client</code>, <code>Robot / AI Players</code>, <code>Web Client (TypeScript/React)</code>, <code>Optional Database &amp; Persistence</code>, <code>i18n Translation Tooling (PTE)</code>, <code>Quality &amp; Verification Infrastructure</code>, <code>Browser WebSocket transport</code>, <code>Server-side board construction from game model</code>, <code>Optional JDBC persistence</code>, <code>Desktop client board rendering from local model</code>, <code>Containerized web+server deployment</code>. The arch black-box altitude names these boundaries but no design doc covers them — DISCLOSED as a navigable gap, not silently omitted (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>55</td>
+<td><code>SGD-EPIC-NAME-INCOHERENT</code></td>
+<td>Scope name coherence (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Game Model &amp; Rules Engine</code>: name tokens <code>game</code>, <code>model</code>, <code>rules</code>, <code>engine</code> absent from the majority of its 2118 governed surface(s) (file paths + CKG node names) — the scope name reads incoherent against its actual contents. DISCLOSED as an operator signal; the merge/rename decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>56</td>
+<td><code>SGD-EPIC-NAME-INCOHERENT</code></td>
+<td>Scope name coherence (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Server &amp; Message Protocol</code>: name tokens <code>server</code>, <code>message</code>, <code>protocol</code> absent from the majority of its 3725 governed surface(s) (file paths + CKG node names) — the scope name reads incoherent against its actual contents. DISCLOSED as an operator signal; the merge/rename decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>57</td>
+<td><code>SGD-EPIC-NAME-INCOHERENT</code></td>
+<td>Scope name coherence (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Robot / AI Players</code>: name tokens <code>robot</code>, <code>players</code> absent from the majority of its 1173 governed surface(s) (file paths + CKG node names) — the scope name reads incoherent against its actual contents. DISCLOSED as an operator signal; the merge/rename decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>58</td>
+<td><code>SGD-EPIC-NAME-INCOHERENT</code></td>
+<td>Scope name coherence (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Optional Database</code>: name tokens <code>optional</code>, <code>database</code> absent from the majority of its 181 governed surface(s) (file paths + CKG node names) — the scope name reads incoherent against its actual contents. DISCLOSED as an operator signal; the merge/rename decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>59</td>
+<td><code>SGD-EPIC-NAME-INCOHERENT</code></td>
+<td>Scope name coherence (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Quality Infrastructure</code>: name token <code>quality</code> absent from the majority of its 1257 governed surface(s) (file paths + CKG node names) — the scope name reads incoherent against its actual contents. DISCLOSED as an operator signal; the merge/rename decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>60</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Quality Infrastructure</code> → epic <code>Game Model &amp; Rules Engine</code>: 949 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>61</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Server &amp; Message Protocol</code> → epic <code>Game Model &amp; Rules Engine</code>: 727 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>62</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Robot / AI Players</code> → epic <code>Game Model &amp; Rules Engine</code>: 581 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>63</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Desktop Swing Client</code> → epic <code>Game Model &amp; Rules Engine</code>: 537 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>64</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Quality Infrastructure</code> → epic <code>Server &amp; Message Protocol</code>: 139 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>65</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Server &amp; Message Protocol</code> → epic <code>Desktop Swing Client</code>: 91 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>66</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Web Protocol &amp; Map Editor</code> → epic <code>Web Client &amp; Board Rendering</code>: 72 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>67</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Desktop Swing Client</code> → epic <code>Server &amp; Message Protocol</code>: 71 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>68</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Web Protocol &amp; Map Editor</code> → epic <code>Server &amp; Message Protocol</code>: 61 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>69</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Robot / AI Players</code> → epic <code>Server &amp; Message Protocol</code>: 55 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>70</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Quality Infrastructure</code> → epic <code>Desktop Swing Client</code>: 47 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>71</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Quality Infrastructure</code> → epic <code>Robot / AI Players</code>: 41 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>72</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Quality Infrastructure</code> → epic <code>Web Protocol &amp; Map Editor</code>: 37 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>73</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Web Client &amp; Board Rendering</code> → epic <code>Server &amp; Message Protocol</code>: 34 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>74</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Server &amp; Message Protocol</code> → epic <code>Optional Database</code>: 31 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>75</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Desktop Swing Client</code> → epic <code>Web Protocol &amp; Map Editor</code>: 28 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>76</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Quality Infrastructure</code> → epic <code>Web Client &amp; Board Rendering</code>: 28 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>77</td>
+<td><code>SGD-CROSS-EPIC-COUPLING</code></td>
+<td>Scope boundary coupling (disclosure; not a law breach)</td>
+<td>recorded</td>
+<td>_scope.md</td>
+<td>epic <code>Server &amp; Message Protocol</code> → epic <code>Robot / AI Players</code>: 23 inter-epic CKG citation edge(s) (calls/imports/uses_type/inherits/implements/depends_on) cross this boundary (&gt; 20) — a possible mis-cut seam (the two scopes are structurally more coupled than a clean boundary). DISCLOSED as an operator signal; the split/merge decision stays human (accurate-not-forced).</td>
+</tr>
+<tr>
+<td>78</td>
+<td><code>DOC-CONTEXT-UNREPRESENTED</code></td>
+<td>Existing-doc coverage (redocumentation gap)</td>
+<td>recorded</td>
+<td>doc/index.html</td>
+<td>1 of 16 discovered source doc(s) were not represented by path in the generated SGD corpus: doc/index.html</td>
+</tr>
+<tr>
+<td>79</td>
+<td><code>SGD-TOKEN-CEILING</code></td>
+<td>Token ceiling (anti-pattern 30: never trim)</td>
+<td>recorded</td>
+<td>game-model-rules-engine/core-game-state-board-model.design.md</td>
+<td>game-model-rules-engine/core-game-state-board-model.design.md is 10455 tokens (~chars/4); the member ceiling is 8000. The doc was emitted INTACT — codelens NEVER trims to satisfy a ceiling (anti-pattern 30). natural <code>##</code> split boundaries: <code>Strategic Context</code>, <code>Overview</code>, <code>Components</code>, <code>Connections</code>, <code>Design Decisions</code>, <code>Constraints</code>, <code>Non-Functional Requirements</code>, <code>Examples</code>, <code>Diagrams</code>, <code>Source Linkage</code>, <code>Source Linkage Grounding</code></td>
+</tr>
+<tr>
+<td>80</td>
+<td><code>SGD-TOKEN-CEILING</code></td>
+<td>Token ceiling (anti-pattern 30: never trim)</td>
+<td>recorded</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a> is 11577 tokens (~chars/4); the member ceiling is 8000. The doc was emitted INTACT — codelens NEVER trims to satisfy a ceiling (anti-pattern 30). natural <code>##</code> split boundaries: <code>Strategic Context</code>, <code>Overview</code>, <code>Components</code>, <code>Boundaries</code>, <code>Integration Points</code>, <code>Diagrams</code>, <code>System Flows</code>, <code>Source Linkage</code>, <code>Source Linkage Grounding</code></td>
+</tr>
+<tr>
+<td>81</td>
+<td><code>SGD-FAITHFULNESS</code></td>
+<td>Faithfulness to source corpus and code</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md: reverted an ungrounded acronym expansion for <code>PTE</code> (the expanded form was not found verbatim in the corpus or code).</td>
+</tr>
+<tr>
+<td>82</td>
+<td><code>SGD-FAITHFULNESS</code></td>
+<td>Faithfulness to source corpus and code</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/editor-launch-and-file-pair-selection.design.md</td>
+<td>i18n-translation-tooling/editor-launch-and-file-pair-selection.design.md: reverted an ungrounded acronym expansion for <code>PTE</code> (the expanded form was not found verbatim in the corpus or code).</td>
+</tr>
+<tr>
+<td>83</td>
+<td><code>SGD-FAITHFULNESS</code></td>
+<td>Faithfulness to source corpus and code</td>
+<td>recorded</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a>: reverted an ungrounded acronym expansion for <code>PTE</code> (the expanded form was not found verbatim in the corpus or code).</td>
+</tr>
+<tr>
+<td>84</td>
+<td><code>SGD-FAITHFULNESS</code></td>
+<td>Faithfulness to source corpus and code</td>
+<td>recorded</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a>: reverted an ungrounded acronym expansion for <code>TCP</code> (the expanded form was not found verbatim in the corpus or code).</td>
+</tr>
+<tr>
+<td>85</td>
+<td><code>SGD-FAITHFULNESS</code></td>
+<td>Faithfulness to source corpus and code</td>
+<td>recorded</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a>: reverted an ungrounded acronym expansion for <code>JDBC</code> (the expanded form was not found verbatim in the corpus or code).</td>
+</tr>
+<tr>
+<td>86</td>
+<td><code>SGD-FAITHFULNESS</code></td>
+<td>Faithfulness to source corpus and code</td>
+<td>recorded</td>
+<td>source-docs/doc-readme-developer.design.md</td>
+<td>source-docs/doc-readme-developer.design.md: reverted an ungrounded acronym expansion for <code>JDBC</code> (the expanded form was not found verbatim in the corpus or code).</td>
+</tr>
+<tr>
+<td>87</td>
+<td><code>SGD-FAITHFULNESS</code></td>
+<td>Faithfulness to source corpus and code</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/_scope.md</td>
+<td>i18n-translation-tooling/_scope.md: reverted an ungrounded acronym expansion for <code>PTE</code> (the expanded form was not found verbatim in the corpus or code).</td>
+</tr>
+<tr>
+<td>88</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>game-model-rules-engine/core-game-state-board-model.design.md</td>
+<td>game-model-rules-engine/core-game-state-board-model.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>89</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>game-model-rules-engine/game-options-scenarios.design.md</td>
+<td>game-model-rules-engine/game-options-scenarios.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>90</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>game-model-rules-engine/cities-knights-scenario-sc-ck.design.md</td>
+<td>game-model-rules-engine/cities-knights-scenario-sc-ck.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>91</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>game-model-rules-engine/custom-map-loading-validation.design.md</td>
+<td>game-model-rules-engine/custom-map-loading-validation.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>92</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>server-message-protocol/server-runtime-request-dispatch.design.md</td>
+<td>server-message-protocol/server-runtime-request-dispatch.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>93</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>server-message-protocol/socmessage-wire-vocabulary.design.md</td>
+<td>server-message-protocol/socmessage-wire-vocabulary.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>94</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>server-message-protocol/browser-websocket-protocol-bridge.design.md</td>
+<td>server-message-protocol/browser-websocket-protocol-bridge.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>95</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>server-message-protocol/game-action-message-sequences.design.md</td>
+<td>server-message-protocol/game-action-message-sequences.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>96</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>desktop-swing-client/network-game-list-client.design.md</td>
+<td>desktop-swing-client/network-game-list-client.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>97</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>desktop-swing-client/in-game-player-interface.design.md</td>
+<td>desktop-swing-client/in-game-player-interface.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>98</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>desktop-swing-client/board-rendering-visual-themes.design.md</td>
+<td>desktop-swing-client/board-rendering-visual-themes.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>99</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>desktop-swing-client/client-preferences-settings.design.md</td>
+<td>desktop-swing-client/client-preferences-settings.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>100</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>robot-ai-players/robot-decision-loop-socrobotbrain.design.md</td>
+<td>robot-ai-players/robot-decision-loop-socrobotbrain.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>101</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>robot-ai-players/robot-client-networking-socrobotclient.design.md</td>
+<td>robot-ai-players/robot-client-networking-socrobotclient.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>102</td>
+<td><code>design.missing-nfr</code></td>
+<td>Design rationale completeness (NFR disclosure)</td>
+<td>recorded</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md: <code>## Non-Functional Requirements</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>103</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>104</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>robot-ai-players/robot-robustness-for-unknown-inventory-items.design.md</td>
+<td>robot-ai-players/robot-robustness-for-unknown-inventory-items.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>105</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>optional-database/jdbc-persistence-helper-schema-upgrades.design.md</td>
+<td>optional-database/jdbc-persistence-helper-schema-upgrades.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>106</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>optional-database/sql-schema-templating-generation.design.md</td>
+<td>optional-database/sql-schema-templating-generation.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>107</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>optional-database/player-accounts-game-stats-persistence.design.md</td>
+<td>optional-database/player-accounts-game-stats-persistence.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>108</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/side-by-side-properties-translation-editing.design.md</td>
+<td>i18n-translation-tooling/side-by-side-properties-translation-editing.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>109</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>110</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/editor-launch-and-file-pair-selection.design.md</td>
+<td>i18n-translation-tooling/editor-launch-and-file-pair-selection.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>111</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>112</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>web-client-board-rendering/board-geometry-svg-rendering.design.md</td>
+<td>web-client-board-rendering/board-geometry-svg-rendering.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>113</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>114</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>web-client-board-rendering/custom-map-editor.design.md</td>
+<td>web-client-board-rendering/custom-map-editor.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>115</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>116</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/custom-map-editor-canvas-palette.design.md</td>
+<td>web-protocol-map-editor/custom-map-editor-canvas-palette.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>117</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>quality-infrastructure/java-unit-test-suite.design.md</td>
+<td>quality-infrastructure/java-unit-test-suite.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>118</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>quality-infrastructure/functional-test-suite-extratest.design.md</td>
+<td>quality-infrastructure/functional-test-suite-extratest.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>119</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>quality-infrastructure/protocol-message-sequence-consistency-tests.design.md</td>
+<td>quality-infrastructure/protocol-message-sequence-consistency-tests.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>120</td>
+<td><code>design.missing-examples</code></td>
+<td>Design rationale completeness (example disclosure)</td>
+<td>recorded</td>
+<td>quality-infrastructure/web-client-test-suite.design.md</td>
+<td>quality-infrastructure/web-client-test-suite.design.md: code-heavy design has no <code>## Examples</code> section with both positive and negative examples</td>
+</tr>
+<tr>
+<td>121</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/agents.design.md</td>
+<td>source-docs/agents.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>122</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/claude.design.md</td>
+<td>source-docs/claude.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>123</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/readme.design.md</td>
+<td>source-docs/readme.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>124</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-cities-and-knights-design.design.md</td>
+<td>source-docs/doc-cities-and-knights-design.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>125</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-cities-and-knights-implemented.design.md</td>
+<td>source-docs/doc-cities-and-knights-implemented.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>126</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-custom-maps.design.md</td>
+<td>source-docs/doc-custom-maps.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>127</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-database.design.md</td>
+<td>source-docs/doc-database.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>128</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-improvements-2026-06.design.md</td>
+<td>source-docs/doc-improvements-2026-06.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>129</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-message-sequences-for-game-actions.design.md</td>
+<td>source-docs/doc-message-sequences-for-game-actions.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>130</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-readme-developer.design.md</td>
+<td>source-docs/doc-readme-developer.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>131</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-release-testing.design.md</td>
+<td>source-docs/doc-release-testing.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>132</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-versions.design.md</td>
+<td>source-docs/doc-versions.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>133</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-web-docker.design.md</td>
+<td>source-docs/doc-web-docker.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>134</td>
+<td><code>design.missing-design-decisions</code></td>
+<td>design</td>
+<td>recorded</td>
+<td>source-docs/doc-extra-gameactionextractor.design.md</td>
+<td>source-docs/doc-extra-gameactionextractor.design.md: <code>## Design Decisions</code> is absent — recorded as an honest absence (not a gate failure)</td>
+</tr>
+<tr>
+<td>135</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘resent in the assembled CKG context, so their exist’…</td>
+</tr>
+<tr>
+<td>136</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>optional-database/sql-schema-templating-generation.design.md</td>
+<td>optional-database/sql-schema-templating-generation.design.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘doc_seed’ scrubbed from rendered body prose: …‘guments when invoked. — doc_seeds.diagram_sequence_0 (par’…</td>
+</tr>
+<tr>
+<td>137</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/side-by-side-properties-translation-editing.design.md</td>
+<td>i18n-translation-tooling/side-by-side-properties-translation-editing.design.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘diagram_class’ scrubbed from rendered body prose: …‘/ escValue / appendEsc (diagram_class); <a href="http://CLAUDE.md">CLAUDE.md</a> i18n encodi’…</td>
+</tr>
+<tr>
+<td>138</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘diagram_class’ scrubbed from rendered body prose: …‘tring lookup (evidence: diagram_class StringManager.get)\n\n##’…</td>
+</tr>
+<tr>
+<td>139</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>game-model-rules-engine/contracts/game-model-rules-engine.gateway.md</td>
+<td>game-model-rules-engine/contracts/game-model-rules-engine.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>140</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>server-message-protocol/contracts/server-message-protocol.gateway.md</td>
+<td>server-message-protocol/contracts/server-message-protocol.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>141</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>desktop-swing-client/contracts/desktop-swing-client.gateway.md</td>
+<td>desktop-swing-client/contracts/desktop-swing-client.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>142</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>robot-ai-players/contracts/robot-ai-players.gateway.md</td>
+<td>robot-ai-players/contracts/robot-ai-players.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>143</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>optional-database/contracts/optional-database.gateway.md</td>
+<td>optional-database/contracts/optional-database.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>144</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>i18n-translation-tooling/contracts/i18n-translation-tooling.gateway.md</td>
+<td>i18n-translation-tooling/contracts/i18n-translation-tooling.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>145</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>web-client-board-rendering/contracts/web-client-board-rendering.gateway.md</td>
+<td>web-client-board-rendering/contracts/web-client-board-rendering.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>146</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/contracts/web-protocol-map-editor.gateway.md</td>
+<td>web-protocol-map-editor/contracts/web-protocol-map-editor.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>147</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>quality-infrastructure/contracts/quality-infrastructure.gateway.md</td>
+<td>quality-infrastructure/contracts/quality-infrastructure.gateway.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘CKG’ scrubbed from rendered body prose: …‘d symbols remain in the CKG and should be promoted’…</td>
+</tr>
+<tr>
+<td>148</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-001.invariant.md</td>
+<td>invariants/INV-CL-001.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>149</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-002.invariant.md</td>
+<td>invariants/INV-CL-002.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>150</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-003.invariant.md</td>
+<td>invariants/INV-CL-003.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>151</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-004.invariant.md</td>
+<td>invariants/INV-CL-004.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>152</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-005.invariant.md</td>
+<td>invariants/INV-CL-005.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>153</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-006.invariant.md</td>
+<td>invariants/INV-CL-006.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>154</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-007.invariant.md</td>
+<td>invariants/INV-CL-007.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>155</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-008.invariant.md</td>
+<td>invariants/INV-CL-008.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>156</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-009.invariant.md</td>
+<td>invariants/INV-CL-009.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>157</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-010.invariant.md</td>
+<td>invariants/INV-CL-010.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>158</td>
+<td><code>SGD-META-LEAKAGE</code></td>
+<td>Emission hygiene (engine-meta vocabulary / internal markers scrubbed from partner-facing prose — disclosure, not a law breach)</td>
+<td>recorded</td>
+<td>invariants/INV-CL-011.invariant.md</td>
+<td>invariants/INV-CL-011.invariant.md: engine-meta leakage scrubbed from rendered body (1 finding(s)) — e.g. engine-meta token ‘codelens’ scrubbed from rendered body prose: …‘&gt; <em>Detected by codelens; HYPOTHESIS candidate invariant pending human ratification.</em>’…</td>
+</tr>
+<tr>
+<td>159</td>
+<td><code>SGD-TOKEN-CEILING</code></td>
+<td>Token ceiling (anti-pattern 30: never trim)</td>
+<td>recorded</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a> is 11515 tokens (~chars/4); the member ceiling is 8000. The doc was emitted INTACT — codelens NEVER trims to satisfy a ceiling (anti-pattern 30). natural <code>##</code> split boundaries: <code>Strategic Context</code>, <code>Overview</code>, <code>Components</code>, <code>Boundaries</code>, <code>Integration Points</code>, <code>Diagrams</code>, <code>System Flows</code>, <code>Source Linkage</code>, <code>Source Linkage Grounding</code></td>
+</tr>
+<tr>
+<td>160</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>desktop-swing-client/desktop-swing-client.arch.md</td>
+<td>desktop-swing-client/desktop-swing-client.arch.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: desktop-swing-client/desktop-swing-client.arch.md:64: disclaims <code>colorsquare.java</code> behavior the sibling desktop-swing-client/board-render…</td>
+</tr>
+<tr>
+<td>161</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>desktop-swing-client/board-rendering-visual-themes.design.md</td>
+<td>desktop-swing-client/board-rendering-visual-themes.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: desktop-swing-client/board-rendering-visual-themes.design.md:66: asserts <code>colorsquare.java</code> behavior the sibling desktop-swing-client/des…</td>
+</tr>
+<tr>
+<td>162</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-client-board-rendering/web-client-board-rendering.arch.md</td>
+<td>web-client-board-rendering/web-client-board-rendering.arch.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-client-board-rendering/web-client-board-rendering.arch.md:72: disclaims <code>coords.ts</code> behavior the sibling web-client-board-rendering/b…</td>
+</tr>
+<tr>
+<td>163</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-client-board-rendering/board-geometry-svg-rendering.design.md</td>
+<td>web-client-board-rendering/board-geometry-svg-rendering.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-client-board-rendering/board-geometry-svg-rendering.design.md:55: asserts <code>coords.ts</code> behavior the sibling web-client-board-rendering…</td>
+</tr>
+<tr>
+<td>164</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a>: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: <a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md:65">sammys-settlers-client-server-settlers-of-catan-platform.arch.md:65</a>: disclaims <code>coords.ts</code> behavior the sibling web-client-board-renderin…</td>
+</tr>
+<tr>
+<td>165</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-protocol-map-editor/web-protocol-map-editor.arch.md:88: disclaims <code>editorcanvas.tsx</code> behavior the sibling web-protocol-map-editor/cus…</td>
+</tr>
+<tr>
+<td>166</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/custom-map-editor-canvas-palette.design.md</td>
+<td>web-protocol-map-editor/custom-map-editor-canvas-palette.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-protocol-map-editor/custom-map-editor-canvas-palette.design.md:68: asserts <code>editorcanvas.tsx</code> behavior the sibling web-protocol-map-e…</td>
+</tr>
+<tr>
+<td>167</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-client-board-rendering/screens-ui-components-client-state.design.md:73: asserts <code>gamestore.ts</code> behavior the sibling web-protocol-map-…</td>
+</tr>
+<tr>
+<td>168</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>quality-infrastructure/web-client-test-suite.design.md</td>
+<td>quality-infrastructure/web-client-test-suite.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: quality-infrastructure/web-client-test-suite.design.md:67: asserts <code>mapeditorscreen.test.tsx</code> behavior the sibling sammys-settlers-client…</td>
+</tr>
+<tr>
+<td>169</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-client-board-rendering/custom-map-editor.design.md</td>
+<td>web-client-board-rendering/custom-map-editor.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-client-board-rendering/custom-map-editor.design.md:58: asserts <code>mapschema.ts</code> behavior the sibling web-client-board-rendering/web-cli…</td>
+</tr>
+<tr>
+<td>170</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/map-schema-custom-map-json-model.design.md</td>
+<td>web-protocol-map-editor/map-schema-custom-map-json-model.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-protocol-map-editor/map-schema-custom-map-json-model.design.md:52: asserts <code>mapschema.ts</code> behavior the sibling web-client-board-rende…</td>
+</tr>
+<tr>
+<td>171</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>server-message-protocol/browser-websocket-protocol-bridge.design.md</td>
+<td>server-message-protocol/browser-websocket-protocol-bridge.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: server-message-protocol/browser-websocket-protocol-bridge.design.md:59: asserts <code>socmessage.ts</code> behavior the sibling web-client-board-ren…</td>
+</tr>
+<tr>
+<td>172</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-client-board-rendering/server-protocol-websocket-connectivity.design.md:60: asserts <code>socmessage.ts</code> behavior the sibling web-client-b…</td>
+</tr>
+<tr>
+<td>173</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md:59: asserts <code>socmessage.ts</code> behavior the sibling web-client-board-…</td>
+</tr>
+<tr>
+<td>174</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>desktop-swing-client/network-game-list-client.design.md</td>
+<td>desktop-swing-client/network-game-list-client.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: desktop-swing-client/network-game-list-client.design.md:67: asserts <code>socplayerclient.java</code> behavior the sibling desktop-swing-client/desk…</td>
+</tr>
+<tr>
+<td>175</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>quality-infrastructure/quality-infrastructure.arch.md</td>
+<td>quality-infrastructure/quality-infrastructure.arch.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: quality-infrastructure/quality-infrastructure.arch.md:77: disclaims <code>testrecorder.java</code> behavior the sibling server-message-protocol/game…</td>
+</tr>
+<tr>
+<td>176</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>server-message-protocol/game-action-message-sequences.design.md</td>
+<td>server-message-protocol/game-action-message-sequences.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: server-message-protocol/game-action-message-sequences.design.md:63: asserts <code>testrecorder.java</code> behavior the sibling quality-infrastructu…</td>
+</tr>
+<tr>
+<td>177</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>quality-infrastructure/protocol-message-sequence-consistency-tests.design.md</td>
+<td>quality-infrastructure/protocol-message-sequence-consistency-tests.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: quality-infrastructure/protocol-message-sequence-consistency-tests.design.md:67: asserts <code>testrecorder.java</code> behavior the sibling quality…</td>
+</tr>
+<tr>
+<td>178</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>server-message-protocol/socmessage-wire-vocabulary.design.md</td>
+<td>server-message-protocol/socmessage-wire-vocabulary.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: server-message-protocol/socmessage-wire-vocabulary.design.md:67: asserts <code>testtocmdtostringparse.java</code> behavior the sibling sammys-settle…</td>
+</tr>
+<tr>
+<td>179</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>quality-infrastructure/java-unit-test-suite.design.md</td>
+<td>quality-infrastructure/java-unit-test-suite.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: quality-infrastructure/java-unit-test-suite.design.md:59: asserts <code>testtocmdtostringparse.java</code> behavior the sibling sammys-settlers-clie…</td>
+</tr>
+<tr>
+<td>180</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>recorded</td>
+<td>desktop-swing-client/client-preferences-settings.design.md</td>
+<td>desktop-swing-client/client-preferences-settings.design.md: cross-doc contradiction RECONCILED by the repair loop (losing claim rewritten toward the code-supported side, or hedged fail-closed when the disputed code could not be judged). Original: desktop-swing-client/client-preferences-settings.design.md:62: asserts <code>userpreferences.java</code> behavior the sibling desktop-swing-client/d…</td>
+</tr>
+<tr>
+<td>181</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/game-model-rules-engine.arch.md</td>
+<td>game-model-rules-engine/game-model-rules-engine.arch.md: same-anchor contradiction on <code>../../../src/main/java/soc/game/SOCGame.java::SOCGame</code>. Claim: Core Game State &amp; Board Model: SOCGame is the single authoritative holder of complete game state at the server; logic advances there and the server pushes deltas (SOCGameState, …</td>
+</tr>
+<tr>
+<td>182</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/core-game-state-board-model.design.md</td>
+<td>game-model-rules-engine/core-game-state-board-model.design.md: same-anchor contradiction on <code>../../../src/main/java/soc/game/SOCGame.java::SOCGame</code>. Claim: - <strong>Explicit monitor instead of implicit thread-safety</strong>: Most SOCGame methods are documented as not implicitly thread-safe; callers must wrap them in takeMonitor()/releaseMonit…</td>
+</tr>
+<tr>
+<td>183</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/cities-knights-scenario-sc-ck.design.md</td>
+<td>game-model-rules-engine/cities-knights-scenario-sc-ck.design.md: same-anchor contradiction on <code>../../../src/main/java/soc/game/SOCGame.java::SOCGame</code>. Claim: - <strong>[HARD]</strong> The <em>CK</em>* options and the _SC_CK scenario stub MUST be registered inactive-hidden (FLAG_INACTIVE_HIDDEN | FLAG_DROP_IF_UNUSED), keeping them out of the New Game UI …</td>
+</tr>
+<tr>
+<td>184</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/game-options-scenarios.design.md</td>
+<td>game-model-rules-engine/game-options-scenarios.design.md: same-anchor contradiction on <code>../../../src/main/java/soc/game/SOCGameOption.java::SOCGameOption</code>. Claim: - <strong>Represent rules/scenarios as a convention-driven data registry keyed by short name strings, not as code branches</strong>: getAllKnownOptions() and initAllScenarios() centralize ev…</td>
+</tr>
+<tr>
+<td>185</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>server-message-protocol/server-message-protocol.arch.md</td>
+<td>server-message-protocol/server-message-protocol.arch.md: same-anchor contradiction on <code>../../../src/main/java/soc/server/SOCServer.java::SOCServer</code>. Claim: Server Runtime &amp; Request Dispatch: SOCServer is the long-running process that extends the generic Server, listens on TCP 8880 plus an optional WebSocket port (started by serverU…</td>
+</tr>
+<tr>
+<td>186</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>server-message-protocol/server-runtime-request-dispatch.design.md</td>
+<td>server-message-protocol/server-runtime-request-dispatch.design.md: same-anchor contradiction on <code>../../../src/main/java/soc/server/SOCServer.java::SOCServer</code>. Claim: - <strong>[HARD]</strong> The bots.cookie value MUST be single-line-and-safe and MUST NOT contain ‘|’ or ‘,’ characters. — src/main/java/soc/server/SOCServer.java::PROP_JSETTLERS_BOTS_COOKIE…</td>
+</tr>
+<tr>
+<td>187</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>optional-database/optional-database.arch.md</td>
+<td>optional-database/optional-database.arch.md: same-anchor contradiction on <code>../../../src/main/bin/sql/template/jsettlers-tables-tmpl.sql</code>. Claim: JDBC Persistence Helper &amp; Schema Upgrades: At startup SOCDBHelper.initialize reads the JDBC URL/driver/credentials, calls connect, then detectSchemaVersion to learn the on-disk …</td>
+</tr>
+<tr>
+<td>188</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>optional-database/sql-schema-templating-generation.design.md</td>
+<td>optional-database/sql-schema-templating-generation.design.md: same-anchor contradiction on <code>../../../src/main/bin/sql/template/jsettlers-tables-tmpl.sql</code>. Claim: This feature is a single-source-of-truth code-generation pipeline for the optional database’s table and index DDL. A developer edits only the vendor-neutral template jsettlers-t…</td>
+</tr>
+<tr>
+<td>189</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>optional-database/jdbc-persistence-helper-schema-upgrades.design.md</td>
+<td>optional-database/jdbc-persistence-helper-schema-upgrades.design.md: same-anchor contradiction on <code>src/main/java/soc/server/database/SOCDBHelper.java</code>. Claim: - <strong>[HARD]</strong> Persisted server settings MUST match the running configuration or initialization fails closed — src/main/java/soc/server/database/SOCDBHelper.java::checkSettings ra…</td>
+</tr>
+<tr>
+<td>190</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>optional-database/player-accounts-game-stats-persistence.design.md</td>
+<td>optional-database/player-accounts-game-stats-persistence.design.md: same-anchor contradiction on <code>src/main/java/soc/server/database/SOCDBHelper.java</code>. Claim: - <strong>[HARD]</strong> Account passwords MUST satisfy the configured length bounds before being accepted or hashed — src/main/java/soc/server/database/SOCDBHelper.java::isPasswordLengthOK…</td>
+</tr>
+<tr>
+<td>191</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/custom-map-loading-validation.design.md</td>
+<td>game-model-rules-engine/custom-map-loading-validation.design.md: same-anchor contradiction on <code>src/main/java/soc/server/CustomMapLoader.java</code>. Claim: - <strong>[HARD]</strong> A derived custom scenario key MUST begin with the reserved SC_X prefix so it can never shadow a built-in scenario. — src/main/java/soc/server/CustomMapLoader.java::…</td>
+</tr>
+<tr>
+<td>192</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>source-docs/agents.design.md</td>
+<td>source-docs/agents.design.md: same-anchor contradiction on <code>SOCPlayerClient</code>. Claim: &gt; <strong>IMPORTANT:</strong> Even when running <code>SOCServer</code>/<code>SOCPlayerClient</code> directly from an IDE, you must first run <code>gradle assemble</code> (or <code>build</code>) at least once to copy `src/main/resource…</td>
+</tr>
+<tr>
+<td>193</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>robot-ai-players/robot-decision-loop-socrobotbrain.design.md</td>
+<td>robot-ai-players/robot-decision-loop-socrobotbrain.design.md: same-anchor contradiction on <code>../../../src/main/java/soc/robot/SOCRobotBrain.java::SOCRobotBrain</code>. Claim: - <strong>[HARD]</strong> setOurPlayerData() MUST be called before the brain is used or its thread is started. — src/main/java/soc/robot/SOCRobotBrain.java::SOCRobotBrain (constructor javado…</td>
+</tr>
+<tr>
+<td>194</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>robot-ai-players/robot-robustness-for-unknown-inventory-items.design.md</td>
+<td>robot-ai-players/robot-robustness-for-unknown-inventory-items.design.md: same-anchor contradiction on <code>../../../src/main/java/soc/robot/SOCRobotBrain.java::SOCRobotBrain</code>. Claim: - <strong>[HARD]</strong> The bot MUST NOT block the game indefinitely while unable to act; the brain abandons the game (alive=false) once its activity counter grows too high. — src/main/jav…</td>
+</tr>
+<tr>
+<td>195</td>
+<td><code>SGD-CROSS-DOC-CONTRADICTION</code></td>
+<td>Cross-doc contradiction</td>
+<td>gate-failure</td>
+<td>quality-infrastructure/functional-test-suite-extratest.design.md</td>
+<td>quality-infrastructure/functional-test-suite-extratest.design.md: same-anchor contradiction on <code>../../../build.gradle</code>. Claim: - <strong>Gradle test task</strong> (inbound) — via extraTest task dependsOn test (build.gradle) (evidence: build.gradle; doc/Readme.developer.md)</td>
+</tr>
+<tr>
+<td>196</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>desktop-swing-client/desktop-swing-client.arch.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for desktop-swing-client/desktop-swing-client.arch.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>197</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>robot-ai-players/robot-ai-players.arch.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for robot-ai-players/robot-ai-players.arch.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified); confidence 0.4 &lt; 0.5 floor. The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>198</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-client-board-rendering/web-client-board-rendering.arch.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-client-board-rendering/web-client-board-rendering.arch.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>199</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-protocol-map-editor/web-protocol-map-editor.arch.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-protocol-map-editor/web-protocol-map-editor.arch.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>200</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>quality-infrastructure/quality-infrastructure.arch.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for quality-infrastructure/quality-infrastructure.arch.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>201</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>server-message-protocol/socmessage-wire-vocabulary.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for server-message-protocol/socmessage-wire-vocabulary.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>202</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>server-message-protocol/browser-websocket-protocol-bridge.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for server-message-protocol/browser-websocket-protocol-bridge.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: hypothesis, not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>203</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>server-message-protocol/game-action-message-sequences.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for server-message-protocol/game-action-message-sequences.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: hypothesis, not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>204</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>desktop-swing-client/network-game-list-client.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for desktop-swing-client/network-game-list-client.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified); confidence 0.4 &lt; 0.5 floor. The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>205</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>desktop-swing-client/in-game-player-interface.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for desktop-swing-client/in-game-player-interface.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>206</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>desktop-swing-client/board-rendering-visual-themes.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for desktop-swing-client/board-rendering-visual-themes.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>207</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>desktop-swing-client/client-preferences-settings.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for desktop-swing-client/client-preferences-settings.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>208</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>robot-ai-players/robot-client-networking-socrobotclient.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for robot-ai-players/robot-client-networking-socrobotclient.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>209</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for robot-ai-players/third-party-bot-extension-framework-sample3p.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: hypothesis, not verified, unverified); confidence 0.3 &lt; 0.5 floor. The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>210</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>i18n-translation-tooling/side-by-side-properties-translation-editing.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for i18n-translation-tooling/side-by-side-properties-translation-editing.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified); confidence 0.4 &lt; 0.5 floor. The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>211</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified); confidence 0.45 &lt; 0.5 floor. The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>212</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>i18n-translation-tooling/editor-launch-and-file-pair-selection.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for i18n-translation-tooling/editor-launch-and-file-pair-selection.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified); confidence 0.3 &lt; 0.5 floor. The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>213</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-client-board-rendering/server-protocol-websocket-connectivity.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>214</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-client-board-rendering/board-geometry-svg-rendering.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-client-board-rendering/board-geometry-svg-rendering.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>215</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-client-board-rendering/screens-ui-components-client-state.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>216</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-client-board-rendering/custom-map-editor.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-client-board-rendering/custom-map-editor.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>217</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>218</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-protocol-map-editor/custom-map-editor-canvas-palette.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-protocol-map-editor/custom-map-editor-canvas-palette.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>219</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-protocol-map-editor/map-schema-custom-map-json-model.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-protocol-map-editor/map-schema-custom-map-json-model.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>220</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>quality-infrastructure/java-unit-test-suite.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for quality-infrastructure/java-unit-test-suite.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>221</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>quality-infrastructure/protocol-message-sequence-consistency-tests.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for quality-infrastructure/protocol-message-sequence-consistency-tests.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified); confidence 0.35 &lt; 0.5 floor. The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>222</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>quality-infrastructure/web-client-test-suite.design.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for quality-infrastructure/web-client-test-suite.design.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified); confidence 0.45 &lt; 0.5 floor. The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>223</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for <a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a> (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>224</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>game-model-rules-engine/contracts/game-model-rules-engine.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for game-model-rules-engine/contracts/game-model-rules-engine.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>225</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>server-message-protocol/contracts/server-message-protocol.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for server-message-protocol/contracts/server-message-protocol.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>226</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>desktop-swing-client/contracts/desktop-swing-client.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for desktop-swing-client/contracts/desktop-swing-client.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>227</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>robot-ai-players/contracts/robot-ai-players.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for robot-ai-players/contracts/robot-ai-players.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>228</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>optional-database/contracts/optional-database.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for optional-database/contracts/optional-database.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>229</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>i18n-translation-tooling/contracts/i18n-translation-tooling.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for i18n-translation-tooling/contracts/i18n-translation-tooling.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>230</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-client-board-rendering/contracts/web-client-board-rendering.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-client-board-rendering/contracts/web-client-board-rendering.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>231</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>web-protocol-map-editor/contracts/web-protocol-map-editor.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for web-protocol-map-editor/contracts/web-protocol-map-editor.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>232</td>
+<td><code>SGD-LIFECYCLE-PROMOTION-REFUSED</code></td>
+<td>Lifecycle marker honesty (promotion refused; the marker follows the body — disclosure, not a law breach)</td>
+<td>informational</td>
+<td>quality-infrastructure/contracts/quality-infrastructure.testplan.md</td>
+<td>lifecycle promotion to <code>validated</code> REFUSED for quality-infrastructure/contracts/quality-infrastructure.testplan.md (kept at <code>hypothesis</code>): hypothesis-language body (markers: not verified, unverified). The marker follows the body — an honestly-hedged or low-confidence doc is never stamped <code>validated</code>.</td>
+</tr>
+<tr>
+<td>233</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/core-game-state-board-model.design.md</td>
+<td>game-model-rules-engine/core-game-state-board-model.design.md: 1 body link(s) do not resolve from the doc’s location: <code>core-game-state-board-model.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>234</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/game-options-scenarios.design.md</td>
+<td>game-model-rules-engine/game-options-scenarios.design.md: 1 body link(s) do not resolve from the doc’s location: <code>game-options-scenarios.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>235</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/cities-knights-scenario-sc-ck.design.md</td>
+<td>game-model-rules-engine/cities-knights-scenario-sc-ck.design.md: 1 body link(s) do not resolve from the doc’s location: <code>cities-knights-scenario-sc-ck.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>236</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/custom-map-loading-validation.design.md</td>
+<td>game-model-rules-engine/custom-map-loading-validation.design.md: 1 body link(s) do not resolve from the doc’s location: <code>custom-map-loading-validation.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>237</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>server-message-protocol/server-runtime-request-dispatch.design.md</td>
+<td>server-message-protocol/server-runtime-request-dispatch.design.md: 1 body link(s) do not resolve from the doc’s location: <code>server-runtime-request-dispatch.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>238</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>server-message-protocol/socmessage-wire-vocabulary.design.md</td>
+<td>server-message-protocol/socmessage-wire-vocabulary.design.md: 1 body link(s) do not resolve from the doc’s location: <code>socmessage-wire-vocabulary.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>239</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>server-message-protocol/browser-websocket-protocol-bridge.design.md</td>
+<td>server-message-protocol/browser-websocket-protocol-bridge.design.md: 1 body link(s) do not resolve from the doc’s location: <code>browser-websocket-protocol-bridge.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>240</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>server-message-protocol/game-action-message-sequences.design.md</td>
+<td>server-message-protocol/game-action-message-sequences.design.md: 1 body link(s) do not resolve from the doc’s location: <code>game-action-message-sequences.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>241</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>desktop-swing-client/network-game-list-client.design.md</td>
+<td>desktop-swing-client/network-game-list-client.design.md: 1 body link(s) do not resolve from the doc’s location: <code>network-game-list-client.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>242</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>desktop-swing-client/in-game-player-interface.design.md</td>
+<td>desktop-swing-client/in-game-player-interface.design.md: 1 body link(s) do not resolve from the doc’s location: <code>in-game-player-interface.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>243</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>desktop-swing-client/board-rendering-visual-themes.design.md</td>
+<td>desktop-swing-client/board-rendering-visual-themes.design.md: 1 body link(s) do not resolve from the doc’s location: <code>board-rendering-visual-themes.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>244</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>desktop-swing-client/client-preferences-settings.design.md</td>
+<td>desktop-swing-client/client-preferences-settings.design.md: 1 body link(s) do not resolve from the doc’s location: <code>client-preferences-settings.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>245</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>robot-ai-players/robot-decision-loop-socrobotbrain.design.md</td>
+<td>robot-ai-players/robot-decision-loop-socrobotbrain.design.md: 1 body link(s) do not resolve from the doc’s location: <code>robot-decision-loop-socrobotbrain.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>246</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>robot-ai-players/robot-client-networking-socrobotclient.design.md</td>
+<td>robot-ai-players/robot-client-networking-socrobotclient.design.md: 1 body link(s) do not resolve from the doc’s location: <code>robot-client-networking-socrobotclient.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>247</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md</td>
+<td>robot-ai-players/third-party-bot-extension-framework-sample3p.design.md: 1 body link(s) do not resolve from the doc’s location: <code>third-party-bot-extension-framework-sample3p.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>248</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>robot-ai-players/robot-robustness-for-unknown-inventory-items.design.md</td>
+<td>robot-ai-players/robot-robustness-for-unknown-inventory-items.design.md: 1 body link(s) do not resolve from the doc’s location: <code>robot-robustness-for-unknown-inventory-items.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>249</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>optional-database/jdbc-persistence-helper-schema-upgrades.design.md</td>
+<td>optional-database/jdbc-persistence-helper-schema-upgrades.design.md: 1 body link(s) do not resolve from the doc’s location: <code>jdbc-persistence-helper-schema-upgrades.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>250</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>optional-database/sql-schema-templating-generation.design.md</td>
+<td>optional-database/sql-schema-templating-generation.design.md: 1 body link(s) do not resolve from the doc’s location: <code>sql-schema-templating-generation.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>251</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>optional-database/player-accounts-game-stats-persistence.design.md</td>
+<td>optional-database/player-accounts-game-stats-persistence.design.md: 1 body link(s) do not resolve from the doc’s location: <code>player-accounts-game-stats-persistence.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>252</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>i18n-translation-tooling/side-by-side-properties-translation-editing.design.md</td>
+<td>i18n-translation-tooling/side-by-side-properties-translation-editing.design.md: 2 body link(s) do not resolve from the doc’s location: <code>side-by-side-properties-translation-editing.feature.md</code>, <code>i18n-translation-tooling.arch.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>253</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md</td>
+<td>i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.md: 2 body link(s) do not resolve from the doc’s location: <code>iso-8859-1-encoding-with-unicode-escapes.feature.md</code>, <code>i18n-translation-tooling.arch.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>254</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>i18n-translation-tooling/editor-launch-and-file-pair-selection.design.md</td>
+<td>i18n-translation-tooling/editor-launch-and-file-pair-selection.design.md: 2 body link(s) do not resolve from the doc’s location: <code>editor-launch-and-file-pair-selection.feature.md</code>, <code>i18n-translation-tooling.arch.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>255</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md</td>
+<td>web-client-board-rendering/server-protocol-websocket-connectivity.design.md: 1 body link(s) do not resolve from the doc’s location: <code>server-protocol-websocket-connectivity.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>256</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-client-board-rendering/board-geometry-svg-rendering.design.md</td>
+<td>web-client-board-rendering/board-geometry-svg-rendering.design.md: 1 body link(s) do not resolve from the doc’s location: <code>board-geometry-svg-rendering.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>257</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md</td>
+<td>web-client-board-rendering/screens-ui-components-client-state.design.md: 1 body link(s) do not resolve from the doc’s location: <code>screens-ui-components-client-state.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>258</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-client-board-rendering/custom-map-editor.design.md</td>
+<td>web-client-board-rendering/custom-map-editor.design.md: 1 body link(s) do not resolve from the doc’s location: <code>custom-map-editor.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>259</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md</td>
+<td>web-protocol-map-editor/typescript-socmessage-protocol-layer.design.md: 1 body link(s) do not resolve from the doc’s location: <code>typescript-socmessage-protocol-layer.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>260</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-protocol-map-editor/custom-map-editor-canvas-palette.design.md</td>
+<td>web-protocol-map-editor/custom-map-editor-canvas-palette.design.md: 1 body link(s) do not resolve from the doc’s location: <code>custom-map-editor-canvas-palette.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>261</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-protocol-map-editor/map-schema-custom-map-json-model.design.md</td>
+<td>web-protocol-map-editor/map-schema-custom-map-json-model.design.md: 1 body link(s) do not resolve from the doc’s location: <code>map-schema-custom-map-json-model.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>262</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>quality-infrastructure/java-unit-test-suite.design.md</td>
+<td>quality-infrastructure/java-unit-test-suite.design.md: 1 body link(s) do not resolve from the doc’s location: <code>java-unit-test-suite.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>263</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>quality-infrastructure/functional-test-suite-extratest.design.md</td>
+<td>quality-infrastructure/functional-test-suite-extratest.design.md: 1 body link(s) do not resolve from the doc’s location: <code>functional-test-suite-extratest.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>264</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>quality-infrastructure/protocol-message-sequence-consistency-tests.design.md</td>
+<td>quality-infrastructure/protocol-message-sequence-consistency-tests.design.md: 1 body link(s) do not resolve from the doc’s location: <code>protocol-message-sequence-consistency-tests.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>265</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>quality-infrastructure/web-client-test-suite.design.md</td>
+<td>quality-infrastructure/web-client-test-suite.design.md: 1 body link(s) do not resolve from the doc’s location: <code>web-client-test-suite.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>266</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a>: 1 body link(s) do not resolve from the doc’s location: <code>_scope.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>267</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>game-model-rules-engine/_scope.md</td>
+<td>game-model-rules-engine/_scope.md: 4 body link(s) do not resolve from the doc’s location: <code>cities-knights-scenario-sc-ck.feature.md</code>, <code>core-game-state-board-model.feature.md</code>, <code>custom-map-loading-validation.feature.md</code> …and 1 more. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>268</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>server-message-protocol/_scope.md</td>
+<td>server-message-protocol/_scope.md: 4 body link(s) do not resolve from the doc’s location: <code>browser-websocket-protocol-bridge.feature.md</code>, <code>game-action-message-sequences.feature.md</code>, <code>server-runtime-request-dispatch.feature.md</code> …and 1 more. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>269</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>desktop-swing-client/_scope.md</td>
+<td>desktop-swing-client/_scope.md: 4 body link(s) do not resolve from the doc’s location: <code>board-rendering-visual-themes.feature.md</code>, <code>client-preferences-settings.feature.md</code>, <code>in-game-player-interface.feature.md</code> …and 1 more. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>270</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>robot-ai-players/_scope.md</td>
+<td>robot-ai-players/_scope.md: 4 body link(s) do not resolve from the doc’s location: <code>robot-client-networking-socrobotclient.feature.md</code>, <code>robot-decision-loop-socrobotbrain.feature.md</code>, <code>robot-robustness-for-unknown-inventory-items.feature.md</code> …and 1 more. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>271</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>optional-database/_scope.md</td>
+<td>optional-database/_scope.md: 3 body link(s) do not resolve from the doc’s location: <code>jdbc-persistence-helper-schema-upgrades.feature.md</code>, <code>player-accounts-game-stats-persistence.feature.md</code>, <code>sql-schema-templating-generation.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>272</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>i18n-translation-tooling/_scope.md</td>
+<td>i18n-translation-tooling/_scope.md: 4 body link(s) do not resolve from the doc’s location: <code>editor-launch-and-file-pair-selection.feature.md</code>, <code>i18n-translation-tooling.arch.md</code>, <code>iso-8859-1-encoding-with-unicode-escapes.feature.md</code> …and 1 more. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>273</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-client-board-rendering/_scope.md</td>
+<td>web-client-board-rendering/_scope.md: 4 body link(s) do not resolve from the doc’s location: <code>board-geometry-svg-rendering.feature.md</code>, <code>custom-map-editor.feature.md</code>, <code>screens-ui-components-client-state.feature.md</code> …and 1 more. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>274</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>web-protocol-map-editor/_scope.md</td>
+<td>web-protocol-map-editor/_scope.md: 3 body link(s) do not resolve from the doc’s location: <code>custom-map-editor-canvas-palette.feature.md</code>, <code>map-schema-custom-map-json-model.feature.md</code>, <code>typescript-socmessage-protocol-layer.feature.md</code>. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>275</td>
+<td><code>SGD-DEAD-LINKS</code></td>
+<td>Link health (dead links are a gate failure)</td>
+<td>gate-failure</td>
+<td>quality-infrastructure/_scope.md</td>
+<td>quality-infrastructure/_scope.md: 4 body link(s) do not resolve from the doc’s location: <code>functional-test-suite-extratest.feature.md</code>, <code>java-unit-test-suite.feature.md</code>, <code>protocol-message-sequence-consistency-tests.feature.md</code> …and 1 more. Per the output policy, dead links are a gate failure.</td>
+</tr>
+<tr>
+<td>276</td>
+<td><code>SGD-RENDER-QUALITY</code></td>
+<td>render-quality</td>
+<td>recorded</td>
+<td>desktop-swing-client/_scope.md, desktop-swing-client/board-rendering-visual-themes.design.md, desktop-swing-client/client-preferences-settings.design.md, desktop-swing-client/in-game-player-interface.design.md, desktop-swing-client/network-game-list-client.design.md …and 5 more</td>
+<td>deadLinks: 71 finding(s) across 43 doc(s) — e.g. body link does not resolve: <a href="http://board-rendering-visual-themes.feature.md">board-rendering-visual-themes.feature.md</a></td>
+</tr>
+<tr>
+<td>277</td>
+<td><code>SGD-RENDER-QUALITY</code></td>
+<td>render-quality</td>
+<td>recorded</td>
+<td>source-docs/_scope.md, source-docs/agents.design.md, source-docs/claude.design.md, source-docs/doc-cities-and-knights-design.design.md, source-docs/doc-cities-and-knights-implemented.design.md …and 5 more</td>
+<td>forbiddenTokens: 14 finding(s) across 14 doc(s) — e.g. engine-meta token ‘codelens’ in body prose: …‘down corpus discovered before CodeLens writes new SGD artifacts. Eac’…</td>
+</tr>
+<tr>
+<td>278</td>
+<td><code>SGD-RENDER-QUALITY</code></td>
+<td>render-quality</td>
+<td>recorded</td>
+<td><a href="http://sammys-settlers-client-server-settlers-of-catan-platform.arch.md">sammys-settlers-client-server-settlers-of-catan-platform.arch.md</a></td>
+<td>mermaidReadability: 27 finding(s) across 1 doc(s) — e.g. message label exceeds the 50-char budget: ‘sends lobby and game traffic to the authoritative server (SO’</td>
+</tr>
+<tr>
+<td>279</td>
+<td><code>DOC-CONTEXT-USED</code></td>
+<td>Existing-docs intake (disclosure; not a law breach)</td>
+<td>informational</td>
+<td>—</td>
+<td>16 existing doc(s) content-seeded into the hypothesis passes; 0 skipped as stale/archived (of 16 discovered)</td>
+</tr>
+<tr>
+<td>280</td>
+<td><code>SGD-HYPOTHESIS-FAILED-TASKS</code></td>
+<td>Hypothesis completion (LLM-backed pass)</td>
+<td>gate-failure</td>
+<td>—</td>
+<td>1 LLM hypothesis task(s) failed terminally; emitted SGD docs may be incomplete. architecture-assembly/codelens-b7eef336-pass5-arch-005: transport 504: Server error ‘504 Gateway Timeout’ for url ‘<a href="http://127.0.0.1:62967/v1/messages">http://127.0.0.1:62967/v1/messages</a>’ For more information check: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/504">https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/504</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main></div>
+<script src="assets/zimwiki.js"></script>
+</body></html>

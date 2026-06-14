@@ -1,0 +1,357 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Protocol Message-Sequence Consistency Tests · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../quality-infrastructure/quality-infrastructure.arch.html"><span class="nm">Quality Infrastructure</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../quality-infrastructure/functional-test-suite-extratest.design.html"><span class="nm">Functional Test Suite (extraTest)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/java-unit-test-suite.design.html"><span class="nm">Java Unit Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../quality-infrastructure/protocol-message-sequence-consistency-tests.design.html"><span class="nm">Protocol Message-Sequence Consistency Tests</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.api-boundary.html"><span class="nm">Quality Infrastructure API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/web-client-test-suite.design.html"><span class="nm">Web Client Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.gateway.html"><span class="nm">Quality Infrastructure Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.testplan.html"><span class="nm">Quality Infrastructure Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Quality Infrastructure</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf low" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:35%"></i></span>
+      <span class="conf-val">0.35</span></span></div>
+        <h1 class="doc-title">Protocol Message-Sequence Consistency Tests</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Protocol Message-Sequence Consistency Tests</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Wire-format interop is the asset being protected</strong> — Per the SOCMessage design (cited in <a href="http://CLAUDE.md">CLAUDE.md</a>), messages are deliberately plain writeUTF strings so non-Java clients and bots can interop; the per-action sequences in doc/Message-Sequences-for-Game-Actions.md are the documented contract. These tests exist specifically as the regression guard that prevents that contract from silently drifting and breaking external readers.</li>
+<li><strong>The robot/bot subsystem is a first-class consumer</strong> — Because bots connect exactly like human clients and recognize actions from the message stream (the GameActionExtractor path), a sequence change is not merely cosmetic — it can break the AI subsystem that originated this codebase, which is why the extraction-side test asserts recognition end-to-end rather than only checking emission.</li>
+</ul>
+<h2>Overview</h2>
+<p>These two JUnit classes guard the property that the SOCMessage sequence emitted for each game action stays stable on the wire, so bots and non-Java readers can recognize an action from its stream. On the recording side, TestRecorder boots a RecordingSOCServer on a stringport, connects DisplaylessTesterClients, loads or creates games, and drives actions; the server records every outgoing (and optionally client-origin) message into a per-game GameEventLog of EventEntry rows, which compareRecordsToExpected diffs against an expected String[][] of recipient-prefixed headers and field fragments. On the extraction side, TestGameActionExtractor constructs a GameEventLog from hand-authored or soclog-loaded EventEntry strings, runs it through GameActionExtractor, and asserts the resulting GameActionLog recognizes each ActionType. Recording proves the contract is emitted; extraction proves a reader can parse it back.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>TestRecorder</strong></li>
+<li><strong>TestRecorder.compareRecordsToExpected</strong> (referenced; defined externally)</li>
+<li><strong>TestGameActionExtractor</strong></li>
+<li><strong>TestGameActionExtractor.makeEmptyEventLog</strong> (referenced; defined externally)</li>
+<li><strong>TestGameActionExtractor.ExtractResultsChecker</strong> (referenced; defined externally)</li>
+<li><strong>GameActionExtractor (integration)</strong> (referenced; defined externally)</li>
+<li><strong>RecordingSOCServer / GameEventLog (integration)</strong> (referenced; defined externally)</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>RecordingSOCServer</strong> (outbound) — via import soc.extra.server.RecordingSOCServer; srv = new RecordingSOCServer() and srv.records.get(gameName) (evidence: src/test/java/soctest/server/TestRecorder.java imports + startStringportServer)</li>
+<li><strong>GameEventLog / GameEventLog.EventEntry</strong> (outbound) — via import soc.extra.server.GameEventLog[.EventEntry]; read log.entries and construct EventEntry fixtures (evidence: src/test/java/soctest/server/TestRecorder.java and src/test/java/soctest/robot/TestGameActionExtractor.java imports)</li>
+<li><strong>GameActionExtractor / GameActionLog</strong> (outbound) — via class TestGameActionExtractor extends GameActionExtractor; asserts GameActionLog.Action entries (evidence: src/test/java/soctest/robot/TestGameActionExtractor.java::TestGameActionExtractor)</li>
+<li><strong>SOCServer / SOCGameHandler</strong> (outbound) — via import soc.server.SOCServer; createAndJoinReloadedGame, resumeReloadedGame, destroyGameAndBroadcast (evidence: src/test/java/soctest/server/TestRecorder.java::testBasics_Loadgame, resumeLoadedGame)</li>
+<li><strong>TestLoadgame (savegame fixtures)</strong> (outbound) — via import soctest.server.savegame.TestLoadgame; TestLoadgame.load(“classic-botturn.game.json”, server) (evidence: src/test/java/soctest/server/TestRecorder.java::testBasics_Loadgame)</li>
+<li><strong>doc/Message-Sequences-for-Game-Actions.md</strong> (inbound) — via documented per-action message sequence contract these tests enforce (evidence: feature source_linkage doc_evidence; <a href="http://CLAUDE.md">CLAUDE.md</a> protocol section)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Split coverage into a recording-side test and an extraction-side test</strong>: TestRecorder verifies the server emits the documented sequence for an action; TestGameActionExtractor verifies an automated reader can recover the action from that sequence. The contract only holds if both directions agree, so each end is guarded independently rather than in one round-trip test.</li>
+<li><strong>Express expected sequences as String[][] of recipient-prefix + field substring, compared by compareRecordsToExpected</strong>: The wire format is itself textual (writeUTF strings), so a human-readable {“p3:SOCGameServerText:”,“text=…”} fixture mirrors what travels on the wire and reads as documentation. The substring match also tolerates localized text without pinning exact bytes.</li>
+<li><strong>TestGameActionExtractor extends the GameActionExtractor it tests</strong>: The javadoc states it does so ‘as an easy way to access its methods being tested’ — extension exposes the protected read cursor (next, backtrackTo, nextIfType, state, currentSequence) to assertions without widening that API for production callers.</li>
+<li><strong>Encode message recipient in the fixture prefix (all: / p3: / f3: / !p3:)</strong>: A sequence’s correctness includes who each message is sent to (broadcast vs per-player vs from-client vs excluded), so the recipient is carried in the comparison key and the extractor is re-checked per client perspective via the toClientPN parameter.</li>
+<li><strong>Run on an in-process stringport server with unique per-test client names</strong>: RecordingSOCServer.STRINGPORT_NAME avoids real sockets for fast, isolated runs; the clientNamesUsed set prevents two methods reusing a name, which ‘would intermittently cause auth problems’ when tests run in parallel.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[UNVERIFIED]</strong> A new game’s recorded log MUST begin with SOCVersion immediately followed by SOCNewGame (or SOCNewGameWithOptions for games created with options). — src/test/java/soctest/server/TestRecorder.java::testNewGameFirstLogEntries asserts log.entries.size()==2 and the exact {all:SOCVersion, all:SOCNewGame[WithOptions]} prologue (cross-document reconciliation: not verified against <code>src/test/java/soctest/server/TestRecorder.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> Client-origin (from-client) messages MUST NOT appear in the recorded log unless isRecordGameEventsFromClientsActive() is enabled (srv.isRecordingFromClients). — src/test/java/soctest/server/TestRecorder.java::testRecordClientMessage — empty expected log before toggle, f3:* entries only after setting isRecordingFromClients=true (cross-document reconciliation: not verified against <code>src/test/java/soctest/server/TestRecorder.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[SOFT]</strong> The extractor input log SHOULD start with version, newgame, and startgame entries before any action sequence. — src/test/java/soctest/robot/TestGameActionExtractor.java::makeEmptyEventLog comment “Extractor expects to see version, newgame, and startgame”</li>
+<li><strong>[UNVERIFIED]</strong> Each test SHOULD use a unique client nickname to avoid auth interference across parallel runs. — src/test/java/soctest/server/TestRecorder.java::clientNamesUsed and per-method CLIENT_NAME constants (cross-document reconciliation: not verified against <code>src/test/java/soctest/server/TestRecorder.java</code>; recorded as design intent, not current code fact.)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — Acts as the regression guard that documented per-action message sequences do not drift on the wire; TestRecorder additionally cross-checks loaded-game asserts by keeping bot-only games alive (DESTROY_BOT_ONLY_GAMES_WHEN_OVER=false). — src/test/java/soctest/server/TestRecorder.java::startStringportServer</li>
+<li><strong>observability</strong> — Recorded EventEntry rows retain recipient routing (all/per-player/from-client) and message fields, enabling assertions on both content and addressing. — src/test/java/soctest/server/TestRecorder.java::compareRecordsToExpected and EventEntry usage</li>
+<li><strong>performance</strong> — Tests run against an in-memory stringport server rather than real sockets, with short Thread.sleep waits for client/server thread hand-off, keeping the unit suite fast. — src/test/java/soctest/server/TestRecorder.java — RecordingSOCServer.STRINGPORT_NAME, DisplaylessTesterClient.init() + Thread.sleep(120)</li>
+<li><strong>error-handling</strong> — Extractor must recover from an unknown sequence and continue recognizing subsequent actions; verified by an UNKNOWN action surrounded by recognized ones. — src/test/java/soctest/robot/TestGameActionExtractor.java::testUnknownSequenceRecovery</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Shows the recipient-prefixed String[][] fixture encoding the required log-header invariant.</em>
+<em>Source: <code>src/test/java/soctest/server/TestRecorder.java (testNewGameFirstLogEntries)</code></em></p>
+<pre><code>{&quot;all:SOCVersion:&quot; + Version.versionNumber(), &quot;str=&quot; + Version.version()},
+{&quot;all:SOCNewGame:&quot;, &quot;game=&quot; + gaName}
+</code></pre>
+<p><em>Documents the prologue the extractor depends on before any action sequence is appended.</em>
+<em>Source: <code>src/test/java/soctest/robot/TestGameActionExtractor.java (makeEmptyEventLog)</code></em></p>
+<pre><code>log.add(new EventEntry(&quot;Extractor expects to see version, newgame, and startgame&quot;));
+</code></pre>
+<p><em>Verifies the extractor degrades an unrecognized middle sequence to UNKNOWN yet still recognizes the actions after it.</em>
+<em>Source: <code>src/test/java/soctest/robot/TestGameActionExtractor.java (testUnknownSequenceRecovery)</code></em></p>
+<pre><code>act = actionLog.get(4);
+assertEquals(desc, ActionType.UNKNOWN, act.actType);
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class StartedTestGameObjects {
+        +StartedTestGameObjects()
+    }
+    class TestGameActionExtractor {
+        +public TestGameActionExtractor()
+        -private static GameEventLog makeEmptyEventLog()
+        +testBasicsReadEvents()
+        +@Test
+    public void testBasicsNextIfGameStateOrOver()
+        -addEventLogEntries()
+        +@Test
+    public void testUnknownSequenceRecovery()
+        +@Test
+    public void testInitialPlacement()
+        +testInitialPlacementCancelSettlement()
+        +testLoadAndExtractInitialPlacement()
+        +@Test
+    public void testTurnWithBuilding()
+        +@Test
+    public void testBuildUndo()
+        +@Test
+    public void testMoveShipUndo()
+        +@Test
+    public void testSpecialBuildingPhase()
+        +@Test
+    public void testBankTradePlayerTrade()
+        +@Test
+    public void testRoll7DiscardsMoveRobberSteal()
+        +@Test
+    public void testBuyDevCard()
+        +@Test
+    public void testPlayDevCards()
+        +@Test
+    public void testPlayDevCardRoadBuilding()
+        +@Test
+    public void testGoldHexFogHex()
+        +@Test
+    public void testRollGainCloth()
+        +@Test
+    public void testGameOver()
+        -testExtractEventSequence()
+    }
+    class ExtractResultsChecker {
+        <<interface>>
+    }
+    class TestRecorder {
+        +@BeforeClass
+    public static void startStringportServer()
+        +@AfterClass
+    public static void shutdownServer()
+        +resumeLoadedGame()
+        +testBasics_ServerUpWithBotsConnectClient()
+        +testBasics_Loadgame()
+        +testBasics_SendToClientWithLocale()
+        +testBasics_ClientVersion()
+        +@Test
+    public void testBasics_compareIgnoresFromClient()
+        +@Test
+    public void testNewGameFirstLogEntries()
+        +testRecordClientMessage()
+        +testMakeElapsedMS()
+        -activateOptionAtServerForClient()
+        +connectCreateJoinNewGame()
+        +createJoinNewGame()
+        +connectLoadJoinResumeGame()
+        +connectObserver()
+        -validateAndUseClientName()
+        -activateObservabilityGameOption()
+        -connectNewTesterClient()
+        +testLoadAndBasicSequences()
+        +buildRoadSequence()
+        +moveRobberStealSequence()
+        +testTradeDecline2Clients()
+        +compareRecordsToExpected()
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_test_java_soctest_robot_TestGameActionExtractor_java["TestGameActionExtractor.java"]
+    src_test_java_soctest_server_TestRecorder_java["TestRecorder.java"]
+
+
+    ext_src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java["SOCDisplaylessPlayerClient.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java
+    ext_src_main_java_soc_extra_robot_GameActionExtractor_java["GameActionExtractor.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_extra_robot_GameActionExtractor_java
+    ext_src_main_java_soc_extra_robot_GameActionLog_java["GameActionLog.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_extra_robot_GameActionLog_java
+    ext_src_main_java_soc_extra_server_GameEventLog_java["GameEventLog.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_extra_server_GameEventLog_java
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_extra_server_GameEventLog_java
+    ext_src_main_java_soc_extra_server_RecordingSOCServer_java["RecordingSOCServer.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_extra_server_RecordingSOCServer_java
+    ext_src_main_java_soc_game_GameAction_java["GameAction.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_GameAction_java
+    ext_src_main_java_soc_game_SOCBoard_java["SOCBoard.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoard_java
+    ext_src_main_java_soc_game_SOCBoardLarge_java["SOCBoardLarge.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoardLarge_java
+    ext_src_main_java_soc_game_SOCCity_java["SOCCity.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_game_SOCCity_java
+    ext_src_main_java_soc_game_SOCDevCardConstants_java["SOCDevCardConstants.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_game_SOCDevCardConstants_java
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCDevCardConstants_java
+    ext_src_main_java_soc_game_SOCGame_java["SOCGame.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    ext_src_main_java_soc_game_SOCGameOption_java["SOCGameOption.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOption_java
+    ext_src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    ext_src_main_java_soc_game_SOCMoveRobberResult_java["SOCMoveRobberResult.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCMoveRobberResult_java
+    ext_src_main_java_soc_game_SOCPlayer_java["SOCPlayer.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayer_java
+    ext_src_main_java_soc_game_SOCPlayingPiece_java["SOCPlayingPiece.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayingPiece_java
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayingPiece_java
+    ext_src_main_java_soc_game_SOCResourceConstants_java["SOCResourceConstants.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceConstants_java
+    ext_src_main_java_soc_game_SOCResourceSet_java["SOCResourceSet.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceSet_java
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceSet_java
+    ext_src_main_java_soc_game_SOCRoad_java["SOCRoad.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoad_java
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoad_java
+    ext_src_main_java_soc_game_SOCScenario_java["SOCScenario.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_game_SOCScenario_java
+    ext_src_main_java_soc_game_SOCSettlement_java["SOCSettlement.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCSettlement_java
+    ext_src_main_java_soc_game_SOCShip_java["SOCShip.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_game_SOCShip_java
+    ext_src_main_java_soc_game_SOCTradeOffer_java["SOCTradeOffer.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_game_SOCTradeOffer_java
+    ext_src_main_java_soc_message_SOCRollDiceRequest_java["SOCRollDiceRequest.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_message_SOCRollDiceRequest_java
+    ext_src_main_java_soc_server_SOCClientData_java["SOCClientData.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_server_SOCClientData_java
+    ext_src_main_java_soc_server_SOCGameHandler_java["SOCGameHandler.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_server_SOCGameHandler_java
+    ext_src_main_java_soc_server_SOCGameListAtServer_java["SOCGameListAtServer.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_server_SOCGameListAtServer_java
+    ext_src_main_java_soc_server_SOCServer_java["SOCServer.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_server_SOCServer_java
+    ext_src_main_java_soc_server_genericServer_Connection_java["Connection.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_server_genericServer_Connection_java
+    ext_src_main_java_soc_server_savegame_SavedGameModel_java["SavedGameModel.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_server_savegame_SavedGameModel_java
+    ext_src_main_java_soc_util_SOCStringManager_java["SOCStringManager.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_util_SOCStringManager_java
+    ext_src_main_java_soc_util_Version_java["Version.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+    ext_src_test_java_soctest_server_TestGameEventLog_java["TestGameEventLog.java"]:::default
+    src_test_java_soctest_robot_TestGameActionExtractor_java -.->|"imports"| ext_src_test_java_soctest_server_TestGameEventLog_java
+    ext_src_test_java_soctest_server_savegame_TestLoadgame_java["TestLoadgame.java"]:::default
+    src_test_java_soctest_server_TestRecorder_java -.->|"imports"| ext_src_test_java_soctest_server_savegame_TestLoadgame_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Protocol recorder consistency test</code></li>
+<li><code class="code-ref" title="source file in your repository">Recorder expected-sequence comparison helper</code></li>
+<li><code class="code-ref" title="source file in your repository">New-game log-header invariant test</code></li>
+<li><code class="code-ref" title="source file in your repository">Game-action extractor recognition test</code></li>
+<li><code class="code-ref" title="source file in your repository">Minimal event-log fixture builder</code></li>
+<li><code class="code-ref" title="source file in your repository">Game-action extractor under test</code></li>
+<li><code class="code-ref" title="source file in your repository">Recorded game-event log model</code></li>
+<li><code class="code-ref" title="source file in your repository">Recording server fixture source</code></li>
+<li><code class="code-ref" title="source file in your repository">Recorded game-event fixture (hypothesized)</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">protocol-message-sequence-consistency-tests.feature.md</span>
+Scope architecture: <a href="quality-infrastructure.arch.html">quality-infrastructure.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Protocol recorder consistency test</td>
+<td></td>
+<td>src/test/java/soctest/server/TestRecorder.java:87-2045</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Game-action extractor recognition test</td>
+<td></td>
+<td>src/test/java/soctest/robot/TestGameActionExtractor.java:69-72</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Game-action extractor under test</td>
+<td></td>
+<td>src/main/java/soc/extra/robot/GameActionExtractor.java:201-249</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Recorded game-event log model</td>
+<td></td>
+<td>src/main/java/soc/extra/server/GameEventLog.java:231-280</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Recording server fixture source</td>
+<td></td>
+<td>src/main/java/soc/extra/server/RecordingSOCServer.java:157-163</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Recorded game-event fixture (hypothesized)</td>
+<td>Game created at: 2021-10-10 22:48:46 -0400</td>
+<td>src/test/resources/resources/gameevent/all-basic-actions.soclog</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#b83858" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="147.0"/>
+        </svg>
+        <div class="ring-num">0.35</div>
+      </div>
+      <div class="cap" style="color:#b83858">Low confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

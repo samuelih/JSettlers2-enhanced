@@ -45,6 +45,11 @@
 
 .close {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
   border: none;
   background: transparent;
   color: var(--color-text-muted);

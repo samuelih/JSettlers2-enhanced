@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BoardSVG } from './BoardSVG';
 import {
@@ -148,6 +148,27 @@ describe('BoardSVG', () => {
 
     await userEvent.click(screen.getByTestId(`edge-${highlightEdges[1]}`));
     expect(onEdgeClick).toHaveBeenCalledWith(highlightEdges[1]);
+  });
+
+  it('only wires hex clicks for highlighted robber/pirate targets', () => {
+    const onHexClick = vi.fn();
+    render(
+      <BoardSVG
+        board={board}
+        pieces={[]}
+        playerColors={PLAYER_COLORS}
+        interactive
+        highlightHexes={[HEX_A]}
+        onHexClick={onHexClick}
+      />,
+    );
+
+    const clickable = screen.getByTestId(`hex-${HEX_A}`).querySelectorAll('polygon')[1];
+    const blocked = screen.getByTestId(`hex-${HEX_B}`).querySelectorAll('polygon')[1];
+    fireEvent.click(blocked);
+    expect(onHexClick).not.toHaveBeenCalled();
+    fireEvent.click(clickable);
+    expect(onHexClick).toHaveBeenCalledWith(HEX_A);
   });
 
   it('omits highlight target groups when none are given', () => {

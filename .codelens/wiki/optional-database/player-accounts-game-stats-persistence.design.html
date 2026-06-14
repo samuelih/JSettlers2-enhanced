@@ -1,0 +1,265 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Player Accounts &amp; Game Stats Persistence · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><div class="nav-sub"><a class="nav-item" href="../optional-database/optional-database.arch.html"><span class="nm">Optional Database</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../optional-database/jdbc-persistence-helper-schema-upgrades.design.html"><span class="nm">JDBC Persistence Helper &amp; Schema Upgrades</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../optional-database/player-accounts-game-stats-persistence.design.html"><span class="nm">Player Accounts &amp; Game Stats Persistence</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../optional-database/sql-schema-templating-generation.design.html"><span class="nm">SQL Schema Templating &amp; Generation</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../optional-database/contracts/optional-database.gateway.html"><span class="nm">Optional Database Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../optional-database/contracts/optional-database.testplan.html"><span class="nm">Optional Database Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Optional Database</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:50%"></i></span>
+      <span class="conf-val">0.50</span></span></div>
+        <h1 class="doc-title">Player Accounts &amp; Game Stats Persistence</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Player Accounts &amp; Game Stats Persistence</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Persistence is the only thing lost without a DB</strong> — Per <a href="http://CLAUDE.md">CLAUDE.md</a> and doc/Database.md the database is strictly opt-in: durable player accounts and completed-game stats/scores are the sole capabilities forfeited when the server runs DB-less, which is why this feature is built as an isolatable layer rather than a core dependency.</li>
+<li><strong>Vendor portability as a product mandate</strong> — doc/Database.md and <a href="http://CLAUDE.md">CLAUDE.md</a> assert the code must stay neutral across MySQL, PostgreSQL, SQLite, and Oracle so operators can deploy on whatever they already run; this constraint drives the single-facade design of SOCDBHelper rather than performance-led, engine-specific data access.</li>
+<li><strong>Bot-parameter persistence reflects the project’s research origin</strong> — The codebase began as an AI-agent dissertation (<a href="http://CLAUDE.md">CLAUDE.md</a>), so retrieving tuned robot parameters from the DB (retrieveRobotParams) is a first-class persistence concern alongside human accounts, not an afterthought.</li>
+</ul>
+<h2>Overview</h2>
+<p>This feature provides the optional, opt-in persistence layer of the server. Repository evidence: <code>src/main/java/soc/server/database/SOCDBHelper.java</code>. On account creation or login the server calls createAccount / authenticateUserPassword, which hash and compare credentials via BCrypt and return through the AuthPasswordRunnable callback so the expensive hash never blocks the inbound message loop. Completed games route summary data into saveGameScores. At startup SOCDBHelper connects, detects the schema version, validates persisted settings (checkSettings), and, when a migration is pending, hands the heavy work to UpgradeBGTasksThread so play can resume immediately. Bot tuning parameters are read back via retrieveRobotParams.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCDBHelper</strong>: Single entry point for all persistence: connection setup (connect, checkConnection, prepareStatements), schema versioning (detectSchemaVersion, getSchemaVersion, isSchemaLatestVersion), account operations (getUser, createAccount, authenticateUserPassword, updateUserPassword, updateLastlogin, recordLogin), bot-parameter retrieval (retrieveRobotParams) and game stats/scores storage (saveGameScores). Isolates the rest of the server from JDBC/vendor specifics.</li>
+<li><strong>BCrypt</strong>: Computes and verifies salted bcrypt password hashes (hashpw, checkpw, gensalt, crypt_raw); the deliberately CPU-bound work factor protects stored account credentials at rest.</li>
+<li><strong>UpgradeBGTasksThread</strong>: Runs long-running schema upgrades (upgradeBGTasks_1000_1200, upgradeBGTasks_1200_2000) off the startup path so the server can accept connections before a large migration finishes; gated by doesSchemaUpgradeNeedBGTasks / startSchemaUpgradeBGTasks.</li>
+<li><strong>DBSettingMismatchException</strong>: Thrown by checkSettings when a persisted DB setting disagrees with the running configuration, forcing operator attention rather than silent divergence.</li>
+<li><strong>AuthPasswordRunnable</strong>: Callback contract returning the result of authenticateUserPassword so the bcrypt verification can complete off the main message-handling thread.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>Relational database engines (MySQL / PostgreSQL / SQLite / Oracle)</strong> (outbound) — via JDBC connection established in SOCDBHelper.connect; vendor specifics in dbtypePostgresGetSerialSequence / upg_postgres_checkIsTableOwner (evidence: src/main/java/soc/server/database/SOCDBHelper.java::connect)</li>
+<li><strong>SOCServer</strong> (inbound) — via Server calls SOCDBHelper.initialize at startup and authenticateUserPassword for login, receiving the result through the AuthPasswordRunnable callback (evidence: src/main/java/soc/server/database/SOCDBHelper.java::authenticateUserPassword)</li>
+<li><strong>Account-creation client (doc/Database.md)</strong> (inbound) — via Server-side createAccount persists new player accounts requested by the separate account-management client app (evidence: src/main/java/soc/server/database/SOCDBHelper.java::createAccount)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Funnel every persistence operation through one vendor-neutral helper (SOCDBHelper) instead of scattering JDBC across the server</strong>: Keeps the supported engines (MySQL, PostgreSQL, SQLite, Oracle) interchangeable and confines vendor-specific quirks to a few localized methods (dbtypePostgresGetSerialSequence, upg_postgres_checkIsTableOwner).</li>
+<li><strong>Make the database entirely optional and detected at runtime</strong>: The server’s core game logic is authoritative in memory; persistence is value-add, so a missing DB should degrade gracefully (only accounts/stats lost) rather than block startup.</li>
+<li><strong>Store account passwords as bcrypt hashes and migrate legacy plaintext on upgrade</strong>: Salted adaptive hashing resists offline credential theft; upgradeSchema_1200_encodeUserPasswords re-encodes pre-existing rows so no plaintext survives a schema bump.</li>
+<li><strong>Run schema upgrades online in a background thread</strong>: Large migrations (1000→1200, 1200→2000) would otherwise delay server availability; UpgradeBGTasksThread lets the server come up while data is upgraded behind it.</li>
+<li><strong>Verify passwords asynchronously via a callback interface</strong>: Because bcrypt verification is deliberately CPU-expensive, performing it inline on the inbound message thread would stall unrelated traffic; AuthPasswordRunnable returns the verdict off-thread.</li>
+<li><strong>Fail closed on persisted-setting drift</strong>: checkSettings raises DBSettingMismatchException when stored DB settings conflict with the running config, surfacing misconfiguration loudly instead of corrupting data silently.</li>
+<li><strong>Adapt 6-player game results into a 4-player-shaped score schema</strong>: saveGameScores_fit6pInto4 lets the stats feature persist larger games without a schema fork, keeping the stats table stable across game sizes.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> Account passwords MUST satisfy the configured length bounds before being accepted or hashed — src/main/java/soc/server/database/SOCDBHelper.java::isPasswordLengthOK / getMaxPasswordLength</li>
+<li><strong>[HARD]</strong> The server MUST refuse to proceed when a persisted DB setting conflicts with the running configuration — src/main/java/soc/server/database/SOCDBHelper.java::checkSettings (throws DBSettingMismatchException)</li>
+<li><strong>[SOFT]</strong> All persistence SQL SHOULD remain vendor-neutral across MySQL, PostgreSQL, SQLite, and Oracle, with engine-specific logic confined to SOCDBHelper — doc/Database.md and <a href="http://CLAUDE.md">CLAUDE.md</a>; localized vendor branches in src/main/java/soc/server/database/SOCDBHelper.java</li>
+<li><strong>[SOFT]</strong> Generated jsettlers-tables-*.sql MUST NOT be hand-edited; edit the template and regenerate — <a href="http://CLAUDE.md">CLAUDE.md</a> (Database section); enforced by the testSrcDBTemplates build task</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>security</strong> — Account credentials are stored only as salted bcrypt hashes and legacy plaintext is re-encoded during schema upgrade — src/main/java/soc/server/database/BCrypt.java::hashpw; SOCDBHelper.java::upgradeSchema_1200_encodeUserPasswords</li>
+<li><strong>security</strong> — Database access uses prepared statements rather than concatenated SQL — src/main/java/soc/server/database/SOCDBHelper.java::prepareStatements</li>
+<li><strong>performance</strong> — Bcrypt work factor is calibrated against the host so authentication cost stays bounded, and queries can cap returned rows — src/main/java/soc/server/database/SOCDBHelper.java::testBCryptSpeed; selectWithLimit</li>
+<li><strong>reliability</strong> — Schema upgrades run as resumable background tasks with DDL rollback support so a failed migration does not leave the server unstartable — src/main/java/soc/server/database/SOCDBHelper.java::UpgradeBGTasksThread; runDDL_rollback</li>
+<li><strong>error-handling</strong> — Configuration drift is signaled by a typed exception rather than silent fallback — src/main/java/soc/server/database/DBSettingMismatchException.java</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class BCrypt {
+        -encode_base64()
+        -private static byte char64(char x)
+        -decode_base64()
+        -private final void encipher(int lr[], int off)
+        -private static int streamtoword(byte data[], int offp[])
+        -private void init_key()
+        -private void key(byte key[])
+        -private void ekskey(byte data[], byte key[])
+        +crypt_raw()
+        +hashpw()
+        +gensalt()
+        +checkpw()
+    }
+    class DBSettingMismatchException {
+        +public DBSettingMismatchException(final String settingKey)
+    }
+    class SOCDBHelper {
+        +initialize()
+        +public boolean isInitialized()
+        +public int getSchemaVersion()
+        +isSchemaLatestVersion()
+        +doesSchemaUpgradeNeedBGTasks()
+        +public boolean startSchemaUpgradeBGTasks()
+        -private boolean checkConnection() throws SQLException
+        -connect()
+        -detectSchemaVersion()
+        -prepareStatements()
+        +checkSettings()
+        +getUser()
+        +authenticateUserPassword()
+        +getUserFromHost()
+        +createAccount()
+        +recordLogin()
+        +updateLastlogin()
+        +updateUserPassword()
+        +public final int getMaxPasswordLength()
+        +isPasswordLengthOK()
+        +saveGameScores()
+        -saveGameScores_fit6pInto4()
+        +retrieveRobotParams()
+        +public int countUsers()
+        throws SQLException
+        +getSettingsFormatted()
+        +queryUsersDuplicateLCase()
+        +public int testBCryptSpeed()
+        -testBCryptSpeed_range()
+        +selectWithLimit()
+        -insertGames2Row()
+        +doesTableExist()
+        +doesTableColumnExist()
+        -enterTransactionMode()
+        -exitTransactionMode()
+        -runSetupScript()
+        +upgradeSchema()
+        -upgradeSchema_setDBVersionTable()
+        +public void cleanup(final boolean isForShutdown)
+        -upgradeSchema_1200_encodeUserPasswords()
+        -upg_postgres_checkIsTableOwner()
+        -dbtypePostgresGetSerialSequence()
+        -runDDL_dropCols()
+        -private boolean runDDL_rollback(final String sql)
+        -runDDL()
+        -getIntSetting()
+        -updateSetting()
+        -static void dispResultSet(ResultSet rs) throws SQLException
+        -testOne_doesTableExist()
+        -testOne_doesTableColumnExist()
+        -testOne_insertGameRow()
+        -testDBHelper_runDDL()
+        +testDBHelper()
+    }
+    class UpgradeBGTasksThread {
+        +public void run()
+        -upgradeBGTasks_1000_1200()
+        -upgradeBGTasks_1200_2000()
+    }
+    class AuthPasswordRunnable {
+        <<interface>>
+    }
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Vendor-neutral database helper layer mediating account and stats storage</code></li>
+<li><code class="code-ref" title="source file in your repository">Optional, runtime-detected database initialization</code></li>
+<li><code class="code-ref" title="source file in your repository">Player account creation and authentication</code></li>
+<li><code class="code-ref" title="source file in your repository">Bcrypt password hashing of account credentials</code></li>
+<li><code class="code-ref" title="source file in your repository">Game stats/scores persistence enabled independently</code></li>
+<li><code class="code-ref" title="source file in your repository">Online schema upgrade via background tasks</code></li>
+<li><code class="code-ref" title="source file in your repository">Fail-closed settings consistency check</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">player-accounts-game-stats-persistence.feature.md</span>
+Scope architecture: <a href="optional-database.arch.html">optional-database.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Vendor-neutral database helper layer mediating account and stats storage</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Optional, runtime-detected database initialization</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java:1069-1072</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Player account creation and authentication</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java:1718-1774</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Bcrypt password hashing of account credentials</td>
+<td></td>
+<td>src/main/java/soc/server/database/BCrypt.java:667-721</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Game stats/scores persistence enabled independently</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java:1981-2149</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Online schema upgrade via background tasks</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java:3127-3549</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Fail-closed settings consistency check</td>
+<td></td>
+<td>src/main/java/soc/server/database/DBSettingMismatchException.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="113.1"/>
+        </svg>
+        <div class="ring-num">0.50</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

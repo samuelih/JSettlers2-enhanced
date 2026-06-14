@@ -218,6 +218,7 @@ export function LobbyScreen(): JSX.Element {
         </div>
         <Button
           variant="primary"
+          className={styles.newGameButton}
           onClick={openDialog}
           data-testid="new-game-button"
         >
@@ -240,7 +241,12 @@ export function LobbyScreen(): JSX.Element {
             <p className={styles.emptyHint}>
               Create a game to start playing against friends or bots.
             </p>
-            <Button variant="secondary" size="sm" onClick={openDialog}>
+            <Button
+              variant="secondary"
+              size="sm"
+              className={styles.emptyButton}
+              onClick={openDialog}
+            >
               Create a game
             </Button>
           </div>
@@ -267,6 +273,7 @@ export function LobbyScreen(): JSX.Element {
                     variant="secondary"
                     size="sm"
                     className={styles.joinButton}
+                    aria-label={`Join game ${g.name}`}
                     onClick={() => handleJoin(g.name)}
                     data-testid={`join-${g.name}`}
                   >

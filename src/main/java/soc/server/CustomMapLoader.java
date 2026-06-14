@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -30,6 +31,8 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
+import soc.game.SOCGameOption;
+import soc.game.SOCGameOptionSet;
 import soc.game.SOCScenario;
 
 /**
@@ -98,6 +101,58 @@ public class CustomMapLoader
     public static boolean isCustomMap(final String scenarioKey)
     {
         return (scenarioKey != null) && loadedMaps.containsKey(scenarioKey);
+    }
+
+    /**
+     * Check whether a game's selected custom-map scenario supports its requested player count.
+     *<P>
+     * For custom maps, {@code playerCounts} is the map author's supported count list.  Missing {@code "PL"}
+     * requests the default 4-player layout; {@code "PL"} &gt; 4 or {@code "PLB"} requests the 6-player layout.
+     *
+     * @param gameOpts  Game options, or {@code null}
+     * @return {@code null} if no custom map is selected or the selected map supports this count;
+     *     otherwise a client-facing status message explaining why the game can't be created
+     * @since 2.7.00
+     */
+    public static String checkGameOptionsForUnsupportedPlayerCount(final SOCGameOptionSet gameOpts)
+    {
+        if (gameOpts == null)
+            return null;  // <--- Early return: no custom map can be selected ---
+
+        final SOCGameOption scOpt = gameOpts.get("SC");
+        if (scOpt == null)
+            return null;  // <--- Early return: no custom map can be selected ---
+
+        final ParsedCustomMap pmap = getLoadedMap(scOpt.getStringValue());
+        if (pmap == null)
+            return null;  // <--- Early return: scenario isn't a registered custom map ---
+
+        final int maxPl = getRequestedPlayerCount(gameOpts);
+        if (pmap.supportsPlayerCount(maxPl))
+            return null;  // <--- Early return: supported player count ---
+
+        return "Cannot create game: custom map \"" + pmap.name + "\" (" + pmap.scenarioKey
+            + ") does not support " + maxPl + " players; supported player counts are "
+            + Arrays.toString(pmap.playerCounts) + ".";
+    }
+
+    /**
+     * Determine which player-count layout a game option set requests.
+     * @param gameOpts  Game options, not null
+     * @return 2, 3, 4, or 6
+     */
+    private static int getRequestedPlayerCount(final SOCGameOptionSet gameOpts)
+    {
+        SOCGameOption opt = gameOpts.get("PLB");
+        if ((opt != null) && opt.getBoolValue())
+            return 6;
+
+        opt = gameOpts.get("PL");
+        if (opt == null)
+            return 4;
+
+        final int maxPl = opt.getIntValue();
+        return (maxPl > 4) ? 6 : maxPl;
     }
 
     /**

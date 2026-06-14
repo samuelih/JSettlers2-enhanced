@@ -1,0 +1,486 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Robot client networking (SOCRobotClient) · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../robot-ai-players/robot-ai-players.arch.html"><span class="nm">Robot / AI Players</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.api-boundary.html"><span class="nm">Robot / AI Players API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../robot-ai-players/robot-client-networking-socrobotclient.design.html"><span class="nm">Robot client networking (SOCRobotClient)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-decision-loop-socrobotbrain.design.html"><span class="nm">Robot decision loop (SOCRobotBrain)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-robustness-for-unknown-inventory-items.design.html"><span class="nm">Robot robustness for unknown inventory items</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/third-party-bot-extension-framework-sample3p.design.html"><span class="nm">Third-party bot extension framework (sample3p)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.gateway.html"><span class="nm">Robot / AI Players Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.testplan.html"><span class="nm">Robot / AI Players Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Robot / AI Players</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:70%"></i></span>
+      <span class="conf-val">0.70</span></span></div>
+        <h1 class="doc-title">Robot client networking (SOCRobotClient)</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Robot client networking (SOCRobotClient)</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Bots as first-class clients</strong> — The robot subsystem originates from Robert S. Thomas’ AI-agent dissertation, so the bot connecting over the same protocol as a human is intentional architecture, not a shortcut: it lets the AI be exercised through the real client surface. SOCRobotClient’s reuse of SOCDisplaylessPlayerClient encodes that the bot is a real network peer.</li>
+<li><strong>Third-party bot ecosystem</strong> — The class javadoc explicitly supports third-party bots that extend SOCRobotClient/SOCRobotBrain or are built from scratch in other languages, with version differences tolerated. The explicit rbclass, security cookie, and overridable buildClientFeats() exist so external bots can authenticate and declare capabilities without the server special-casing them.</li>
+</ul>
+<h2>Overview</h2>
+<p>A built-in or third-party bot constructs SOCRobotClient with a ServerConnectInfo and credentials, then calls init(). init() establishes either a TCP Socket (hostname/port) or a same-JVM StringConnection (stringSocketName), spins up the reader thread, and sends a SOCVersion message followed by SOCImARobot carrying the nickname, the robotCookie from ServerConnectInfo, and rbclass. Because the bot speaks the identical SOCMessage string protocol that human clients use (writeUTF/readUTF), the server treats it like any other connection. The inherited run() loop reads each framed string, parses it with SOCMessage.toMsg, and dispatches via treat(); SOCRobotClient.treat() intercepts bot-only types (join requests, robot-parameter updates, dismissals) and delegates everything else to SOCDisplaylessPlayerClient.treat(), which folds message contents into the local SOCGame model. Per-game decision-making is not done here: each joined game gets a SOCRobotBrain fed through a CappedQueue, keeping connection concerns separate from move planning. disconnectReconnect() reuses the same handshake to recover dropped links.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCRobotClient</strong></li>
+<li><strong>SOCDisplaylessPlayerClient</strong></li>
+<li><strong>ServerConnectInfo</strong></li>
+<li><strong>SOCRobotParameters</strong></li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>SOCDisplaylessPlayerClient</strong> (outbound) — via Java inheritance — SOCRobotClient extends SOCDisplaylessPlayerClient; treat() default case calls super.treat() (evidence: src/main/java/soc/robot/SOCRobotClient.java (public class SOCRobotClient extends SOCDisplaylessPlayerClient))</li>
+<li><strong>ServerConnectInfo</strong> (outbound) — via Held as final serverConnectInfo field; read for hostname/port/stringSocketName/robotCookie in init() (evidence: src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java (protected final ServerConnectInfo serverConnectInfo))</li>
+<li><strong>SOCRobotParameters</strong> (inbound) — via Received via SOCUpdateRobotParams network message, cached as currentRobotParameters (evidence: src/main/java/soc/robot/SOCRobotClient.java (protected SOCRobotParameters currentRobotParameters))</li>
+<li><strong>SOCRobotBrain</strong> (outbound) — via Per-game brains in robotBrains Hashtable, fed messages through per-brain CappedQueue (brainQs); created via createBrain() (evidence: src/main/java/soc/robot/SOCRobotClient.java (Hashtable&lt;String, SOCRobotBrain&gt; robotBrains))</li>
+<li><strong>SOCServer</strong> (bidirectional) — via TCP Socket or same-JVM StringServerSocket carrying SOCMessage strings (writeUTF/readUTF) (evidence: src/main/java/soc/robot/SOCRobotClient.java::init (sock = new Socket(…); sLocal = StringServerSocket.connectTo(…)))</li>
+<li><strong>SOCGameOptionSet</strong> (inbound) — via knownOpts seeded from getAllKnownOptions(); per-game options cached in gameOptions Hashtable from SOCBotJoinGameRequest (evidence: src/main/java/soc/robot/SOCRobotClient.java (Hashtable&lt;String, SOCGameOptionSet&gt; gameOptions))</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Bots reuse the human-client SOCMessage protocol instead of a dedicated bot RPC channel</strong>: SOCRobotClient extends SOCDisplaylessPlayerClient and sends the same SOCVersion/SOCImARobot/JOINGAME exchange a human client would, so the server need not special-case bot traffic. The wire format is plain writeUTF/readUTF unicode strings, which also keeps the door open for non-Java third-party bots to interoperate.</li>
+<li><strong>Connection identity is a ServerConnectInfo value object rather than overloaded constructors</strong>: Its javadoc states the class exists to avoid pairs of TCP/string-socket constructors and to let future bot clients receive more server info or a new protocol’s port without changing their constructor signatures. It carries the robotCookie but deliberately omits nickname/password, which are passed separately, so the same struct serves both bot and human callers.</li>
+<li><strong>Separate connection layer from per-game decision-making</strong>: SOCRobotClient owns sockets, the handshake, and message routing, but holds a Hashtable of SOCRobotBrain plus per-brain CappedQueues and hands each game’s messages to its brain rather than deciding moves inline. This isolates the volatile AI logic from the stable networking core and lets a third-party bot override createBrain()/buildClientFeats() without touching transport.</li>
+<li><strong>Built-in bots are pinned to the server version; sync messages are largely skipped</strong>: Because built-in bots run in the server JVM and are the same version, allOptsReceived defaults true and knownOpts is seeded from getAllKnownOptions(), so SOCGameOptionInfo/SOCScenarioInfo synchronization is unnecessary (handled only if sent). Third-party bots may differ in version, which is why client features and rbclass are explicitly negotiated at connect.</li>
+<li><strong>Extension points are virtual hooks, not subclass-edited constants</strong>: Third-party bots set rbclass, override createBrain() to supply their SOCRobotBrain subclass, and override buildClientFeats() when their optional client features differ, with Sample3PClient as the trivial reference. This keeps the base handshake intact while letting subclasses declare their own capabilities.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> A robot client MUST authenticate its connection with the server-issued security cookie carried in ServerConnectInfo.robotCookie when sending SOCImARobot. — src/main/java/soc/robot/SOCRobotClient.java::init (put(SOCImARobot.toCmd(nickname, serverConnectInfo.robotCookie, rbclass)))</li>
+<li><strong>[HARD]</strong> ServerConnectInfo MUST NOT be null when constructing a displayless/robot client; the base constructor throws IllegalArgumentException otherwise. — src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java::SOCDisplaylessPlayerClient (if (sci == null) throw new IllegalArgumentException)</li>
+<li><strong>[HARD]</strong> buildClientFeats() MUST NOT return null; init() throws IllegalStateException if a subclass override returns null. — src/main/java/soc/robot/SOCRobotClient.java::init (if (cliFeats == null) throw new IllegalStateException)</li>
+<li><strong>[SOFT]</strong> Third-party subclasses SHOULD update rbclass, override createBrain(), and override buildClientFeats() before calling init() when their behavior or features differ from the built-in bot. — src/main/java/soc/robot/SOCRobotClient.java::SOCRobotClient (class javadoc Third-Party Bots list)</li>
+<li><strong>[HARD]</strong> disconnectReconnect() retries the connect handshake a maximum of 3 times before giving up and killing active brains. — src/main/java/soc/robot/SOCRobotClient.java::disconnectReconnect (for attempt = 3 loop)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — Dropped connections are recovered by disconnectReconnect(), which re-runs the full connect handshake up to 3 times and, on total failure, sets connected=false and kills all active brains so games fail cleanly. — src/main/java/soc/robot/SOCRobotClient.java::disconnectReconnect</li>
+<li><strong>reliability</strong> — The TCP socket sets a 300000 ms read timeout, intentionally longer than the bot client-ping sleep interval, so a healthy bot is kept alive by pings while a truly dead link eventually times out. — src/main/java/soc/robot/SOCRobotClient.java::init (sock.setSoTimeout(300000))</li>
+<li><strong>security</strong> — Robot connections are gated by a weak shared-secret cookie required by server v1.1.19+, configured via jsettlers.bots.cookie; ServerConnectInfo stores it as a final field and it is unused (null) for human clients. — src/main/java/soc/baseclient/ServerConnectInfo.java::ServerConnectInfo (robotCookie javadoc)</li>
+<li><strong>observability</strong> — When jsettlers.debug.traffic is set, all inbound/outbound SOCMessage contents are debug-printed, with repetitive idle SOCServerPing traffic suppressed via nextServerPingExpectedAt to keep logs readable. — src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java::treat (PROP_JSETTLERS_DEBUG_TRAFFIC, nextServerPingExpectedAt)</li>
+<li><strong>error-handling</strong> — init() catches all connect exceptions, stores them in ex, and prints to System.err rather than throwing, so a failed bot connect degrades to an inert client instead of crashing the host JVM. — src/main/java/soc/robot/SOCRobotClient.java::init (catch (Exception e) { ex = e; … })</li>
+</ul>
+<h2>Examples</h2>
+<p><em>The two-message connect handshake: announce version+features, then authenticate as a robot with the cookie and class.</em>
+<em>Source: <code>src/main/java/soc/robot/SOCRobotClient.java:init</code></em></p>
+<pre><code>put(SOCVersion.toCmd
+    (Version.versionNumber(), Version.version(), Version.buildnum(), cliFeats.getEncodedList(), null));
+put(SOCImARobot.toCmd(nickname, serverConnectInfo.robotCookie, rbclass));
+</code></pre>
+<p><em>Shared read loop: every framed string is parsed to a SOCMessage and dispatched, identical to a human client’s path.</em>
+<em>Source: <code>src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:run</code></em></p>
+<pre><code>SOCMessage msg = SOCMessage.toMsg(s);
+if (msg != null)
+    treat(msg);
+else if (debugTraffic)
+    soc.debug.D.ebugERROR(nickname + &quot;: Could not parse net message: &quot; + s);
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCRobotParameters {
+        +public SOCRobotParameters(SOCRobotParameters params)
+        +copyIfOptionChanged()
+        +public int getMaxGameLength()
+        +public int getMaxETA()
+        +public float getETABonusFactor()
+        +public float getAdversarialFactor()
+        +public float getLeaderAdversarialFactor()
+        +public float getDevCardMultiplier()
+        +public float getThreatMultiplier()
+        +public int getStrategyType()
+        +public int getTradeFlag()
+        +public boolean equals(Object o)
+        +@Override
+    public String toString()
+    }
+    class SOCDisplaylessPlayerClient {
+        +SOCDisplaylessPlayerClient()
+        +public String getNickname()
+        +public SOCGame getGame(final String gaName)
+        +public void run()
+        +public void resend()
+        +put()
+        -treat()
+        -protected void handleSTATUSMESSAGE(SOCStatusMessage mes)
+        -protected void handleSERVERPING(SOCServerPing mes)
+        -handleJOINCHANNELAUTH()
+        -handleVERSION()
+        -protected void handleJOINCHANNEL(SOCJoinChannel mes)
+        -protected void handleCHANNELMEMBERS(SOCChannelMembers mes)
+        -protected void handleNEWCHANNEL(SOCNewChannel mes)
+        -protected void handleCHANNELS(SOCChannels mes)
+        -protected void handleBCASTTEXTMSG(SOCBCastTextMsg mes)
+        -protected void handleCHANNELTEXTMSG(SOCChannelTextMsg mes)
+        -protected void handleLEAVECHANNEL(SOCLeaveChannel mes)
+        -protected void handleDELETECHANNEL(SOCDeleteChannel mes)
+        -protected void handleGAMES(SOCGames mes)
+        -handleGAMESWITHOPTIONS()
+        -handleJOINGAMEAUTH()
+        -protected void handleJOINGAME(SOCJoinGame mes)
+        -protected void handleLEAVEGAME(SOCLeaveGame mes)
+        -protected void handleNEWGAME(SOCNewGame mes)
+        -handleNEWGAMEWITHOPTIONS()
+        -protected void handleDELETEGAME(SOCDeleteGame mes)
+        -protected void handleGAMEMEMBERS(SOCGameMembers mes)
+        +handleGAMESTATS()
+        -protected void handleGAMETEXTMSG(SOCGameTextMsg mes)
+        -protected void handleGAMESERVERTEXT(SOCGameServerText mes)
+        +handleDICERESULTRESOURCES()
+        -protected SOCGame handleSITDOWN(final SOCSitDown mes)
+        +handleBOARDLAYOUT()
+        +handleBOARDLAYOUT2()
+        -handleSTARTGAME()
+        +handleSTARTGAME_checkIsBotsOnly()
+        +handleGAMESTATE()
+        +handleDECLINEPLAYERREQUEST()
+        -protected void handleSETTURN(SOCSetTurn mes)
+        -protected void handleFIRSTPLAYER(SOCFirstPlayer mes)
+        -protected void handleTURN(SOCTurn mes)
+        -handlePLAYERELEMENTS()
+        +handlePLAYERELEMENT()
+        +handlePLAYERELEMENT_simple()
+        +handlePLAYERELEMENT_numPieces()
+        +handlePLAYERELEMENT_numKnights()
+        +handlePLAYERELEMENT_numRsrc()
+        -handleGAMEELEMENTS()
+        +handleGAMEELEMENT()
+        -protected void handleRESOURCECOUNT(SOCResourceCount mes)
+        +handleLASTSETTLEMENT()
+        -protected void handleDICERESULT(SOCDiceResult mes)
+        +handlePUTPIECE()
+        -handleCANCELBUILDREQUEST()
+        +handleDISCARD()
+        -protected void handleMOVEROBBER(SOCMoveRobber mes)
+        -protected void handleDISCARDREQUEST(SOCDiscardRequest mes)
+        -handleCHOOSEPLAYERREQUEST()
+        +handleROBBERYRESULT()
+        -protected void handleMAKEOFFER(SOCMakeOffer mes)
+        -protected void handleCLEAROFFER(SOCClearOffer mes)
+        -protected void handleREJECTOFFER(SOCRejectOffer mes)
+        +handleACCEPTOFFER()
+        -protected void handleCLEARTRADEMSG(SOCClearTradeMsg mes)
+        +handleBANKTRADE()
+        -protected void handleDEVCARDCOUNT(SOCDevCardCount mes)
+        -handleDEVCARDACTION()
+        -handleSETPLAYEDDEVCARD()
+        +handlePICKRESOURCES()
+        +handleINVENTORYITEMACTION()
+        +handlePOTENTIALSETTLEMENTS()
+        -protected void handleCHANGEFACE(SOCChangeFace mes)
+        -handleREJECTCONNECTION()
+        -protected void handleLONGESTROAD(SOCLongestRoad mes)
+        -protected void handleLARGESTARMY(SOCLargestArmy mes)
+        -protected void handleSETSEATLOCK(SOCSetSeatLock mes)
+        -protected void handleRESETBOARDAUTH(SOCResetBoardAuth mes)
+        -handleGAMEOPTIONINFO()
+        +handleCHANGEGAMEOPTIONS()
+        +handleSETLASTACTION()
+        +handleUNDONOTALLOWEDREASONTEXT()
+        +handlePLAYERSTATS()
+        +handleSIMPLEREQUEST()
+        +handleSIMPLEACTION()
+        -protected void handleMOVEPIECE(SOCMovePiece mes)
+        -protected void handleREMOVEPIECE(SOCRemovePiece mes)
+        +handleUNDOPUTPIECE()
+        -handleREVEALFOGHEX()
+        -protected void handlePIECEVALUE(final SOCPieceValue mes)
+        +handleSETSHIPROUTECLOSED()
+        +handleSETSPECIALITEM()
+        +public void chSend(String ch, String mes)
+        +public void leaveChannel(String ch)
+        -protected void disconnect()
+        +public void joinGame(final String gaName)
+        +public void buyDevCard(SOCGame ga)
+        +buildRequest()
+        +public void cancelBuildRequest(SOCGame ga, int piece)
+        +putPiece()
+        +movePieceRequest()
+        +undoPutOrMovePieceRequest()
+        +public void moveRobber(SOCGame ga, SOCPlayer pl, int coord)
+        +simpleRequest()
+        +pickSpecialItem()
+        +playInventoryItem()
+        +public void sendText(SOCGame ga, String me)
+        +public void leaveGame(final String gaName)
+        +public void sitDown(SOCGame ga, int pn)
+        +public void startGame(SOCGame ga)
+        +public void rollDice(SOCGame ga)
+        +public void endTurn(SOCGame ga)
+        +public void discard(SOCGame ga, SOCResourceSet rs)
+        +public void choosePlayer(SOCGame ga, final int ch)
+        +public void rejectOffer(SOCGame ga)
+        +public void acceptOffer(SOCGame ga, int from)
+        +public void clearOffer(SOCGame ga)
+        +bankTrade()
+        +public void offerTrade(SOCGame ga, SOCTradeOffer offer)
+        +public void playDevCard(SOCGame ga, int dc)
+        +public void pickResources(SOCGame ga, SOCResourceSet rscs)
+        +public void pickResourceType(SOCGame ga, int res)
+        +public void changeFace(SOCGame ga, int id)
+        +setSeatLock()
+        +public void destroy()
+        +public static void main(String[] args)
+    }
+    class ServerConnectInfo {
+        +ServerConnectInfo()
+    }
+    class SOCRobotClient {
+        +SOCRobotClient()
+        +public void init()
+        +public void disconnectReconnect()
+        -protected SOCFeatureSet buildClientFeats()
+        +createBrain()
+        +@Override
+    public void treat(SOCMessage mes)
+        -protected void handleADMINPING(SOCAdminPing mes)
+        -protected void handleADMINRESET(SOCAdminReset mes)
+        -handleUPDATEROBOTPARAMS()
+        -handleBOTJOINGAMEREQUEST()
+        -handleSTATUSMESSAGE()
+        -handleJOINGAMEAUTH()
+        -handleGAMEMEMBERS()
+        -protected void handlePutBrainQ(SOCMessageForGame mes)
+        -handleGAMETEXTMSG()
+        -protected void handleGAMETEXTMSG_debug(SOCGameTextMsg mes)
+        -handleSITDOWN()
+        -handleDELETEGAME()
+        -handleGAMESTATE()
+        -protected void handleROBOTDISMISS(SOCRobotDismiss mes)
+        -handleRESETBOARDAUTH()
+        -sendRecordsText()
+        +debugPrintBrainStatus()
+        +leaveGame()
+        +public void addCleanKill()
+        +@Override
+    public void destroy()
+        +public static void main(String[] args)
+    }
+
+    SOCRobotClient --|> SOCDisplaylessPlayerClient : extends
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java["SOCDisplaylessPlayerClient.java"]
+    src_main_java_soc_baseclient_ServerConnectInfo_java["ServerConnectInfo.java"]
+    src_main_java_soc_robot_SOCRobotClient_java["SOCRobotClient.java"]
+    src_main_java_soc_util_SOCRobotParameters_java["SOCRobotParameters.java"]
+
+    src_main_java_soc_robot_SOCRobotClient_java -->|"imports"| src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java
+    src_main_java_soc_robot_SOCRobotClient_java -->|"imports"| src_main_java_soc_baseclient_ServerConnectInfo_java
+    src_main_java_soc_robot_SOCRobotClient_java -->|"imports"| src_main_java_soc_util_SOCRobotParameters_java
+
+    ext_src_main_java_soc_game_GameAction_java["GameAction.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_GameAction_java
+    ext_src_main_java_soc_game_SOCBoard_java["SOCBoard.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoard_java
+    ext_src_main_java_soc_game_SOCBoardLarge_java["SOCBoardLarge.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoardLarge_java
+    ext_src_main_java_soc_game_SOCCity_java["SOCCity.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCCity_java
+    ext_src_main_java_soc_game_SOCDevCardConstants_java["SOCDevCardConstants.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCDevCardConstants_java
+    ext_src_main_java_soc_game_SOCFortress_java["SOCFortress.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCFortress_java
+    ext_src_main_java_soc_game_SOCGame_java["SOCGame.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    ext_src_main_java_soc_game_SOCGameOption_java["SOCGameOption.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOption_java
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOption_java
+    src_main_java_soc_util_SOCRobotParameters_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOption_java
+    ext_src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    src_main_java_soc_util_SOCRobotParameters_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    ext_src_main_java_soc_game_SOCInventory_java["SOCInventory.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCInventory_java
+    ext_src_main_java_soc_game_SOCInventoryItem_java["SOCInventoryItem.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCInventoryItem_java
+    ext_src_main_java_soc_game_SOCPlayer_java["SOCPlayer.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayer_java
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayer_java
+    ext_src_main_java_soc_game_SOCPlayingPiece_java["SOCPlayingPiece.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayingPiece_java
+    ext_src_main_java_soc_game_SOCResourceConstants_java["SOCResourceConstants.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceConstants_java
+    ext_src_main_java_soc_game_SOCResourceSet_java["SOCResourceSet.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceSet_java
+    ext_src_main_java_soc_game_SOCRoad_java["SOCRoad.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoad_java
+    ext_src_main_java_soc_game_SOCRoutePiece_java["SOCRoutePiece.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoutePiece_java
+    ext_src_main_java_soc_game_SOCSettlement_java["SOCSettlement.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCSettlement_java
+    ext_src_main_java_soc_game_SOCShip_java["SOCShip.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCShip_java
+    ext_src_main_java_soc_game_SOCSpecialItem_java["SOCSpecialItem.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCSpecialItem_java
+    ext_src_main_java_soc_game_SOCTradeOffer_java["SOCTradeOffer.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCTradeOffer_java
+    ext_src_main_java_soc_game_SOCVillage_java["SOCVillage.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCVillage_java
+    ext_src_main_java_soc_server_genericServer_StringConnection_java["StringConnection.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_server_genericServer_StringConnection_java
+    ext_src_main_java_soc_server_genericServer_StringServerSocket_java["StringServerSocket.java"]:::default
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_server_genericServer_StringServerSocket_java
+    ext_src_main_java_soc_util_CappedQueue_java["CappedQueue.java"]:::default
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_util_CappedQueue_java
+    ext_src_main_java_soc_util_CutoffExceededException_java["CutoffExceededException.java"]:::default
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_util_CutoffExceededException_java
+    ext_src_main_java_soc_util_DebugRecorder_java["DebugRecorder.java"]:::default
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_util_DebugRecorder_java
+    ext_src_main_java_soc_util_SOCFeatureSet_java["SOCFeatureSet.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    ext_src_main_java_soc_util_Version_java["Version.java"]:::default
+    src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+    src_main_java_soc_robot_SOCRobotClient_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCRobotClient connection layer and handshake</code></li>
+<li><code class="code-ref" title="source file in your repository">init() opens socket, starts reader, sends version + IMAROBOT</code></li>
+<li><code class="code-ref" title="source file in your repository">disconnectReconnect() 3-attempt recovery</code></li>
+<li><code class="code-ref" title="source file in your repository">buildClientFeats() overridable feature declaration</code></li>
+<li><code class="code-ref" title="source file in your repository">Headless Runnable base client run()/treat()/put()</code></li>
+<li><code class="code-ref" title="source file in your repository">Base constructor null-check on ServerConnectInfo</code></li>
+<li><code class="code-ref" title="source file in your repository">ServerConnectInfo carries hostname/stringSocketName/robotCookie</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCRobotParameters per-bot strategy/tuning value object</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">robot-client-networking-socrobotclient.feature.md</span>
+Scope architecture: <a href="robot-ai-players.arch.html">robot-ai-players.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCRobotClient connection layer and handshake</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotClient.java:339-342</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: init() opens socket, starts reader, sends version + IMAROBOT</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotClient.java:349-387</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: disconnectReconnect() 3-attempt recovery</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotClient.java:395-446</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: buildClientFeats() overridable feature declaration</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotClient.java:470-494</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Headless Runnable base client run()/treat()/put()</td>
+<td></td>
+<td>src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:263-274</td>
+<td style="text-align:right">0.89</td>
+</tr>
+<tr>
+<td>Source Linkage: ServerConnectInfo carries hostname/stringSocketName/robotCookie</td>
+<td></td>
+<td>src/main/java/soc/baseclient/ServerConnectInfo.java:86-92</td>
+<td style="text-align:right">0.48</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCRobotParameters per-bot strategy/tuning value object</td>
+<td></td>
+<td>src/main/java/soc/util/SOCRobotParameters.java:88-99</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+<h2>Contract Gaps Detected</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Declared Field</th>
+<th>Accepting Function</th>
+<th>Gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>web/src/protocol/messages/SOCMakeOffer.ts</code></td>
+<td><code>TradeOffer.to</code></td>
+<td><code>constructor(offer: TradeOffer)</code></td>
+<td>No same-file read of <code>offer.to</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/protocol/messages/SOCMakeOffer.ts</code></td>
+<td><code>TradeOffer.get</code></td>
+<td><code>constructor(offer: TradeOffer)</code></td>
+<td>No same-file read of <code>offer.get</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="67.9"/>
+        </svg>
+        <div class="ring-num">0.70</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

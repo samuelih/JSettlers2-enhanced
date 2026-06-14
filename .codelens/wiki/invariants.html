@@ -1,0 +1,113 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invariants · ZimWiki</title>
+<link rel="stylesheet" href="assets/zimwiki.css">
+</head><body>
+<script src="assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item active" href="invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="index.html">Overview</a><span class="sep">/</span>Invariants</div>
+      <div class="doc-head"><div class="doc-kicker"><span class="badge t-invariant">Invariant registry</span></div>
+        <h1 class="doc-title">Detected invariants</h1>
+        <p class="doc-intent">11 load-bearing rules CodeLens detected enforced in your codebase. Each is a candidate cited to concrete source sites, pending human ratification.</p></div>
+      <div class="filterbar" id="filterbar"><button class="chip-btn active" data-band="all">All <span style="opacity:.6">11</span></button><button class="chip-btn" data-band="high">High confidence <span style="opacity:.6">0</span></button><button class="chip-btn" data-band="med">Moderate <span style="opacity:.6">11</span></button><button class="chip-btn" data-band="low">Low <span style="opacity:.6">0</span></button></div>
+      <a class="inv-card" href="invariants/INV-CL-001.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-001</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:66%"></i></span>
+      <span class="conf-val">0.66</span></span></div>
+        <h3>single writer next landarea</h3>
+        <p class="guar">single-writer: field next.landArea is mutated by exactly one function (placeHex)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-002.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-002</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer desc curstrvalue</h3>
+        <p class="guar">single-writer: field desc.curStrValue is mutated by exactly one function (descriptorFromInfo)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-003.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-003</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer parsed boolvalue</h3>
+        <p class="guar">single-writer: field parsed.boolValue is mutated by exactly one function (parseOptions)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-004.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-004</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer parsed intvalue</h3>
+        <p class="guar">single-writer: field parsed.intValue is mutated by exactly one function (parseOptions)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-005.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-005</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer prevdicetotal current</h3>
+        <p class="guar">single-writer: field prevDiceTotal.current is mutated by exactly one function (useGameFeedback)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-006.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-006</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer prevpiececount current</h3>
+        <p class="guar">single-writer: field prevPieceCount.current is mutated by exactly one function (useGameFeedback)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-007.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-007</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer prevmyturn current</h3>
+        <p class="guar">single-writer: field prevMyTurn.current is mutated by exactly one function (useGameFeedback)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-008.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-008</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer viewport scrollleft</h3>
+        <p class="guar">single-writer: field viewport.scrollLeft is mutated by exactly one function (MapEditorScreen)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-009.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-009</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer viewport scrolltop</h3>
+        <p class="guar">single-writer: field viewport.scrollTop is mutated by exactly one function (MapEditorScreen)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-010.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-010</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h3>single writer panref current</h3>
+        <p class="guar">single-writer: field panRef.current is mutated by exactly one function (MapEditorScreen)</p>
+        <div class="imeta"><span class="arch-tag">single-writer</span><span class="arch-tag">candidate</span></div>
+      </a><a class="inv-card" href="invariants/INV-CL-011.invariant.html" data-band="med">
+        <div class="ich"><span class="iid">INV-CL-011</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:70%"></i></span>
+      <span class="conf-val">0.70</span></span></div>
+        <h3>lifecycle web src main tsx requires</h3>
+        <p class="guar">lifecycle: web/src/main.tsx requires snapshot state before the dependent operation proceeds</p>
+        <div class="imeta"><span class="arch-tag">lifecycle</span><span class="arch-tag">candidate</span></div>
+      </a>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main></div>
+<script src="assets/zimwiki.js"></script>
+</body></html>

@@ -43,6 +43,55 @@ async function tryPlace(page: Page, tried: Set<string>): Promise<boolean> {
   return false;
 }
 
+type Snap = {
+  gameState: number;
+  mySeat: number;
+  currentPlayerNumber: number;
+  robberHex: number;
+} | null;
+
+async function snapshot(page: Page): Promise<Snap> {
+  return page.evaluate(() => {
+    const w = window as unknown as { __jsettlers?: { gameSnapshot: () => unknown } };
+    return (w.__jsettlers ? w.__jsettlers.gameSnapshot() : null) as {
+      gameState: number;
+      mySeat: number;
+      currentPlayerNumber: number;
+      robberHex: number;
+    } | null;
+  });
+}
+
+const LEGAL_ROBBER_KINDS = new Set(['clay', 'ore', 'sheep', 'wheat', 'wood', 'desert', 'gold']);
+
+async function clickLegalHex(
+  page: Page,
+  kindAllowed: (kind: string) => boolean,
+  currentHex: number,
+): Promise<boolean> {
+  for (const h of await page.locator('[data-testid^="hex-"]').all()) {
+    const tid = await h.getAttribute('data-testid');
+    const kind = await h.getAttribute('data-hexkind');
+    if (!tid || kind === null || !kindAllowed(kind)) continue;
+    const coord = Number(tid.replace('hex-', ''));
+    if (!Number.isFinite(coord) || coord === currentHex) continue;
+    const before = await snapshot(page);
+    await h.locator('polygon').nth(1).click({ timeout: 2_000 }).catch(() => undefined);
+    const moved = await expect
+      .poll(async () => {
+        const after = await snapshot(page);
+        return after == null || before == null
+          ? true
+          : after.gameState !== before.gameState || after.robberHex !== before.robberHex;
+      }, { timeout: 2_500 })
+      .toBe(true)
+      .then(() => true)
+      .catch(() => false);
+    if (moved) return true;
+  }
+  return false;
+}
+
 test('SC_CK game vs bots: bots survive many C&K rounds without stalling', async ({ page }, testInfo) => {
   test.setTimeout(300_000);
 
@@ -100,19 +149,8 @@ test('SC_CK game vs bots: bots survive many C&K rounds without stalling', async 
   let lastSig = '';
   const deadline = Date.now() + 280_000;
 
-  type Snap = { gameState: number; mySeat: number; currentPlayerNumber: number } | null;
-  const snap = async (): Promise<Snap> =>
-    page.evaluate(() => {
-      const w = window as unknown as { __jsettlers?: { gameSnapshot: () => unknown } };
-      return (w.__jsettlers ? w.__jsettlers.gameSnapshot() : null) as {
-        gameState: number;
-        mySeat: number;
-        currentPlayerNumber: number;
-      } | null;
-    });
-
   while (Date.now() < deadline && rolls < wantRolls) {
-    const s = await snap();
+    const s = await snapshot(page);
     if (!s) {
       await page.waitForTimeout(400);
       continue;
@@ -130,7 +168,7 @@ test('SC_CK game vs bots: bots survive many C&K rounds without stalling', async 
     if (await discard.count()) {
       for (let guard = 0; guard < 20 && !(await discard.isEnabled()); ++guard) {
         let bumped = false;
-        for (const p of await page.locator('[data-testid^="pick-"][data-testid$="-plus"]').all()) {
+        for (const p of await page.locator('[data-testid^="discard-"][data-testid$="-plus"]').all()) {
           if (await discard.isEnabled()) break;
           if (await p.isEnabled().catch(() => false)) {
             await p.click().catch(() => undefined);
@@ -185,14 +223,12 @@ test('SC_CK game vs bots: bots survive many C&K rounds without stalling', async 
         continue;
       }
       if (s.gameState === 33 || s.gameState === 34) {
-        // PLACING_ROBBER / PLACING_PIRATE: click a resource land hex
-        const LAND_KINDS = new Set(['clay', 'ore', 'sheep', 'wheat', 'wood']);
-        for (const h of await page.locator('[data-testid^="hex-"]').all()) {
-          const kind = await h.getAttribute('data-hexkind');
-          if (kind === null || !LAND_KINDS.has(kind)) continue;
-          await h.click({ timeout: 2_000 }).catch(() => undefined);
-          break;
-        }
+        // PLACING_ROBBER / PLACING_PIRATE: click a legal non-current hex.
+        await clickLegalHex(
+          page,
+          (kind) => (s.gameState === 33 ? LEGAL_ROBBER_KINDS.has(kind) : kind === 'water'),
+          s.robberHex,
+        );
         await page.waitForTimeout(300);
         continue;
       }
@@ -207,7 +243,7 @@ test('SC_CK game vs bots: bots survive many C&K rounds without stalling', async 
 
     // Bots' turn (or a state we don't drive): watch for progress.
     if (Date.now() - lastProgress >= 45_000) {
-      console.log('STALL SNAPSHOT:', JSON.stringify(await snap()));
+      console.log('STALL SNAPSHOT:', JSON.stringify(await snapshot(page)));
       console.log('PAGE ERRORS:', JSON.stringify(pageErrors));
     }
     expect(Date.now() - lastProgress, `game progressed within 45s (sig ${sig})`).toBeLessThan(45_000);

@@ -102,6 +102,12 @@ import soc.game.SOCResourceConstants;
     private final int displayScale;
 
     /**
+     * Optional callback after any square value changes.
+     * @since 2.7.00
+     */
+    private ValueChangeListener valueChangeListener;
+
+    /**
      * Creates a new SquaresPanel object.
      *
      * @param in Interactive?
@@ -171,6 +177,16 @@ import soc.game.SOCResourceConstants;
             get[i].setInteractive(inter);
             give[i].setInteractive(inter);
         }
+    }
+
+    /**
+     * Set or clear the optional callback for resource value changes.
+     * @param listener Callback to notify, or {@code null}
+     * @since 2.7.00
+     */
+    public void setValueChangeListener(final ValueChangeListener listener)
+    {
+        valueChangeListener = listener;
     }
 
     @Override
@@ -362,6 +378,26 @@ import soc.game.SOCResourceConstants;
 
         if ((parentHand != null) && (wasNotZero != notAllZero))
             parentHand.sqPanelZerosChange(notAllZero);
+
+        if (parentHand != null)
+            parentHand.sqPanelValuesChanged();
+
+        if (valueChangeListener != null)
+            valueChangeListener.squareValuesChanged(this);
+    }
+
+    /**
+     * Callback after a {@link SquaresPanel} resource value changes.
+     * @since 2.7.00
+     */
+    public interface ValueChangeListener
+    {
+        /**
+         * The panel's resource values have changed.
+         * @param panel Panel whose values changed
+         * @since 2.7.00
+         */
+        public void squareValuesChanged(SquaresPanel panel);
     }
 
 

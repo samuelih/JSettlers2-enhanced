@@ -1,0 +1,252 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Java Unit Test Suite · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../quality-infrastructure/quality-infrastructure.arch.html"><span class="nm">Quality Infrastructure</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../quality-infrastructure/functional-test-suite-extratest.design.html"><span class="nm">Functional Test Suite (extraTest)</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../quality-infrastructure/java-unit-test-suite.design.html"><span class="nm">Java Unit Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/protocol-message-sequence-consistency-tests.design.html"><span class="nm">Protocol Message-Sequence Consistency Tests</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.api-boundary.html"><span class="nm">Quality Infrastructure API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/web-client-test-suite.design.html"><span class="nm">Web Client Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.gateway.html"><span class="nm">Quality Infrastructure Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.testplan.html"><span class="nm">Quality Infrastructure Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Quality Infrastructure</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:50%"></i></span>
+      <span class="conf-val">0.50</span></span></div>
+        <h1 class="doc-title">Java Unit Test Suite</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Java Unit Test Suite</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Protocol-stability as the reason round-trip tests exist</strong> — Per <a href="http://CLAUDE.md">CLAUDE.md</a>, every client⇄server message is a SOCMessage serialized as plain UTF strings, deliberately simple so non-Java clients and bots can interoperate; round-trip encoding tests therefore exist to defend that cross-language wire contract, not merely to exercise Java getters.</li>
+</ul>
+<h2>Overview</h2>
+<p>The Java Unit Test Suite is the unit-level verification layer for the server and game model, rooted at src/test/java/soctest with subpackages that mirror the main source tree (message, server, server/savegame) plus companion Python tests under src/test/python. Tests construct core classes directly and assert behavior without assembling the shipped JARs, so they stay fast and artifact-independent. Gradle’s <code>test</code> task compiles and runs these JUnit 4 cases and additionally drives the Python tests. A representative case, TestToCmdToStringParse, round-trips SOCMessage subclasses such as SOCBoardLayout2, SOCGameElements, and SOCPlayerElements through their command-string encoding, guarding wire-protocol stability. The suite gates <code>gradle build</code>.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>TestToCmdToStringParse</strong></li>
+<li><strong>Message-protocol test group</strong> (referenced; defined externally)</li>
+<li><strong>TestCustomMapLoader</strong></li>
+<li><strong>TestSavegame</strong></li>
+<li><strong>Python companion test suite</strong> (referenced; defined externally)</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>soc.message (SOCMessage subclasses: SOCBoardLayout2, SOCGameElements, SOCPlayerElements)</strong> (outbound) — via Java imports / direct instantiation in round-trip test (evidence: src/test/java/soctest/message/TestToCmdToStringParse.java)</li>
+<li><strong>soc.server.CustomMapLoader</strong> (outbound) — via Java import / direct call under test (evidence: src/test/java/soctest/server/TestCustomMapLoader.java)</li>
+<li><strong>soc.server savegame subsystem</strong> (outbound) — via Java import / save-load exercised under test (evidence: src/test/java/soctest/server/savegame/TestSavegame.java)</li>
+<li><strong>Gradle build (test / testPython tasks)</strong> (inbound) — via build.gradle task wiring that compiles and runs the suite (evidence: build.gradle)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Mirror the main package layout inside a dedicated soctest tree (soctest.message, soctest.server, soctest.server.savegame) rather than colocating tests with sources.</strong>: Keeps test code physically and on the classpath separate from shipped artifacts so it is never bundled into the server/full JARs, while letting each test sit next to its subject’s package for discoverability.</li>
+<li><strong>Verify the wire protocol with a round-trip (toCmd → parse → equals) invariant in TestToCmdToStringParse instead of asserting fixed encoded strings only.</strong>: The protocol is plain UTF strings designed so non-Java clients/bots can interop; a symmetric round-trip catches both encode and decode regressions and protects backward compatibility better than one-directional snapshot assertions.</li>
+<li><strong>Run unit checks under the fast <code>test</code>/<code>testPython</code> tasks and push lengthy functional tests into a separate extraTest source set.</strong>: Separating fast, JAR-independent business-logic checks from slow end-to-end tests keeps the default build loop quick while still allowing deep functional coverage on demand via extraTest.</li>
+<li><strong>Fold SQL-template consistency checks (testSrcDBTemplateTokens / testSrcDBTemplates) into the same <code>test</code> task that runs the unit suite.</strong>: Treating generated-vs-template SQL drift as a unit-level failure makes the build fail closed when the generated scripts are hand-edited, rather than relying on review discipline.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[UNVERIFIED]</strong> SOCMessage subclasses MUST survive a command-string round-trip (toCmd/toString → parse) without changing their contents. — src/test/java/soctest/message/TestToCmdToStringParse.java (cross-document reconciliation: not verified against <code>src/test/java/soctest/message/TestToCmdToStringParse.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[HARD]</strong> Generated SQL scripts in src/main/bin/sql/ MUST NOT be hand-edited; they must be regenerated from the template, enforced by the test task’s testSrcDBTemplates / testSrcDBTemplateTokens checks. — build.gradle (testSrcDBTemplates / testSrcDBTemplateTokens); <a href="http://CLAUDE.md">CLAUDE.md</a> Database section</li>
+<li><strong>[SOFT]</strong> Long-running functional tests SHOULD live in the extraTest source set rather than the fast unit suite. — build.gradle extraTest source set; <a href="http://CLAUDE.md">CLAUDE.md</a> Build &amp; test section</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>performance</strong> — Unit tests SHOULD execute without assembling JARs to keep the default build loop fast and artifact-independent. — doc/Readme.developer.md; <a href="http://CLAUDE.md">CLAUDE.md</a> Build &amp; test section</li>
+<li><strong>reliability</strong> — Test results gate <code>gradle build</code>; a failing unit or SQL-template check fails the build. — build.gradle (build depends on test)</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class MessageMs {
+        +public MessageMs(List<String> pal)
+        +toString()
+    }
+    class TestSOCGameStats {
+        +@Test
+    public void testConstructors()
+    }
+    class TestSOCStatusMessage {
+        +@Test
+    public void testStatusFallback()
+    }
+    class TestStringConstantsAndEnums {
+        +@Test
+    public void testDevCardAction()
+        +@Test
+    public void testInventoryItemAction()
+        +@Test
+    public void testGameElements()
+        +@Test
+    public void testPlayerElement()
+        +@Test
+    public void testSetSpecialItem()
+    }
+    class test_0_env {
+        +def test_env(self)
+    }
+    class BLException {
+        +public BLException(final String message)
+    }
+    class StartedTestGameObjects {
+        +StartedTestGameObjects()
+    }
+    class TestDataOutputUtils {
+        +@Test
+    public void testNewlinesToHTML()
+        +@Test
+    public void testEscapeHTML()
+    }
+    class TestPlayingPiece {
+        +@Test
+    public void testTypeNamePattern()
+        +@Test
+    public void testPieceTypeConstants()
+        +@Test
+    public void testGetPieceTypeName()
+        +testPieceTypeName_negative()
+        +@Test
+    public void testGetPieceType()
+        +testGetPieceType_null()
+        +testGetPieceType_empty()
+        +testGetPieceType_wrongCharClass_p()
+        +testGetPieceType_wrongCharClass_lc()
+        +testGetPieceType_notReallyNumeric()
+        +@Test
+    public void testSharedGetPieceTypeName()
+        +testSharedPieceTypeName_negative()
+        +@Test
+    public void testSharedGetPieceType()
+        +testSharedGetPieceType_null()
+        +testSharedGetPieceType_empty()
+        +testSharedGetPieceType_wrongCharClass_p()
+        +testSharedGetPieceType_wrongCharClass_lc()
+        +testSharedGetPieceType_notReallyNumeric()
+    }
+    class TestSOCChangeGameOptions {
+        +@Test
+    public void testConstructor()
+        +@Test
+    public void testParseDataStr()
+    }
+    class TestSOCKeyedMessages {
+        +@Test
+    public void testSOCUndoNotAllowedReasonText()
+    }
+    class TestTemplatesAbstracts {
+        +@Test
+    public void testSOCMessageTemplateMsToString()
+        +testSOCMessageTemplateMsParseData_FindEmptyStrs()
+    }
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Java unit test root</code></li>
+<li><code class="code-ref" title="source file in your repository">Python unit tests</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCMessage round-trip test</code></li>
+<li><code class="code-ref" title="source file in your repository">Custom map loader test</code></li>
+<li><code class="code-ref" title="source file in your repository">Savegame test</code></li>
+<li><code class="code-ref" title="source file in your repository">Gradle test task wiring</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">java-unit-test-suite.feature.md</span>
+Scope architecture: <a href="quality-infrastructure.arch.html">quality-infrastructure.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Java unit test root</td>
+<td></td>
+<td>src/test/java/soctest</td>
+<td style="text-align:right">1.00</td>
+</tr>
+<tr>
+<td>Source Linkage: Python unit tests</td>
+<td></td>
+<td>src/test/python</td>
+<td style="text-align:right">0.56</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCMessage round-trip test</td>
+<td></td>
+<td>src/test/java/soctest/message/TestToCmdToStringParse.java</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: Custom map loader test</td>
+<td></td>
+<td>src/test/java/soctest/server/TestCustomMapLoader.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Savegame test</td>
+<td></td>
+<td>src/test/java/soctest/server/savegame/TestSavegame.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Gradle test task wiring</td>
+<td>Sammys-Settlers build script for gradle 6 or 7</td>
+<td>build.gradle</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<h2>Unverified Areas</h2>
+<p>Parts of this document have limited verifiable source evidence — treat normative claims as unverified until confirmed. See <a href="../documentation-conventions.html#unverified-areas">documentation conventions</a>.</p>
+<p>Related scopes: <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="113.1"/>
+        </svg>
+        <div class="ring-num">0.50</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

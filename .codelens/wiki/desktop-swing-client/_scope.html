@@ -1,0 +1,209 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Desktop Swing Client · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item active" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../desktop-swing-client/desktop-swing-client.arch.html"><span class="nm">Desktop Swing Client</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../desktop-swing-client/board-rendering-visual-themes.design.html"><span class="nm">Board Rendering &amp; Visual Themes</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/client-preferences-settings.design.html"><span class="nm">Client Preferences &amp; Settings</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.api-boundary.html"><span class="nm">Desktop Swing Client API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/in-game-player-interface.design.html"><span class="nm">In-Game Player Interface</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/network-game-list-client.design.html"><span class="nm">Network &amp; Game-List Client</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.gateway.html"><span class="nm">Desktop Swing Client Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.testplan.html"><span class="nm">Desktop Swing Client Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Desktop Swing Client</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-scope">SCOPE</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:85%"></i></span>
+      <span class="conf-val">0.85</span></span></div>
+        <h1 class="doc-title">Desktop Swing Client</h1>
+        <p class="doc-intent">The Java AWT/Swing desktop client for Sammys-Settlers. `SOCPlayerClient` owns network communication and the game-list window, while `SOCPlayerInterface` hosts the in-game UI and `SOCBoardPanel` renders the board. The 2.0 refactor inserted the `PlayerClientListener` and `GameDisplay` interfaces between `SOCPlayerClient` and the AWT/Swing UI so network handli…</p>
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Desktop Swing Client</h1>
+<h2>Purpose</h2>
+<p>The Java AWT/Swing desktop client for Sammys-Settlers. <code>SOCPlayerClient</code> owns network communication and the game-list window, while <code>SOCPlayerInterface</code> hosts the in-game UI and <code>SOCBoardPanel</code> renders the board. The 2.0 refactor inserted the <code>PlayerClientListener</code> and <code>GameDisplay</code> interfaces between <code>SOCPlayerClient</code> and the AWT/Swing UI so network handling stays separate from display. Per doc/Improvements-2026-06.md, recent work added a central Preferences dialog and a preference registry, board rendering-quality controls (antialiasing, image-scaling interpolation), a color-blind assist mode, externalized per-graphics-set themes, startup font-size scaling, and in-game build hotkeys and left-click confirm-to-build. This domain covers the desktop presentation layer; authoritative game state and rules live at the server, with clients holding only partial state. Governs 2 code areas rooted at <code>src/main/java/soc/client</code>, <code>src/main/java/soc</code>, spanning 9 member documents (1 ARCH, 4 DESIGN, 4 FEATURE).</p>
+<h2>Scope</h2>
+<p>sgd:codelens/64c51e15-af55-50cd-8d03-12b24fb09071/desktop-swing-client</p>
+<h2>Local Laws</h2>
+<ul>
+<li>Use the project glossary’s established terminology consistently — 466 term(s) carry a citable source document (e.g. “Game”).</li>
+</ul>
+<h2>Members</h2>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Kind</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="board-rendering-visual-themes.design.html">Board Rendering &amp; Visual Themes</a></td>
+<td>DESIGN</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><span class="dead-ref" title="referenced doc not present in this generation">board-rendering-visual-themes.feature</span></td>
+<td>FEATURE</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><a href="client-preferences-settings.design.html">Client Preferences &amp; Settings</a></td>
+<td>DESIGN</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><span class="dead-ref" title="referenced doc not present in this generation">client-preferences-settings.feature</span></td>
+<td>FEATURE</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><a href="desktop-swing-client.arch.html">Desktop Swing Client</a></td>
+<td>ARCH</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><a href="in-game-player-interface.design.html">In-Game Player Interface</a></td>
+<td>DESIGN</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><span class="dead-ref" title="referenced doc not present in this generation">in-game-player-interface.feature</span></td>
+<td>FEATURE</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><a href="network-game-list-client.design.html">Network &amp; Game-List Client</a></td>
+<td>DESIGN</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td><span class="dead-ref" title="referenced doc not present in this generation">network-game-list-client.feature</span></td>
+<td>FEATURE</td>
+<td>Draft</td>
+</tr>
+</tbody>
+</table>
+<p>Total direct children: 9</p>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCPlayerClient.java</code></li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCPlayerInterface.java</code></li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCBoardPanel.java</code></li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client</code></li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/TradePanel.java</code></li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/ColorSquare.java</code></li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/PreferencesDialog.java</code></li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/UserPreferences.java</code></li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SwingMainDisplay.java</code></li>
+</ul>
+<p>Charter conventions: <a href="../documentation-conventions.html#epic-charter-conventions">documentation-conventions.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: src/main/java/soc/client/SOCPlayerClient.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: src/main/java/soc/client/SOCPlayerInterface.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerInterface.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: src/main/java/soc/client/SOCBoardPanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCBoardPanel.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: src/main/java/soc/client</td>
+<td></td>
+<td>src/main/java/soc/client</td>
+<td style="text-align:right">1.00</td>
+</tr>
+<tr>
+<td>Source Linkage: src/main/java/soc/client/TradePanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/TradePanel.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: src/main/java/soc/client/ColorSquare.java</td>
+<td></td>
+<td>src/main/java/soc/client/ColorSquare.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: src/main/java/soc/client/PreferencesDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/PreferencesDialog.java</td>
+<td style="text-align:right">0.43</td>
+</tr>
+<tr>
+<td>Source Linkage: src/main/java/soc/client/UserPreferences.java</td>
+<td></td>
+<td>src/main/java/soc/client/UserPreferences.java</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Source Linkage: src/main/java/soc/client/SwingMainDisplay.java</td>
+<td></td>
+<td>src/main/java/soc/client/SwingMainDisplay.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="33.9"/>
+        </svg>
+        <div class="ring-num">0.85</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -26,11 +26,11 @@ contains spaces" predates this initiative's baseline and is not part of it.)
 | Workstream | What shipped | Key files | Commits |
 | ---------- | ------------ | --------- | ------- |
 | Graphics & themes | Board rendering-quality preferences (antialiasing, image-scaling interpolation) actually consumed by the board; dice-number circle image caching; per-graphics-set externalized `theme.properties`; color-blind assist mode for the solid-color UI | `src/main/java/soc/client/SOCBoardPanel.java`, `src/main/java/soc/client/ColorSquare.java`, `src/main/resources/resources/hexes/pastel/theme.properties`, `src/main/resources/resources/hexes/classic/theme.properties` | `6e8e54c`, `989675a` |
-| Playability & UX | A central **Preferences…** dialog and preference registry; UI font-size scaling at startup; in-game build hotkeys; left-click confirm-to-build on the board; TradePanel auto-reject countdown layout fix | `src/main/java/soc/client/PreferencesDialog.java`, `src/main/java/soc/client/UserPreferences.java`, `src/main/java/soc/client/SwingMainDisplay.java`, `src/main/java/soc/client/SOCPlayerInterface.java`, `src/main/java/soc/client/TradePanel.java`, `src/main/java/soc/client/SOCBoardPanel.java` | `f3d3c91`, `6e8e54c`, `48c4989`, `989675a` |
+| Playability & UX | A central **Preferences…** dialog and preference registry; UI font-size scaling at startup; in-game build hotkeys; left-click confirm-to-build on the board; Event Timeline window; TradePanel auto-reject countdown layout fix; compact trade summaries and bank/port hints | `src/main/java/soc/client/PreferencesDialog.java`, `src/main/java/soc/client/UserPreferences.java`, `src/main/java/soc/client/SwingMainDisplay.java`, `src/main/java/soc/client/SOCPlayerInterface.java`, `src/main/java/soc/client/SOCGameEventTimelineFrame.java`, `src/main/java/soc/client/TradePanel.java`, `src/main/java/soc/client/SquaresPanel.java`, `src/main/java/soc/client/SOCBoardPanel.java` | `f3d3c91`, `6e8e54c`, `48c4989`, `989675a` |
 | Custom maps | Server-side, off-by-default loading of user-defined board layouts from `*.map.json` files, registered as custom scenarios; full validator; sample map; documentation | `src/main/java/soc/server/CustomMapLoader.java`, `src/main/java/soc/server/CustomMapValidator.java`, `src/main/java/soc/server/SOCBoardAtServer.java`, `src/main/java/soc/server/SOCServer.java`, `src/main/java/soc/game/SOCScenario.java`, `src/main/bin/custommaps/sample-island.map.json`, `doc/Custom-Maps.md` | `f3d3c91`, `989675a` |
 | Cities & Knights groundwork | Phase 0 only: reserved inactive-hidden options, a disabled scenario stub, `SOCSpecialItem` improvement tracks, a barbarian-strength counter, and a decision-complete design doc plus proposed message sequences | `src/main/java/soc/game/SOCGameOptionSet.java`, `src/main/java/soc/game/SOCScenario.java`, `src/main/java/soc/game/SOCSpecialItem.java`, `src/main/java/soc/game/SOCGame.java`, `doc/Cities-and-Knights-Design.md`, `doc/Message-Sequences-for-Game-Actions.md` | `f3d3c91`, `6e8e54c`, `989675a` |
 | Robot robustness | Built-in bot no longer hangs when asked to place an inventory item for a scenario it has no strategy for; it cancels the placement gracefully | `src/main/java/soc/robot/SOCRobotBrain.java` | `48c4989`, `989675a` |
-| Build/test fixes | Wave gates kept the suite green; the C&K option keynames were shortened to satisfy the 8-character keyname limit; the I18N path-with-spaces fix | `src/main/java/soc/game/SOCGameOptionSet.java`, `src/main/java/soc/game/SOCSpecialItem.java`, `src/main/resources/resources/strings/server/toClient.properties` | `6e8e54c` |
+| Build/test fixes | Wave gates kept the suite green; the C&K option keynames were shortened to satisfy the 8-character keyname limit; the I18N path-with-spaces fix; localized placeholder/key validation | `src/main/java/soc/game/SOCGameOptionSet.java`, `src/main/java/soc/game/SOCSpecialItem.java`, `src/main/resources/resources/strings/server/toClient.properties`, `src/test/python/i18n/test_props_escaped.py` | `6e8e54c` |
 
 
 ## 2. Workstreams
@@ -144,6 +144,25 @@ fall back).
 **TradePanel countdown fix.** The bot auto-reject countdown timer text is now always shown on
 its own line below the Accept/Reject/Counter buttons. Previously, in the compact narrow
 layout, it could overlap the stacked buttons.
+
+**Trade summaries and bank/port hints.** The client player's trade composer now shows a
+compact text summary of the selected give/get resources and a live bank/port hint. The hint
+uses the existing `SOCHandPanel.resourceTradeCost` cache, so it reflects the player's current
+4:1 bank, 3:1 generic port, or 2:1 resource-port rate without adding a second rules engine.
+It explains incomplete selections, mixed give resources, multi-resource bank requests,
+same-resource trades, insufficient holdings, exact ready trades, and better-rate reminders.
+The Bank/Port button tooltip shows the same live hint. Incoming offer and counteroffer panels
+also show compact summaries; counteroffers start from the original offer, mirrored from the
+client's point of view, and show a live "Change" line while editing so the proposed delta is
+visible without mentally comparing two resource grids. Validation remains with the existing
+`SOCHandPanel` checks and server rejection path.
+
+**Event Timeline.** The game window now has a non-modal Event Timeline window, opened from
+the game text area's context menu or with Ctrl/Cmd-T. It mirrors recent game-action text
+separately from chat, keeps a 500-line history independent of the shorter visible game text
+area, clears when a board reset reconstructs the UI, supports case-insensitive search with
+Previous/Next and match count, can pause auto-scroll while reading older events, and has
+Latest and Copy All buttons for debugging, teaching, and manual replay review.
 
 **Developer notes.** The canonical place to add a client preference is the
 `UserPreferences.PreferenceDescriptor` registry (`UserPreferences.getRegisteredPreferences()`):
@@ -291,6 +310,12 @@ to be green before the next wave proceeded. Two notable fixes happened along the
   notes that show the long names.**
 - **I18N path-with-spaces (pre-baseline).** `TestI18NGameoptScenStrings` was made robust to a
   project path containing spaces (commit `2e0fc1d`, just before this initiative's baseline).
+- **Localized placeholder/key validation.** `src/test/python/i18n/test_props_escaped.py`
+  now compares locale bundles against their base bundles for translated keys: argument
+  indexes must match, SoC-special placeholder types (`rsrcs`, `list`, `dcards`) must match,
+  and locale-only obsolete keys are reported. Normal `MessageFormat` pluralization changes
+  such as `number` versus `choice` are allowed. This caught and fixed missing `{0}`
+  placeholders in Spanish and French `account.msg.applet_destroyed`.
 
 
 ## 3. Verification

@@ -16,6 +16,7 @@
 - Internationalization (I18N)
 - Robots (AI)
 - Client preferences and board rendering
+- Strategic improvements roadmap
 - Network Communication and interop with other versions or languages
 - Coding Style
 - Release Testing
@@ -116,6 +117,10 @@ When submitting patches, please send pull requests or use unified diff (`-ur`) f
 The client's structure was refactored in 2.0 by Paul Bilnoski.  Paul's description of this work:
 
 > Added two major new pieces of API: PlayerClientListener and GameDisplay. These are spliced between the `SOCPlayerClient` and AWT UI code, primarily found in `SOCPlayerInterface`. The APIs are used by the player client abstract network communication away from the UI - to communicate with the UI about network events received and receive events to send to the server. Some of it is done using inner classes and interfaces which should be split out into an improved package structure.
+
+For a larger implementation roadmap covering Client/UI, Robot/AI, architecture,
+testing, and persistence improvements, see
+[Strategic-Improvements-Roadmap.md](Strategic-Improvements-Roadmap.md).
 
 
 ## Tips for Debugging
@@ -824,6 +829,15 @@ The server strings live in `soc/server/strings/*.properties`.  An example
 commit is 3e062b7. See the comments at the top of
 strings/server/toClient.properties for format details.
 
+The Gradle `test` task also runs `testPython`, which includes i18n properties
+validation in `src/test/python/i18n/test_props_escaped.py`. Those tests verify
+`MessageFormat` quote/brace escaping, check that translated keys do not become
+obsolete relative to their base bundle, and compare placeholder argument indexes
+plus SoC-special placeholder types such as `{0,rsrcs}`, `{0,list}`, and
+`{0,dcards}`. Standard `MessageFormat` types like `number` versus `choice` are
+allowed to differ, because translated strings may need locale-specific plural
+forms.
+
 If an i18n string lookup's english text isn't obvious from the key, add it as a
 comment to make searching the source for strings easier:
 
@@ -1138,6 +1152,69 @@ For contributors extending the in-game UI, two mechanisms are worth pointing at:
   strategy for a new `PLACING_INV_ITEM` item, add a branch in `planAndPlaceInvItem()` calling a new
   `planAndPlaceInvItemPlacement_*` helper before the fallback is reached; the contract is documented in
   those two methods' javadocs.
+
+### Trade summaries and bank/port hints
+
+The Swing client keeps trade guidance additive: summaries and hints explain the
+current UI state but do not decide legality. `SOCHandPanel` remains the owner of
+the client player's trade composer and server send path. Its `tradeSummaryLab`
+shows a compact "you give / you get" summary from the `SquaresPanel` values, and
+`getBankPortTradeHint(...)` builds the bank/port hint from
+`resourceTradeCost[]`, the same cache used by the right-click bank/port menus.
+That means the hint follows the player's current 4:1 bank, 3:1 generic port, or
+2:1 resource-port rate without duplicating rule authority. The same hint is also
+used as the Bank/Port button tooltip while resources are selected.
+
+`SquaresPanel` has a small value-change listener so both `SOCHandPanel` and
+`TradePanel` can refresh text on every resource-square edit. `TradePanel` owns
+the incoming-offer and counteroffer summaries; for counteroffers it also compares
+the edited resources to the original offer and shows a compact "Change" line.
+`SOCHandPanel.clickOfferCounterButton()` seeds the counteroffer panel with the
+original offer mirrored from the client's point of view, so players tweak rather
+than reconstruct. `TradePanel` still delegates button actions to `SOCHandPanel`
+through `TradePanel.TPListener`. New trade UI strings live in
+`src/main/resources/resources/strings/client/data.properties` and use the existing
+`{n,rsrcs}` and `{n,list}` formatters. Preserve the existing validation chain:
+the UI may give hints, but `SOCHandPanel` and the server remain authoritative.
+
+### Event timeline window
+
+The Swing game window has a non-modal Event Timeline window for scanning recent
+game actions separately from chat. It is opened from the game text area's context
+menu or with Ctrl/Cmd-T, and is implemented by
+[soc.client.SOCGameEventTimelineFrame](../src/main/java/soc/client/SOCGameEventTimelineFrame.java).
+The frame has a search field with Previous/Next controls and match count, an
+Auto-scroll checkbox for pausing updates while reading older events, a Latest
+button to jump back to the end, and a Copy All button.
+
+`SOCPlayerInterface` owns the timeline state:
+
+- `eventTimelineLines` keeps up to 500 recent game-text lines, independent of the
+  shorter `SnippingTextArea` limit in the visible game text area.
+- `appendGameTextLine(...)` and `appendGameText(...)` are the central paths for
+  game text so the visible game log and timeline stay in sync.
+- The timeline is cleared when `resetBoard(...)` reconstructs the game UI.
+- The frame is disposed from the game-window close path, like the game statistics
+  frame.
+
+`SOCGameEventTimelineFrame` owns timeline-specific UI state:
+
+- `allEventLines` mirrors the snapshot shown in the frame and is used for Copy All.
+- Search is case-insensitive and selects matching text in the read-only text area.
+- Append and snapshot updates scroll to the end only when Auto-scroll is enabled
+  and the search field is empty.
+
+This first version intentionally records localized game text, not structured
+events. That keeps the feature additive and compatible with the current message
+flow. Future replay/filter work should introduce structured event categories and
+feed the timeline from those categories rather than parsing localized text.
+
+
+## Strategic improvements roadmap
+
+For the broader long-term roadmap across Client/UI, Robot/AI, architecture,
+testing, and persistence work, see
+[Strategic-Improvements-Roadmap.md](Strategic-Improvements-Roadmap.md).
 
 
 ## Network Communication and interop with other versions or languages

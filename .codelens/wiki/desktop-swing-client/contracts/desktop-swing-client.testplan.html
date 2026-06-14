@@ -1,0 +1,401 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Desktop Swing Client Test Plan · ZimWiki</title>
+<link rel="stylesheet" href="../../assets/zimwiki.css">
+</head><body>
+<script src="../../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../../desktop-swing-client/desktop-swing-client.arch.html"><span class="nm">Desktop Swing Client</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../../desktop-swing-client/board-rendering-visual-themes.design.html"><span class="nm">Board Rendering &amp; Visual Themes</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/client-preferences-settings.design.html"><span class="nm">Client Preferences &amp; Settings</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/contracts/desktop-swing-client.api-boundary.html"><span class="nm">Desktop Swing Client API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/in-game-player-interface.design.html"><span class="nm">In-Game Player Interface</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/network-game-list-client.design.html"><span class="nm">Network &amp; Game-List Client</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/contracts/desktop-swing-client.gateway.html"><span class="nm">Desktop Swing Client Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item active" href="../../desktop-swing-client/contracts/desktop-swing-client.testplan.html"><span class="nm">Desktop Swing Client Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../../index.html">Overview</a> <span class="sep">/</span><a href="../_scope.html">Desktop Swing Client</a> <span class="sep">/</span><a href="_scope.html">Desktop Swing Client Contra…</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-testplan">TESTPLAN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:85%"></i></span>
+      <span class="conf-val">0.85</span></span></div>
+        <h1 class="doc-title">Desktop Swing Client Test Plan</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Desktop Swing Client Test Plan</h1>
+<h2>Coverage Gaps</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/AWTClickTester.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/AboutDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/AskDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/ChannelFrame.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/ClientNetwork.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/ColorSquare.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/ColorSquareLarger.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/ColorSquareListener.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/DataOutputUtils.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/FaceChooserFrame.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/GameMessageSender.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/MainDisplay.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/MessageHandler.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/MessagePanel.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/NewGameOptionsFrame.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/NotifyDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/PlayerClientListener.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/PreferencesDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCAccountClient.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCBoardPanel.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCBuildingPanel.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCChoosePlayerDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCConnectOrPracticePanel.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCDiscardOrGainResDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCFaceButton.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCHandPanel.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCMonopolyDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCPlayerClient.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCPlayerInterface.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCPracticeAskDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCQuitAllConfirmDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCQuitConfirmDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SOCSpecialItemDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/ServerGametypeInfo.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/ShadowedBox.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SnippingTextArea.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/Sounds.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SpeechBalloon.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SquaresPanel.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/SwingMainDisplay.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/TradePanel.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/UserPreferences.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/WhatsNewInfoDialog.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/stats/GameStatisticsFrame.java</code> has no mapped test file in the scanned corpus.</li>
+<li><code class="code-ref" title="source file in your repository">src/main/java/soc/client/stats/SOCGameStatistics.java</code> has no mapped test file in the scanned corpus.</li>
+</ul>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/AWTClickTester.java</td>
+<td></td>
+<td>src/main/java/soc/client/AWTClickTester.java</td>
+<td style="text-align:right">0.56</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/AboutDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/AboutDialog.java</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/AskDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/AskDialog.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/ChannelFrame.java</td>
+<td></td>
+<td>src/main/java/soc/client/ChannelFrame.java</td>
+<td style="text-align:right">0.46</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/ClientNetwork.java</td>
+<td></td>
+<td>src/main/java/soc/client/ClientNetwork.java</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/ColorSquare.java</td>
+<td></td>
+<td>src/main/java/soc/client/ColorSquare.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/ColorSquareLarger.java</td>
+<td></td>
+<td>src/main/java/soc/client/ColorSquareLarger.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/ColorSquareListener.java</td>
+<td></td>
+<td>src/main/java/soc/client/ColorSquareListener.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/DataOutputUtils.java</td>
+<td></td>
+<td>src/main/java/soc/client/DataOutputUtils.java</td>
+<td style="text-align:right">0.40</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/FaceChooserFrame.java</td>
+<td></td>
+<td>src/main/java/soc/client/FaceChooserFrame.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/GameMessageSender.java</td>
+<td></td>
+<td>src/main/java/soc/client/GameMessageSender.java</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/MainDisplay.java</td>
+<td></td>
+<td>src/main/java/soc/client/MainDisplay.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/MessageHandler.java</td>
+<td></td>
+<td>src/main/java/soc/client/MessageHandler.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/MessagePanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/MessagePanel.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/NewGameOptionsFrame.java</td>
+<td></td>
+<td>src/main/java/soc/client/NewGameOptionsFrame.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/NotifyDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/NotifyDialog.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/PlayerClientListener.java</td>
+<td></td>
+<td>src/main/java/soc/client/PlayerClientListener.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/PreferencesDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/PreferencesDialog.java</td>
+<td style="text-align:right">0.43</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCAccountClient.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCAccountClient.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCBoardPanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCBoardPanel.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCBuildingPanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCBuildingPanel.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCChoosePlayerDialog.java</td>
+<td></td>
+<td>linkonly: src/main/java/soc/client/SOCChoosePlayerDialog.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCConnectOrPracticePanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCConnectOrPracticePanel.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCDialog.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCDiscardOrGainResDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCDiscardOrGainResDialog.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCFaceButton.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCFaceButton.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCHandPanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCHandPanel.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCMonopolyDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCMonopolyDialog.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCPlayerClient.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCPlayerInterface.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerInterface.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCPracticeAskDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPracticeAskDialog.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCQuitAllConfirmDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCQuitAllConfirmDialog.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCQuitConfirmDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCQuitConfirmDialog.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SOCSpecialItemDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/SOCSpecialItemDialog.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/ServerGametypeInfo.java</td>
+<td></td>
+<td>src/main/java/soc/client/ServerGametypeInfo.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/ShadowedBox.java</td>
+<td></td>
+<td>src/main/java/soc/client/ShadowedBox.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SnippingTextArea.java</td>
+<td></td>
+<td>src/main/java/soc/client/SnippingTextArea.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/Sounds.java</td>
+<td></td>
+<td>src/main/java/soc/client/Sounds.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SpeechBalloon.java</td>
+<td></td>
+<td>src/main/java/soc/client/SpeechBalloon.java</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SquaresPanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/SquaresPanel.java</td>
+<td style="text-align:right">0.24</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/SwingMainDisplay.java</td>
+<td></td>
+<td>src/main/java/soc/client/SwingMainDisplay.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/TradePanel.java</td>
+<td></td>
+<td>src/main/java/soc/client/TradePanel.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/UserPreferences.java</td>
+<td></td>
+<td>src/main/java/soc/client/UserPreferences.java</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/WhatsNewInfoDialog.java</td>
+<td></td>
+<td>src/main/java/soc/client/WhatsNewInfoDialog.java</td>
+<td style="text-align:right">0.40</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/stats/GameStatisticsFrame.java</td>
+<td></td>
+<td>src/main/java/soc/client/stats/GameStatisticsFrame.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Coverage Gaps: src/main/java/soc/client/stats/SOCGameStatistics.java</td>
+<td></td>
+<td>src/main/java/soc/client/stats/SOCGameStatistics.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="33.9"/>
+        </svg>
+        <div class="ring-num">0.85</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../../assets/zimwiki.js"></script>
+</body></html>

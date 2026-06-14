@@ -78,6 +78,7 @@
 
 .input {
   padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  min-height: max(2.75rem, 44px);
   border: 1px solid var(--color-border, #ccc);
   border-radius: var(--radius-md, 0.375rem);
   background: var(--color-surface, #fff);
@@ -165,5 +166,13 @@
 
   .heroSubtitle {
     font-size: var(--font-size-md, 1rem);
+  }
+
+  .row {
+    flex-direction: column;
+  }
+
+  .fieldPort {
+    flex-basis: auto;
   }
 }

@@ -1,0 +1,413 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sammys-Settlers — Client-Server Settlers of Catan Platform · ZimWiki</title>
+<link rel="stylesheet" href="assets/zimwiki.css">
+</head><body>
+<script src="assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="index.html">Overview</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-arch">ARCH</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:82%"></i></span>
+      <span class="conf-val">0.82</span></span></div>
+        <h1 class="doc-title">Sammys-Settlers — Client-Server Settlers of Catan Platform</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Sammys-Settlers — Client-Server Settlers of Catan Platform</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Dissertation origin makes the bot subsystem first-class</strong> — Per <a href="http://Readme.md">Readme.md</a> and <a href="http://Readme.developer.md">Readme.developer.md</a>, Sammys-Settlers was initially created by Robert S Thomas as a dissertation project about intelligent agents and real-time decision making. This is why bots are ordinary protocol clients speaking SOCMessage rather than a privileged in-process API, and why the robot/bot subsystem (SOCRobotBrain decision loop) is a core component rather than an afterthought.</li>
+<li><strong>Wire format chosen for cross-language interop, not Java convenience</strong> — Per the SOCMessage architecture notes (<a href="http://CLAUDE.md">CLAUDE.md</a> / <a href="http://Readme.developer.md">Readme.developer.md</a>), messages are deliberately flat unicode strings via writeUTF/readUTF rather than Java object serialization specifically so non-Java clients and bots can interoperate. This single decision is what made the TypeScript/React web client possible as a pure front-end replacement that speaks the identical protocol over WebSocket without server changes.</li>
+<li><strong>Web client replaces only the front end; Java server stays authoritative</strong> — Per <a href="http://Readme.md">Readme.md</a> and doc/Web-Docker.md, the webapp connects to the same Java SOCServer over an additive WebSocket listener where each text frame carries one existing SOCMessage string, so the server, rules engine, robot subsystem, scenarios, and custom-map validation continue unchanged. The web client is explicitly an in-development client, not yet a full replacement for the Java Swing client.</li>
+<li><strong>Rules and scenarios as a data registry, not branching code</strong> — Per the design corpus (<a href="http://CLAUDE.md">CLAUDE.md</a> game-options section), all game rules, house rules, and scenarios are driven by SOCGameOption registered in SOCGameOptionSet.getAllKnownOptions with semantics encoded in keyname conventions. This is the central extensibility mechanism: it lets Cities &amp; Knights ship as inactive-hidden groundwork and custom maps register as SC_X scenarios without forking the codebase or adding new board types.</li>
+<li><strong>Cities &amp; Knights shipped as phased inactive-hidden groundwork</strong> — Per doc/Cities-and-Knights-Design.md, a playable C&amp;K was judged not achievable in one initiative because the codebase assumes exactly five resources; the design deliberately ships reserved <em>CK</em>* options behind FLAG_INACTIVE_HIDDEN, a disabled scenario stub, and flag-hidden prototypes so incomplete work never reaches an unprepared player. doc/Cities-and-Knights-Implemented.md records that Phases 1–3 later shipped with commodities as separate per-player counters rather than the full SOCResourceSet refactor.</li>
+<li><strong>Database is optional by design</strong> — Per doc/Database.md and the persistence design, the user/score/bot-params database is entirely optional — the server runs fully without it and only persistent accounts/stats are lost. Code is held vendor-neutral across MySQL, PostgreSQL, SQLite, and Oracle, and all JDBC access is concentrated in one SOCDBHelper class with runtime schema upgrades, so the common no-DB deployment stays zero-setup.</li>
+</ul>
+<h2>Overview</h2>
+<p>Game Model &amp; Rules Engine: SOCGame is the single authoritative holder of complete game state at the server; logic advances there and the server pushes deltas to clients. The board (SOCBoard / sea-board SOCBoardLarge) holds no back-reference to game or players, uses an explicit monitor for thread-safety, and is constructed from game options. Game state is modeled as documented integer constants. Rules, house rules, and scenarios are a convention-driven data registry (SOCGameOption/SOCGameOptionSet.getAllKnownOptions, SOCScenario.initAllScenarios) keyed by short-name strings with semantics encoded in the keyname (<em>SC</em> scenario, leading-underscore internal, _3 third-party, <em>EXT</em> reserved) and a graduated optFlags bitfield. Cities &amp; Knights ships as inactive-hidden <em>CK</em>* option groundwork plus the SC_CK scenario: city-improvement and knight tracks modeled as SOCSpecialItem instances (typeKey = optionName + “/” + shortKey), three commodities kept outside SOCResourceSet as per-player counters, and all authoritative C&amp;K state held in SOCGame. Custom maps are registered as SC_X scenarios via CustomMapLoader (I/O + registration) split from CustomMapValidator (structure/safety, not playability), shaping ParsedCustomMap to the makeNewBoard_placeHexes contract and never aborting startup on a bad file. Wire Protocol &amp; Message Vocabulary: soc.message is the single source of truth for the client-server vocabulary — one SOCMessage subclass per action owning its typed fields, with a numeric type-ID registry and a central toMsg() switch. Encoding is a flat strings-and-integers format (not Java serialization) so non-Java clients/bots interop. SOCBoardLayout2 carries an extensible named Layout-Parts map instead of a fixed field list; element messages (SOCGameElements/SOCPlayerElements via SOCMessageTemplateMi) use parallel arrays to replace single-purpose messages. Backward/forward compatibility comes from value remapping and tolerant parsing rather than versioned message formats, and since v2.5.00 a separate human-readable toString() must itself round-trip. Server Runtime &amp; Request Dispatch: SOCServer is the long-running process owning server lifecycle, extending the generic Server, listening on TCP 8880 plus an optional WebSocket port started by serverUp(). Inbound dispatch is split three ways — SOCServerMessageHandler (lobby/connection), SOCGameMessageHandler (in-game actions, returning false for unrecognized/non-game types), and SOCGameHandler (per-game glue). Two transports (plain TCP socket and WebSocketServerBridge) share one dispatch pipeline. Robot clients connect over the same SOCMessage path as humans, and the server stays authoritative for full game state while clients hold partial state. Desktop Swing Client: SOCPlayerClient is the network and lobby surface, resolving locale/i18n and wiring ClientNetwork (socket), MessageHandler, GameMessageSender, and MainDisplay; it supports three coexisting server connections (remote TCP, locally-hosted TCP, stringport practice) behind one shared game list, gating i18n/scenario requests on negotiated server version and keeping only partial state. SOCPlayerInterface hosts one active game, routing all inbound game/network events through the ClientBridge (PlayerClientListener) inner class instead of touching Swing directly, with a role-parameterized TradePanel and modal dialogs. SOCBoardPanel renders in two layers (cached empty board + composited pieces) in a single unscaled un-rotated internal coordinate system with transforms at the boundary, color-blind palette applied once at class load and per-graphics-set theme.properties re-skinning. UserPreferences/PreferencesDialog/PreferenceDescriptor add a descriptor mini-registry (LinkedHashMap insertion-ordered) over the static getPref/putPref API with apply-on-OK semantics. Robot / AI Players: SOCRobotClient (extends SOCDisplaylessPlayerClient, constructed with a ServerConnectInfo value object) establishes a TCP Socket or same-JVM StringConnection and separates the connection layer from per-game decision-making; built-in bots are pinned to the server version and skip most sync messages. SOCRobotBrain is one Thread per seated game; its run() loop blocks on a CappedQueue&lt;SOCMessage&gt; fed by the network client plus a once-per-second TIMINGPING, tracking expect*/waitingFor* flags and a buildingPlan stack, with decision logic factored into replaceable strategy objects (SOCRobotDM, SOCRobotNegotiator, <em>Strategy) behind factory methods. Liveness uses bounded retry counters and a per-second watchdog; unrecognized inventory items hit a generic fallback-cancel path (fallbackUnknownInvItemPlacement, single rejectedPlayInvItem per turn) routed through the normal SOCMessage protocol. Third-party bots subclass the same client/brain (sample3p) and use the reserved _EXT_BOT option namespace. Web Client (TypeScript/React): the protocol layer re-implements the Java SOCMessage string wire format verbatim in TypeScript so the browser speaks the exact SEP-delimited format over WebSocket, one toCmd() string per text frame; dispatch is a self-registering parser registry keyed by type id (parsers register through side-effecting imports), decode() returns null rather than throwing, integer parsing is stricter than Number.parseInt, and constants are <code>as const</code> objects with derived union types. The board layer (coords.ts/types.ts) parses a SOCBoardLayout2 message into a render-friendly BoardModel using an integer-packed 0xRRCC scheme shared by hexes/nodes/edges with pure no-React functions and CSS-custom-property presentation. Client state is split across three Zustand stores (gameStore reducers fold decoded messages into connection/lobby/room state, settingsStore, uiStore) with pure immutable reducers and early-returning action senders. The custom-map editor keeps coordinates as on-disk 0xRRCC strings, mirrors the Java loader’s GSON-permissive deserialization in fromRaw, houses zero business validation in mapSchema.ts, and canonicalizes land areas on export; canvas/palette are pure presentational components with all state lifted to the parent screen, reusing the in-game board geometry read-only. Optional Database &amp; Persistence: all durable state — player accounts and completed-game stats/scores — flows exclusively through SOCDBHelper, initialized only when a database is configured (initialize reads JDBC URL/driver/credentials, connect, detectSchemaVersion, prepareStatements). The database is entirely optional with graceful degradation, vendor-neutral across MySQL/PostgreSQL/SQLite/Oracle. Schema upgrades run online via UpgradeBGTasksThread (fast DDL split from slow data migration), passwords are stored as bcrypt hashes (bundled BCrypt) with legacy-plaintext migration, password verification is asynchronous via AuthPasswordRunnable, and the server fails closed on persisted-setting drift (DBSettingMismatchException). The DDL itself is generated from a single vendor-neutral template (jsettlers-tables-tmpl.sql) by <a href="http://render.py">render.py</a> into shipped per-vendor jsettlers-tables-</em>.sql files, with template/output consistency enforced as a hard build gate (testSrcDBTemplateTokens / testSrcDBTemplates). PTE: a translator opens a less-specific source locale file and a more-specific destination file, modeled as one key-aligned ParsedPropsFilePair rather than two independent editors. PropsFileParser reads each into ordered FileEntry rows (comment vs key/value subtypes), decoding \uXXXX escapes and recording duplicate keys; PropsFileWriter centralizes symmetric ISO-8859-1 escaping and writes the required encoding automatically. PTEMain is the launcher (separate from the PropertiesTranslatorEditor window), deriving the source filename from a single chosen destination and persisting last-edited dir as a per-user preference; the tool ships as a standalone Swing app built by its own gradle task, separate from the game JARs. Quality &amp; Verification Infrastructure: unit tests mirror the main package layout under a dedicated soctest tree and run under the fast test/testPython tasks, with the wire protocol verified by a toCmd→parse→equals round-trip invariant (TestToCmdToStringParse) rather than fixed encoded strings; SQL-template consistency checks fold into the same test task. Heavyweight end-to-end tests live in a separate extraTest source set with its own classpath, excluded from shipped JARs and depending on the test task, driven against an in-process stringport server. Protocol message-sequence consistency is split into a recording-side test (TestRecorder, expected sequences as String[][] of recipient-prefix + field substring compared by compareRecordsToExpected) and an extraction-side test (TestGameActionExtractor extends the GameActionExtractor it tests). The web suite tests through the user-facing surface (test-ids + DOM events) with unit (Vitest/jsdom) split from end-to-end (Playwright).</p>
+<h2>Components</h2>
+<ul>
+<li><strong>Game Model &amp; Rules Engine</strong>: Hold complete game state at the server (clients hold only partial state) and express all rules, house rules, and scenarios as a convention-keyed data registry rather than branching code; construct boards from options.</li>
+<li><strong>Wire Protocol &amp; Message Vocabulary</strong>: Define and parse every typed message that crosses the client-server boundary; keep encoding strings-and-integers-only so non-Java clients/bots can interop, and preserve backward/forward compatibility via tolerant parsing and value remapping rather than versioned formats.</li>
+<li><strong>Server Runtime &amp; Dispatch</strong>: Own server lifecycle and route every inbound message to the correct handler; remain authoritative for full game state while pushing deltas to clients; treat robot clients identically to human clients on the same SOCMessage path.</li>
+<li><strong>Desktop Swing Client</strong>: Present the authoritative server state to a human player and send their actions back; keep network handling separated from AWT/Swing display via injected helpers and listener interfaces; hold only partial client-side state.</li>
+<li><strong>Robot / AI Players</strong>: Play games as ordinary protocol clients (no privileged in-process API), one decision thread per seated game, with bounded retry counters and adaptive pacing; provide extension hooks for third-party bots.</li>
+<li><strong>Web Client (TypeScript/React)</strong>: Replace only the front end: speak the exact existing wire protocol over WebSocket so the Java server, rules engine, robots, and desktop client are unaffected; decode() returns null rather than throwing on malformed input.</li>
+<li><strong>Optional Database &amp; Persistence</strong>: Provide entirely optional, vendor-neutral persistence for player accounts and game stats with graceful degradation when absent; apply schema upgrades at runtime and generate per-vendor DDL from one template.</li>
+<li><strong>PTE</strong>: Edit paired source/destination .properties bundles side-by-side, round-tripping \uXXXX escapes in code rather than trusting file encoding; ship as an independent Swing tool excluded from the shipped game JARs.</li>
+<li><strong>Quality &amp; Verification Infrastructure</strong>: Verify the wire protocol by toCmd→parse→equals round-trip rather than fixed strings; separate fast unit checks from long-running end-to-end tests; guard that per-action message sequences stay stable on the wire for bots and non-Java readers.</li>
+</ul>
+<h2>Boundaries</h2>
+<ul>
+<li><strong>Game Model &amp; Rules Engine</strong> boundary: Owns the authoritative game state and the rules that advance it: SOCGame, SOCPlayer, SOCBoard, and the sea-board subclass SOCBoardLarge, plus the data-driven rule/scenario registry (SOCGameOption, SOCGameOptionSet, SOCScenario) and Cities &amp; Knights state (SOCSpecialItem improvement/knight tracks, commodity counters, barbarian counter held in SOCGame). Also owns server-side custom-map ingestion (CustomMapLoader, CustomMapValidator) which registers user JSON layouts as SC_X scenarios.</li>
+<li><strong>Wire Protocol &amp; Message Vocabulary</strong> boundary: Owns soc.message: the single source of truth for the client-server wire vocabulary — one SOCMessage subclass per game action/state-change, a numeric type-ID registry, a central toMsg() switch, the extensible named Layout-Parts map (SOCBoardLayout2), and parallel-array element messages (SOCGameElements, SOCPlayerElements). Encoding is flat unicode strings via writeUTF/readUTF with a round-tripping toString().</li>
+<li><strong>Server Runtime &amp; Dispatch</strong> boundary: Owns the long-running server process (SOCServer extends the generic Server), listening on TCP port 8880 plus an optional WebSocket port, and the three-way inbound dispatch: SOCServerMessageHandler (lobby/connection), SOCGameMessageHandler (in-game actions), SOCGameHandler (per-game glue). Two transports (plain TCP socket and the WebSocket bridge) share one dispatch pipeline.</li>
+<li><strong>Desktop Swing Client</strong> boundary: Owns soc.client: SOCPlayerClient (network + game-list/lobby surface, three coexisting connections behind one game list), SOCPlayerInterface (in-game UI for one game, routing inbound events through the ClientBridge/PlayerClientListener inner class), SOCBoardPanel (two-layer board rendering with theme/color-blind palettes), and the preferences subsystem (PreferencesDialog, UserPreferences, PreferenceDescriptor).</li>
+<li><strong>Robot / AI Players</strong> boundary: Owns soc.robot: SOCRobotClient (connection layer, extends SOCDisplaylessPlayerClient, constructed with a ServerConnectInfo) and SOCRobotBrain — a per-game Thread whose run() loop consumes a CappedQueue of SOCMessages and drives decisions through replaceable strategy objects (SOCRobotDM, SOCRobotNegotiator, *Strategy). Includes the unknown-inventory-item fallback-cancel path and the sample3p third-party extension subclasses.</li>
+<li><strong>Web Client (TypeScript/React)</strong> boundary: Owns web/src: a browser client that re-implements the SOCMessage string wire format in TypeScript (protocol/SOCMessage.ts, constants.ts, a self-registering parser registry), renders the board as SVG from a 0xRRCC integer-coordinate scheme (board/coords.ts, types.ts), holds client state in three Zustand stores (gameStore, settingsStore, uiStore), and provides the custom-map editor (map-editor/mapSchema.ts and canvas/palette components). Connects to SOCServer over WebSocket, one toCmd() string per text frame. <em>[unverified: no imports/calls edge web/src/protocol/SOCMessage.ts, web/src/board/coords.ts, web/src/store/gameStore.ts, web/src/map-editor/mapSchema.ts -&gt; protocol/SOCMessage.ts, web/src/protocol/SOCMessage.ts, web/src/board/coords.ts, web/src/store/gameStore.ts, web/src/map-editor/mapSchema.ts -&gt; constants.ts, web/src/protocol/SOCMessage.ts, web/src/board/coords.ts, web/src/store/gameStore.ts, web/src/map-editor/mapSchema.ts -&gt; board/coords.ts in code graph]</em></li>
+<li><strong>Optional Database &amp; Persistence</strong> boundary: Owns soc.server.database: SOCDBHelper concentrates all JDBC access and schema definition (with UpgradeBGTasksThread for online migrations, a bundled BCrypt, DBSettingMismatchException, AuthPasswordRunnable), plus the SQL templating pipeline (jsettlers-tables-tmpl.sql + <a href="http://render.py">render.py</a> generating per-vendor jsettlers-tables-*.sql, gated by build tasks testSrcDBTemplateTokens / testSrcDBTemplates). <em>[unverified: no imports/calls edge soc.server.database.SOCDBHelper, src/main/bin/sql/template/jsettlers-tables-tmpl.sql, src/main/bin/sql/template/render.py -&gt; AuthPasswordRunnable in code graph]</em></li>
+<li><strong>PTE</strong> boundary: Owns net.nand.util.i18n: the standalone PropertiesTranslatorEditor — PTEMain launcher, ParsedPropsFilePair key-aligned model, PropsFileParser/PropsFileWriter with centralized ISO-8859-1 escaping, the FileEntry row hierarchy, and PropsFilePseudoLocalizer. Built by its own gradle i18neditorJar task, separate from the game JARs.</li>
+<li><strong>Quality &amp; Verification Infrastructure</strong> boundary: Owns the test tree mirroring main packages: fast unit tests under src/test/java/soctest (TestToCmdToStringParse round-trip protocol invariant, TestCustomMapLoader, TestSavegame, message-protocol tests) plus Python companions; heavyweight functional tests in the separate extraTest source set (TestActionsMessages, TestBoardLayoutsRounds, TestClientVersion); protocol-sequence consistency tests (TestRecorder, TestGameActionExtractor) over an in-process stringport server; and the web Vitest/Playwright suites. <em>[unverified: no imports/calls edge src/test/java/soctest/message/TestToCmdToStringParse.java, src/test/java/soctest/server/TestCustomMapLoader.java, src/extraTest/java/soctest, web/src/screens/MapEditorScreen.test.tsx -&gt; TestToCmdToStringParse, src/test/java/soctest/message/TestToCmdToStringParse.java, src/test/java/soctest/server/TestCustomMapLoader.java, src/extraTest/java/soctest, web/src/screens/MapEditorScreen.test.tsx -&gt; TestCustomMapLoader, src/test/java/soctest/message/TestToCmdToStringParse.java, src/test/java/soctest/server/TestCustomMapLoader.java, src/extraTest/java/soctest, web/src/screens/MapEditorScreen.test.tsx -&gt; TestSavegame in code graph]</em></li>
+</ul>
+<h2>Integration Points</h2>
+<ul>
+<li><strong>TCP</strong>: The desktop client, robots, and server exchange every game action and state change as SOCMessage strings over a plain TCP socket (default port 8880), encoded via writeUTF/readUTF. Server is authoritative; clients receive deltas.</li>
+<li><strong>Browser WebSocket transport</strong>: The web client connects to SOCServer over an optional WebSocket listener, sending one msg.toCmd() command string per text frame and decoding inbound frames through its self-registering parser registry — the same wire vocabulary the Java server already speaks, with no transport framing added.</li>
+<li><strong>Server-side board construction from game model</strong>: The server runtime constructs and advances boards/games from the Game Model &amp; Rules Engine, driven by the negotiated SOCGameOption set; custom maps loaded at startup are registered as SC_X scenarios shaped to the makeNewBoard_placeHexes contract.</li>
+<li><strong>Robot clients over SOCMessage</strong>: Built-in and third-party bots connect to the server exactly like human clients — over the same SOCMessage path (in-JVM StringConnection for built-ins, TCP for external) — rather than through a privileged bot RPC channel.</li>
+<li><strong>Optional JDBC persistence</strong>: At startup SOCServer optionally initializes SOCDBHelper for player accounts and game stats; if no database is configured the server runs fully with only persistent accounts/stats lost.</li>
+<li><strong>Desktop client board rendering from local model</strong>: SOCBoardPanel and SOCPlayerInterface read the partial client-side SOCGame/SOCBoard/SOCBoardLarge model objects to paint the board and hand panels; the client mirrors authoritative state received as SOCMessage deltas.</li>
+<li><strong>Containerized web+server deployment</strong>: A single Docker image serves the React/Vite build on HTTP 8080, runs the Java SOCServer on TCP 8880, and enables the browser WebSocket listener on 8888, so browser and (optionally) desktop clients connect to one process.</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Architecture</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+
+    Desktop_Swing_Client["Desktop Swing Client"]
+    Game_Model___Rules_Engine["Game Model & Rules Engine"]
+    Optional_Database___Persistence["Optional Database & Persistence"]
+    Quality___Verification_Infrastructure["Quality & Verification Infrastructure"]
+    Robot___AI_Players["Robot / AI Players"]
+    Server_Runtime___Dispatch["Server Runtime & Dispatch"]
+    Web_Client__TypeScript_React_["Web Client (TypeScript/React)"]
+    Wire_Protocol___Message_Vocabulary["Wire Protocol & Message Vocabulary"]
+    i18n_Translation_Tooling__PTE_["PTE"]
+
+    Desktop_Swing_Client -->|"in-process Java calls"| Game_Model___Rules_Engine
+    Robot___AI_Players -->|"SOCMessage over TCP socket or in-JVM ..."| Server_Runtime___Dispatch
+    Server_Runtime___Dispatch -->|"in-process Java calls"| Game_Model___Rules_Engine
+    Server_Runtime___Dispatch -->|"JDBC"| Optional_Database___Persistence
+    Server_Runtime___Dispatch -->|"TCP socket (SOCMessage strings, write..."| Wire_Protocol___Message_Vocabulary
+    Web_Client__TypeScript_React_ -->|"HTTP + WebSocket + TCP"| Server_Runtime___Dispatch
+    Web_Client__TypeScript_React_ -->|"WebSocket text frames (SOCMessage toC..."| Server_Runtime___Dispatch
+
+
+
+
+
+
+
+
+
+</pre>
+<h2>System Flows</h2>
+<h3>Flow: Desktop player game action</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}, 'sequence': {'mirrorActors': false, 'useMaxWidth': true, 'wrap': true, 'actorMargin': 40}}}%%
+sequenceDiagram
+    autonumber
+    participant ClientNetwork as ClientNetwork [Desktop Swing Client]
+    participant SOCServer___soc_message as SOCServer / soc.message [Desktop Swing Client]
+    participant genericServer_transport_layer as genericServer transport layer [Server & Message Protocol]
+    participant Desktop_Swing_Client___Robot_players as Desktop Swing Client / Robot players [Server & Message Protocol]
+    participant SOCGameHandler as SOCGameHandler [Server & Message Protocol]
+    participant SOCGame___SOCPlayer as SOCGame / SOCPlayer [Server & Message Protocol]
+    participant SOCGame__Authoritative_Game_State_ as SOCGame (Authoritative Game State) [Game Model & Rules Engine]
+    participant SOCPlayerClient___SOCDisplaylessPlayerClient___SOCRobotBrain as SOCPlayerClient / SOCDisplaylessPlayerClient / SOCRobotBrain [Game Model & Rules Engine]
+    participant MessageHandler as MessageHandler [Desktop Swing Client]
+    participant SOCPlayerInterface__SwingMainDisplay as SOCPlayerInterface, SwingMainDisplay [Desktop Swing Client]
+
+    ClientNetwork ->> SOCServer___soc_message: sends lobby and game traffic to the authoritative server (SOCMessage over TCP...
+    genericServer_transport_layer ->> Desktop_Swing_Client___Robot_players: receives the UTF-encoded SOCMessage strings over the shared socket path (TCP ...
+    SOCGameHandler ->> SOCGame___SOCPlayer: applies the player action against the authoritative game model (in-process Ja...
+    SOCGame__Authoritative_Game_State_ ->> SOCPlayerClient___SOCDisplaylessPlayerClient___SOCRobotBrain: broadcasts validated state changes so clients mirror partial game state (SOCM...
+    MessageHandler ->> SOCPlayerInterface__SwingMainDisplay: decodes inbound messages and drives the Swing UI through the PlayerClientList...
+</pre>
+<p>A human desktop player issues an in-game action through the Swing client. ClientNetwork transmits the SOCMessage over TCP to the authoritative Java server. The genericServer transport layer receives the UTF-encoded SOCMessage string and the dispatch handlers (SOCGameMessageHandler/SOCGameHandler) translate the player-action message into authoritative calls on the SOCGame and SOCPlayer game model. The validated state change is then mirrored back outbound as SOCMessage updates, which the client’s MessageHandler decodes and drives into the Swing layer (SOCPlayerInterface, SwingMainDisplay) through the PlayerClientListener / GameDisplay seam to repaint the board and panels.</p>
+<p>Involves: <a href="desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a>, <a href="game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a></p>
+<h3>Flow: Robot AI turn</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}, 'sequence': {'mirrorActors': false, 'useMaxWidth': true, 'wrap': true, 'actorMargin': 40}}}%%
+sequenceDiagram
+    autonumber
+    participant SOCRobotClient__connection_layer_ as SOCRobotClient (connection layer) [Robot / AI Players]
+    participant SOCServer___SOCMessage_protocol as SOCServer / SOCMessage protocol [Robot / AI Players]
+    participant SOCRobotBrain__per_game_decision_loop_ as SOCRobotBrain (per-game decision loop) [Robot / AI Players]
+    participant SOCGame___SOCPlayer as SOCGame / SOCPlayer [Robot / AI Players]
+    participant SOCRobotDM__decision_maker___build_planner_ as SOCRobotDM (decision-maker / build planner) [Robot / AI Players]
+    participant soc_util_DebugRecorder as soc.util.DebugRecorder [Robot / AI Players]
+    participant SOCGameHandler as SOCGameHandler [Server & Message Protocol]
+
+    SOCRobotClient__connection_layer_ ->> SOCServer___SOCMessage_protocol: connects and exchanges moves like a human client (SOCMessage strings over TCP...
+    SOCRobotBrain__per_game_decision_loop_ ->> SOCGame___SOCPlayer: folds inbound protocol updates into a local game-state mirror (in-process Jav...
+    SOCRobotDM__decision_maker___build_planner_ ->> SOCGame___SOCPlayer: reads the game model to score positions and produce building plans (in-proces...
+    SOCRobotDM__decision_maker___build_planner_ ->> soc_util_DebugRecorder: optionally emits planning traces for offline analysis (in-process Java calls)
+    SOCGameHandler ->> SOCGame___SOCPlayer: applies the robot's chosen move against the authoritative game model (in-proc...
+</pre>
+<p>A built-in or external robot connects to the authoritative server exactly like a human client, speaking the identical SOCMessage string protocol over a TCP socket or same-JVM StringConnection. As inbound protocol updates arrive, SOCRobotBrain folds them into a local SOCGame/SOCPlayer mirror so it can reason about state. The decision-maker SOCRobotDM (with SOCPlayerTracker) reads that game model to score positions and produce building plans, optionally emitting planning traces to the DebugRecorder utility for offline analysis. The resulting move is sent back to the server over the same SOCMessage channel, where the dispatch handlers apply it against the authoritative game model.</p>
+<p>Involves: <a href="robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+<h3>Flow: Browser player game action</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}, 'sequence': {'mirrorActors': false, 'useMaxWidth': true, 'wrap': true, 'actorMargin': 40}}}%%
+sequenceDiagram
+    autonumber
+    participant Screens___UI_Components as Screens & UI Components [Web Client & Board Rendering]
+    participant Server___Message_Protocol__Java_SOCServer_ as Server & Message Protocol (Java SOCServer) [Web Client & Board Rendering]
+    participant Network_Transport__GameConnection_ as Network Transport (GameConnection) [Web Client & Board Rendering]
+    participant genericServer_transport_layer as genericServer transport layer [Server & Message Protocol]
+    participant Web_protocol_layer__web_src_protocol_ as Web protocol layer (web/src/protocol) [Server & Message Protocol]
+    participant SOCGameHandler as SOCGameHandler [Server & Message Protocol]
+    participant SOCGame___SOCPlayer as SOCGame / SOCPlayer [Server & Message Protocol]
+    participant Client_State_Stores as Client State Stores [Web Client & Board Rendering]
+    participant Board_Geometry___SVG_Rendering as Board Geometry & SVG Rendering [Web Client & Board Rendering]
+
+    Screens___UI_Components ->> Server___Message_Protocol__Java_SOCServer_: translate user interactions into action-sender calls dispatched to the server...
+    Network_Transport__GameConnection_ ->> Server___Message_Protocol__Java_SOCServer_: carries one SOCMessage command string per WebSocket text frame (WebSocket (te...
+    genericServer_transport_layer ->> Web_protocol_layer__web_src_protocol_: bridges each WebSocket text frame to exactly one SOCMessage wire string (WebS...
+    SOCGameHandler ->> SOCGame___SOCPlayer: applies the action against the authoritative game model (in-process Java calls)
+    Client_State_Stores ->> Client_State_Stores: decode inbound frames via the codec and fold them into gameStore's pure reducers
+    Screens___UI_Components ->> Board_Geometry___SVG_Rendering: subscribe to the Zustand stores and render the board from them
+</pre>
+<p>A browser player interacts with in-game React screens (including the Cities &amp; Knights panel), which translate interactions into action-sender calls on gameStore. The web Network Transport (GameConnection) carries one SOCMessage command string per WebSocket text frame to the authoritative Java SOCServer, bridged by the additive WebSocketServerBridge in the genericServer transport layer. The server applies the action via its dispatch handlers against SOCGame. Returning frames are decoded by the Protocol Codec &amp; Parser Registry and dispatched into gameStore’s pure reducers, which fold them into client state; React screens and the Board Geometry &amp; SVG renderer subscribe to those Zustand stores and re-render the board from them.</p>
+<p>Involves: <a href="web-client-board-rendering/web-client-board-rendering.arch.html">Web Client &amp; Board Rendering</a>, <a href="server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+<h3>Flow: Custom map editing and validation</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}, 'sequence': {'mirrorActors': false, 'useMaxWidth': true, 'wrap': true, 'actorMargin': 40}}}%%
+sequenceDiagram
+    autonumber
+    participant Editor_Operations as Editor Operations [Web Protocol & Map Editor]
+    participant web_src_screens_MapEditorScreen_tsx as web/src/screens/MapEditorScreen.tsx [Web Protocol & Map Editor]
+    participant Editor_Grid_Geometry as Editor Grid Geometry [Web Protocol & Map Editor]
+    participant web_src_board_coords_ts__hexToPixel as web/src/board/coords.ts::hexToPixel [Web Protocol & Map Editor]
+    participant Map_Validation as Map Validation [Web Protocol & Map Editor]
+    participant src_main_java_soc_server_genericServer_InboundMessageQueue_java as src/main/java/soc/server/genericServer/InboundMessageQueue.java [Web Protocol & Map Editor]
+    participant Custom_Map_Loading___Validation as Custom Map Loading & Validation [Game Model & Rules Engine]
+    participant Game_Options___Scenario_Registry as Game Options & Scenario Registry [Game Model & Rules Engine]
+
+    Editor_Operations ->> web_src_screens_MapEditorScreen_tsx: is driven by the editor screen which owns editor state
+    Editor_Grid_Geometry ->> web_src_board_coords_ts__hexToPixel: reuses the in-game board coordinate helpers read-only to translate coordinates
+    Map_Validation ->> src_main_java_soc_server_genericServer_InboundMessageQueue_java: pushes validation messages into the server inbound queue (heaviest TS→server ...
+    Custom_Map_Loading___Validation ->> Game_Options___Scenario_Registry: registers validated ParsedCustomMap layouts as SOCScenarios under the reserve...
+</pre>
+<p>The MapEditorScreen owns editor state and drives the editor data layer, calling Editor Operations which consume the in-game board coordinate codec (coords.ts hexToPixel) read-only to translate packed coordinates for the Editor Canvas. Editor edits and the Map Validation layer push SOCMessage text frames into the authoritative server’s InboundMessageQueue over WebSocket — the validation edge is the heaviest TS→server path. On the server, CustomMapLoader parses and validates the layout, then registers the validated ParsedCustomMap as a SOCScenario under the reserved SC_X prefix in the Game Options &amp; Scenario Registry, making the custom map available for game creation.</p>
+<p>Involves: <a href="web-protocol-map-editor/web-protocol-map-editor.arch.html">Web Protocol &amp; Map Editor</a>, <a href="game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a></p>
+<h3>Flow: Game creation with options and persistence</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}, 'sequence': {'mirrorActors': false, 'useMaxWidth': true, 'wrap': true, 'actorMargin': 40}}}%%
+sequenceDiagram
+    autonumber
+    participant Game_Option_Discovery as Game Option Discovery [Web Protocol & Map Editor]
+    participant web_src_store_gameStore_ts__connectStore as web/src/store/gameStore.ts::connectStore [Web Protocol & Map Editor]
+    participant SOCServer__runtime___lifecycle_ as SOCServer (runtime & lifecycle) [Server & Message Protocol]
+    participant SOCGameOptionSet___SOCGameOption as SOCGameOptionSet / SOCGameOption [Server & Message Protocol]
+    participant SOCDBHelper as SOCDBHelper [Server & Message Protocol]
+    participant External_RDBMS__MySQL_PostgreSQL_SQLite_Oracle_ as External RDBMS (MySQL/PostgreSQL/SQLite/Oracle) [Optional Database]
+
+    Game_Option_Discovery ->> web_src_store_gameStore_ts__connectStore: is read by the game store to negotiate options on connect
+    SOCServer__runtime___lifecycle_ ->> SOCGameOptionSet___SOCGameOption: resolves known game options and scenario rules at game creation (in-process J...
+    SOCServer__runtime___lifecycle_ ->> SOCDBHelper: optionally connects to the account/score/JDBC
+    SOCDBHelper ->> External_RDBMS__MySQL_PostgreSQL_SQLite_Oracle_: opens a JDBC connection and issues all durable reads/writes (JDBC)
+</pre>
+<p>At game creation the server runtime resolves requested game options and scenario rules from the game-model registry, with SOCServer consulting SOCGameOptionSet to validate and negotiate client/server options. The web game store separately reads Game Option Discovery to negotiate options on connect. Once a game exists, SOCServer optionally connects to the vendor-neutral account/score/bot-params database through the SOCDBHelper persistence facade over JDBC, which in turn owns and issues all reads/writes against the configured external RDBMS. The database is entirely optional — the server runs fully without it, losing only persistent accounts and stats.</p>
+<p>Involves: <a href="web-protocol-map-editor/web-protocol-map-editor.arch.html">Web Protocol &amp; Map Editor</a>, <a href="server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a>, <a href="optional-database/optional-database.arch.html">Optional Database</a></p>
+<h3>Flow: Save/load game persistence and test round-trip</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}, 'sequence': {'mirrorActors': false, 'useMaxWidth': true, 'wrap': true, 'actorMargin': 40}}}%%
+sequenceDiagram
+    autonumber
+    participant SOCGame__Authoritative_Game_State_ as SOCGame (Authoritative Game State) [Game Model & Rules Engine]
+    participant SavedGameModel as SavedGameModel [Game Model & Rules Engine]
+    participant Java_Unit_Test_Suite as Java Unit Test Suite [Quality Infrastructure]
+    participant SOCGame___SOCPlayer___SOCGameOptionSet as SOCGame / SOCPlayer / SOCGameOptionSet [Quality Infrastructure]
+    participant Functional_Test_Suite__extraTest_ as Functional Test Suite (extraTest) [Quality Infrastructure]
+    participant SOCServer___RecordingSOCServer as SOCServer / RecordingSOCServer [Quality Infrastructure]
+
+    SOCGame__Authoritative_Game_State_ ->> SavedGameModel: maps game/player state to and from a JSON snapshot (in-process Java calls / G...
+    Java_Unit_Test_Suite ->> SavedGameModel: constructs and round-trips the savegame snapshot to verify JSON serialization...
+    Java_Unit_Test_Suite ->> SOCGame___SOCPlayer___SOCGameOptionSet: constructs and asserts directly against the authoritative game-model classes
+    Functional_Test_Suite__extraTest_ ->> SOCServer___RecordingSOCServer: boots a live server in-JVM over a stringport to drive end-to-end sequences (S...
+</pre>
+<p>The <em>SAVEGAME</em>/<em>LOADGAME</em> debug feature maps authoritative game state to and from a JSON snapshot: SavedGameModel reads and writes SOCGame/SOCPlayer state via GSON JSON serialization. The Java unit test suite exercises this path directly, constructing and round-tripping SavedGameModel against the game model to verify the JSON savegame serialization. The same suites also construct and assert against the authoritative game-model classes (SOCGame, SOCPlayer, SOCGameOptionSet) under test, while functional tests boot a live RecordingSOCServer over an in-JVM stringport to drive end-to-end sequences.</p>
+<p>Involves: <a href="game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a></p>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Game Model &amp; Rules Engine</code></li>
+<li><code class="code-ref" title="source file in your repository">Game options data registry</code></li>
+<li><code class="code-ref" title="source file in your repository">Custom map loading</code></li>
+<li><code class="code-ref" title="source file in your repository">Wire Protocol &amp; Message Vocabulary</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCBoardLayout2 layout parts</code></li>
+<li><code class="code-ref" title="source file in your repository">Server Runtime &amp; Dispatch</code></li>
+<li><code class="code-ref" title="source file in your repository">Desktop Swing Client</code></li>
+<li><code class="code-ref" title="source file in your repository">Board rendering panel</code></li>
+<li><code class="code-ref" title="source file in your repository">Robot / AI Players</code></li>
+<li><code class="code-ref" title="source file in your repository">Robot client networking</code></li>
+<li><code class="code-ref" title="source file in your repository">Web Client protocol layer</code></li>
+<li><code class="code-ref" title="source file in your repository">Web board geometry</code></li>
+<li><code class="code-ref" title="source file in your repository">Web client state stores</code></li>
+<li><code class="code-ref" title="source file in your repository">Custom map editor schema</code></li>
+<li><code class="code-ref" title="source file in your repository">Optional Database &amp; Persistence</code></li>
+<li><code class="code-ref" title="source file in your repository">SQL schema templating</code></li>
+<li><code class="code-ref" title="source file in your repository">PTE</code></li>
+<li><code class="code-ref" title="source file in your repository">Quality &amp; Verification Infrastructure</code></li>
+<li><code class="code-ref" title="source file in your repository">Containerized deployment</code></li>
+</ul>
+<p>Parent scope: <span class="dead-ref" title="referenced doc not present in this generation">_scope.md</span></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Game Model &amp; Rules Engine</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java</td>
+<td style="text-align:right">0.95</td>
+</tr>
+<tr>
+<td>Source Linkage: Game options data registry</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGameOptionSet.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Custom map loading</td>
+<td></td>
+<td>src/main/java/soc/server/CustomMapLoader.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Wire Protocol &amp; Message Vocabulary</td>
+<td></td>
+<td>src/main/java/soc/message/SOCMessage.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCBoardLayout2 layout parts</td>
+<td></td>
+<td>src/main/java/soc/message/SOCBoardLayout2.java</td>
+<td style="text-align:right">0.40</td>
+</tr>
+<tr>
+<td>Source Linkage: Server Runtime &amp; Dispatch</td>
+<td></td>
+<td>src/main/java/soc/server/SOCServer.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Desktop Swing Client</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Board rendering panel</td>
+<td></td>
+<td>src/main/java/soc/client/SOCBoardPanel.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Robot / AI Players</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Robot client networking</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotClient.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Web Client protocol layer</td>
+<td>Base SOCMessage type, parser registry, and encode/decode helpers.</td>
+<td>web/src/protocol/SOCMessage.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Web board geometry</td>
+<td></td>
+<td>web/src/board/coords.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Web client state stores</td>
+<td>gameStore — Zustand store for connection + lobby state.</td>
+<td>web/src/store/gameStore.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Custom map editor schema</td>
+<td></td>
+<td>web/src/map-editor/mapSchema.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Optional Database &amp; Persistence</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SQL schema templating</td>
+<td><a href="http://render.py">render.py</a> - Simple template renderer for SQL DML/DDL to specific DBMS types.</td>
+<td>src/main/bin/sql/template/render.py</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: PTE</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/gui/PTEMain.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Quality &amp; Verification Infrastructure</td>
+<td></td>
+<td>src/test/java/soctest/message/TestToCmdToStringParse.java</td>
+<td style="text-align:right">0.32</td>
+</tr>
+<tr>
+<td>Source Linkage: Containerized deployment</td>
+<td>syntax=docker/dockerfile:1</td>
+<td>Dockerfile</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="40.7"/>
+        </svg>
+        <div class="ring-num">0.82</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="assets/zimwiki.js"></script>
+</body></html>

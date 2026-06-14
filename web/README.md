@@ -53,9 +53,10 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@17 gradle assemble
 ```
 
 `gradle assemble` compiles the server, copies `src/main/resources/` into the build
-output (required — see the repo `CLAUDE.md`), and downloads the WebSocket dependency
-into your Gradle cache. (A faster `JAVA_HOME=… gradle compileJava processResources`
-is enough for the helper scripts, but `assemble` is the safe one-shot.)
+output (required — see the repo `CLAUDE.md`), and copies runtime dependency jars into
+`build/runtime-libs/`. (A faster `JAVA_HOME=… gradle compileJava processResources
+copyRuntimeLibs` is enough for the helper scripts, but `assemble` is the safe
+one-shot.)
 
 ### 2. Start the server with the WebSocket listener
 
@@ -79,7 +80,9 @@ matter and are easy to get wrong:
 The script waits for the `WebSocket listener started on port 8888` log line, then
 prints the PID and exits (the server keeps running in the background; log at
 `/tmp/js-web-server.log`). Override ports/bots with `--tcp`, `--ws`, `--bots`, or
-run it in the foreground with `--foreground`.
+run it in the foreground with `--foreground`. By default it uses
+`build/runtime-libs/*` for Java runtime dependencies; set `JS_SERVER_CLASSPATH` to a
+colon-separated classpath if you need to point at custom jars.
 
 > Alternative (no helper script): `JAVA_HOME=/opt/homebrew/opt/openjdk@17 gradle
 > runServer -Djsettlers.websocket.port=8888 -Djsettlers.startrobots=7`. The
@@ -165,9 +168,10 @@ web/scripts/validate-map.sh path/to/exported.map.json
 
 The script compiles a tiny standalone CLI (`web/scripts/MapValidateCLI.java`) on
 demand and feeds the JSON through the same `soc.server.CustomMapLoader` /
-`CustomMapValidator` pipeline the live server uses (gson pulled from the Gradle
-cache). It needs the project compiled at least once (step 1 above). The web E2E
-map-editor spec produces an export artifact that this script can verify.
+`CustomMapValidator` pipeline the live server uses. It needs the project compiled at
+least once (step 1 above), including `build/runtime-libs/`; set
+`JS_SERVER_CLASSPATH` for a custom runtime classpath. The web E2E map-editor spec
+produces an export artifact that this script can verify.
 
 
 ## Project layout

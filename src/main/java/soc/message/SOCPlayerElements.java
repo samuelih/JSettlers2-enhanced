@@ -317,6 +317,8 @@ public class SOCPlayerElements extends SOCMessageTemplateMi
         if (! act.startsWith("actionType="))
             return null;
         act = act.substring(11);
+        if (act.isEmpty())
+            return null;
         if (! Character.isDigit(act.charAt(0)))
         {
             for (int ac = 0; ac < SOCPlayerElement.ACTION_STRINGS.length; ++ac)
@@ -335,7 +337,7 @@ public class SOCPlayerElements extends SOCMessageTemplateMi
         for (int i = 0; i < pieces.length; ++i)
         {
             String piece = pieces[i];  // "e5=9"
-            if (piece.charAt(0) != 'e')
+            if (piece.isEmpty() || (piece.charAt(0) != 'e'))
                 return null;
 
             int j = piece.indexOf('=');

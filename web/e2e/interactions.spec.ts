@@ -117,6 +117,80 @@ async function handCount(page: Page, key: string): Promise<number> {
   return m ? Number(m[1]) : Number.NaN;
 }
 
+const LEGAL_ROBBER_KINDS = new Set(['clay', 'ore', 'sheep', 'wheat', 'wood', 'desert', 'gold']);
+
+async function clickLegalHex(
+  page: Page,
+  kindAllowed: (kind: string) => boolean,
+  currentHex: number,
+): Promise<boolean> {
+  for (const h of await page.locator('[data-testid^="hex-"]').all()) {
+    const tid = await h.getAttribute('data-testid');
+    const kind = await h.getAttribute('data-hexkind');
+    if (!tid || kind === null || !kindAllowed(kind)) continue;
+    const coord = Number(tid.replace('hex-', ''));
+    if (!Number.isFinite(coord) || coord === currentHex) continue;
+    const before = await snapshot(page);
+    await h.locator('polygon').nth(1).click({ timeout: 2_000 }).catch(() => undefined);
+    const moved = await expect
+      .poll(async () => {
+        const after = await snapshot(page);
+        return after == null || before == null
+          ? true
+          : after.gameState !== before.gameState || after.robberHex !== before.robberHex;
+      }, { timeout: 2_500 })
+      .toBe(true)
+      .then(() => true)
+      .catch(() => false);
+    if (moved) return true;
+  }
+  return false;
+}
+
+async function chooseRobberIfPrompt(page: Page, timeoutMs = 8_000): Promise<boolean> {
+  const choice = page.getByTestId('choose-robber');
+  const appeared = await choice
+    .waitFor({ state: 'visible', timeout: timeoutMs })
+    .then(() => true)
+    .catch(() => false);
+  if (!appeared) {
+    return false; // <--- Early return: prompt not present ---
+  }
+  await choice.click({ timeout: 2_000 }).catch(() => undefined);
+  return true;
+}
+
+async function resolveRobberInterludes(page: Page, timeoutMs = 20_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await chooseRobberIfPrompt(page, 300)) {
+      await page.waitForTimeout(300);
+      continue;
+    }
+
+    const victims = await page.locator('[data-testid^="rob-victim-"]').all();
+    if (victims.length > 0) {
+      await victims[0].click({ timeout: 2_000 }).catch(() => undefined);
+      await page.waitForTimeout(300);
+      continue;
+    }
+
+    const s = await snapshot(page);
+    if (s === null) return; // <--- Early return: game left/closed ---
+    if (s.gameState === 33 || s.gameState === 34) {
+      await clickLegalHex(
+        page,
+        (kind) => (s.gameState === 33 ? LEGAL_ROBBER_KINDS.has(kind) : kind === 'water'),
+        s.robberHex,
+      );
+      await page.waitForTimeout(300);
+      continue;
+    }
+
+    return;
+  }
+}
+
 /**
  * Drive initial placement and the first dice roll. Reuses the highlight-clicking
  * approach from game.spec.ts: respond whenever it's our turn until roll-dice is
@@ -158,9 +232,10 @@ async function placeAndRollFirstTurn(page: Page): Promise<number> {
  * true if PLAY1-on-our-turn was reached within the timeout.
  */
 async function waitForMyPlay1(page: Page, timeoutMs = 30_000): Promise<boolean> {
-  const PLAY1 = 40;
+  const PLAY1 = 20;
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
+    await resolveRobberInterludes(page, 1_000);
     const s = await snapshot(page);
     if (s && s.mySeat >= 0 && s.currentPlayerNumber === s.mySeat && s.gameState === PLAY1) {
       return true;
@@ -181,11 +256,13 @@ async function waitForMyTurnAgain(page: Page, timeoutMs = 90_000): Promise<numbe
   // same turn we started from.
   const handoff = Date.now() + 10_000;
   while (Date.now() < handoff) {
+    await resolveRobberInterludes(page, 1_000);
     const s = await snapshot(page);
     if (s && s.currentPlayerNumber !== s.mySeat) break;
     await page.waitForTimeout(250);
   }
   while (Date.now() < deadline) {
+    await resolveRobberInterludes(page, 1_000);
     const s = await snapshot(page);
     if (s && s.mySeat >= 0 && s.currentPlayerNumber === s.mySeat) {
       return s.gameState;
@@ -292,6 +369,10 @@ test('full in-game interactions vs bots: bank trade, buy dev card, knight + robb
       const clayBefore = await handCount(page, 'clay');
       const oreBefore = await handCount(page, 'ore');
 
+      await page.getByTestId('trade-tab-bank').click();
+      await expect(page.getByTestId('bank-trade-ratio')).toBeVisible();
+      await page.getByTestId('bank-trade-give').selectOption('1'); // clay
+      await page.getByTestId('bank-trade-get').selectOption('2'); // ore
       const submit = page.getByTestId('bank-trade-submit');
       await page.getByTestId('bank-trade-ratio').selectOption('4');
       await expect(submit, 'bank-trade submit is enabled with 4 clay in PLAY1').toBeEnabled({
@@ -382,6 +463,8 @@ test('full in-game interactions vs bots: bank trade, buy dev card, knight + robb
     ).toBe(true);
 
     // End our turn so the inventory ages NEW -> OLD; bots then take their turns.
+    await resolveRobberInterludes(page, 20_000);
+    await waitForMyPlay1(page, 20_000);
     const endBtn = page.getByTestId('end-turn');
     if (await endBtn.count()) {
       await endBtn.first().click().catch(() => undefined);
@@ -416,11 +499,12 @@ test('full in-game interactions vs bots: bank trade, buy dev card, knight + robb
       return; // <--- Early return ---
     }
 
-    // Record where the robber currently sits (its SVG path), then play the Knight.
+    // Record where the robber currently sits, then play the Knight. The marker
+    // reuses the same pawn path at every hex; movement is reflected in the
+    // parent group's translate(...) transform.
     const robber = page.getByTestId('robber');
-    const robberDBefore = await robber
-      .locator('path')
-      .getAttribute('d')
+    const robberTransformBefore = await robber
+      .getAttribute('transform')
       .catch(() => null);
     const snapBeforePlay = await snapshot(page);
     const robberHexBefore = snapBeforePlay?.robberHex ?? 0;
@@ -429,9 +513,9 @@ test('full in-game interactions vs bots: bank trade, buy dev card, knight + robb
     await playKnight.click();
 
     // The server moves us toward robber placement. On the sea board it may first
-    // pass through WAITING_FOR_ROBBER_OR_PIRATE (54), which the current UI does
-    // not handle; wait for the clickable PLACING_ROBBER (33) state. If we get
-    // stuck in 54, annotate and assert what we can.
+    // pass through WAITING_FOR_ROBBER_OR_PIRATE (54); choose the robber, then
+    // wait for the clickable PLACING_ROBBER (33) state.
+    await chooseRobberIfPrompt(page, 8_000);
     const PLACING_ROBBER = 33;
     const reachedPlacing = await expect
       .poll(async () => (await snapshot(page))?.gameState ?? -1, { timeout: 8_000 })
@@ -444,7 +528,6 @@ test('full in-game interactions vs bots: bank trade, buy dev card, knight + robb
         type: 'note',
         description:
           `(c) After playing the Knight the game reached state ${st} (not PLACING_ROBBER=33); ` +
-          'likely WAITING_FOR_ROBBER_OR_PIRATE, which the UI does not yet drive. ' +
           'Asserting only that the Knight was played (it left our inventory).',
       });
       // The Knight was consumed by the play request (PLAY removes it).
@@ -454,52 +537,21 @@ test('full in-game interactions vs bots: bank trade, buy dev card, knight + robb
       return; // <--- Early return: cannot drive the robber via hex clicks ---
     }
 
-    // PLACING_ROBBER: the board hexes become clickable. Pick a RESOURCE land hex
-    // (clay/ore/sheep/wheat/wood) other than the robber's current hex — water /
-    // gold / desert / fog are not valid robber targets and would be declined.
-    const LAND_KINDS = new Set(['clay', 'ore', 'sheep', 'wheat', 'wood']);
-    const hexes = await page.locator('[data-testid^="hex-"]').all();
-    const candidates: { loc: (typeof hexes)[number]; coord: number }[] = [];
-    for (const h of hexes) {
-      const tid = await h.getAttribute('data-testid');
-      const kind = await h.getAttribute('data-hexkind');
-      if (!tid || kind === null || !LAND_KINDS.has(kind)) continue;
-      const coord = Number(tid.replace('hex-', ''));
-      if (!Number.isFinite(coord) || coord === robberHexBefore) continue;
-      candidates.push({ loc: h, coord });
-    }
-
-    let movedTo: number | null = null;
-    for (const c of candidates) {
-      // The click handler sits on the hex's <polygon>; click it directly so the
-      // dice-token / group layering can't intercept the hit.
-      const poly = c.loc.locator('polygon').first();
-      await poly.click({ timeout: 3_000 }).catch(() => undefined);
-      const moved = await expect
-        .poll(async () => (await snapshot(page))?.robberHex ?? robberHexBefore, {
-          timeout: 2_500,
-        })
-        .not.toBe(robberHexBefore)
-        .then(() => true)
-        .catch(() => false);
-      if (moved) {
-        movedTo = (await snapshot(page))?.robberHex ?? null;
-        break;
-      }
-    }
+    // PLACING_ROBBER: click a legal non-current land/gold/desert hex.
+    await clickLegalHex(page, (kind) => LEGAL_ROBBER_KINDS.has(kind), robberHexBefore);
+    const movedTo = (await snapshot(page))?.robberHex ?? null;
 
     // Assert the robber actually moved: both the store's robberHex and the
     // rendered robber marker's position changed.
     expect(movedTo, 'robber landed on a new hex coordinate').not.toBeNull();
     expect(movedTo).not.toBe(robberHexBefore);
 
-    const robberDAfter = await robber
-      .locator('path')
-      .getAttribute('d')
+    const robberTransformAfter = await robber
+      .getAttribute('transform')
       .catch(() => null);
-    if (robberDBefore !== null && robberDAfter !== null) {
-      expect(robberDAfter, 'rendered robber marker moved to a new position').not.toBe(
-        robberDBefore,
+    if (robberTransformBefore !== null && robberTransformAfter !== null) {
+      expect(robberTransformAfter, 'rendered robber marker moved to a new position').not.toBe(
+        robberTransformBefore,
       );
     }
   });

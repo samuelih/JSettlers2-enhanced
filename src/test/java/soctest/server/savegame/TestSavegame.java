@@ -128,6 +128,34 @@ public class TestSavegame
         GameSaverJSON.saveGame(ga, testTmpFolder.getRoot(), "wontsave.game.json", srv);
     }
 
+    /** Saving a Cities &amp; Knights game should fail until savegame supports its extra state fields. */
+    @Test(expected=UnsupportedSGMOperationException.class)
+    public void testSaveUnsupportedCitiesAndKnightsScenario()
+        throws IOException
+    {
+        final SOCGameOptionSet opts = new SOCGameOptionSet();
+        SOCGameOption opt = srv.knownOpts.getKnownOption("SC", true);
+        opt.setStringValue(SOCScenario.K_SC_CK);
+        opts.put(opt);
+        assertNull(opts.adjustOptionsToKnown(srv.knownOpts, true, null));  // apply SC's scenario game opts
+        assertTrue(opts.containsKey(SOCGameOptionSet.K_SC_CK));
+        final SOCGame ga = new SOCGame("ck", opts, srv.knownOpts);
+
+        UnsupportedSGMOperationException checkResult = null;
+        try
+        {
+            SavedGameModel.checkCanSave(ga);
+        } catch (UnsupportedSGMOperationException e) {
+            checkResult = e;
+        }
+        assertNotNull(checkResult);
+        assertEquals("admin.savegame.cannot_save.scen", checkResult.getMessage());
+        assertEquals("SC_CK", checkResult.param1);
+        assertEquals(SOCGameOptionSet.K_SC_CK, checkResult.param2);
+
+        GameSaverJSON.saveGame(ga, testTmpFolder.getRoot(), "wontsave.game.json", srv);
+    }
+
     /**
      * Save a basic game, reload it, check field contents.
      * For a more detailed test, see {@link #testSaveLoadPlayerMiscFields()}.
@@ -554,4 +582,3 @@ public class TestSavegame
     }
 
 }
-

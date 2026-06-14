@@ -1,0 +1,373 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Robot decision loop (SOCRobotBrain) · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../robot-ai-players/robot-ai-players.arch.html"><span class="nm">Robot / AI Players</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.api-boundary.html"><span class="nm">Robot / AI Players API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-client-networking-socrobotclient.design.html"><span class="nm">Robot client networking (SOCRobotClient)</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../robot-ai-players/robot-decision-loop-socrobotbrain.design.html"><span class="nm">Robot decision loop (SOCRobotBrain)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/robot-robustness-for-unknown-inventory-items.design.html"><span class="nm">Robot robustness for unknown inventory items</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/third-party-bot-extension-framework-sample3p.design.html"><span class="nm">Third-party bot extension framework (sample3p)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.gateway.html"><span class="nm">Robot / AI Players Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../robot-ai-players/contracts/robot-ai-players.testplan.html"><span class="nm">Robot / AI Players Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Robot / AI Players</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:55%"></i></span>
+      <span class="conf-val">0.55</span></span></div>
+        <h1 class="doc-title">Robot decision loop (SOCRobotBrain)</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Robot decision loop (SOCRobotBrain)</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Robot subsystem is first-class, not an afterthought</strong> — Per the class javadoc and project docs, this AI originated in Robert S Thomas’ intelligent-agent dissertation, so the per-game decision loop lives in SOCRobotBrain.run() and is designed for extension (factory methods, sample3p subclasses) rather than buried in the client.</li>
+<li><strong>Protocol-level parity enables third-party bots</strong> — Because the brain only speaks SOCMessage through its client/queue, game option SOCGameOptionSet.K__EXT_BOT can pass server-side config to third-party bots, and non-Java bot implementations can join using the same simple writeUTF/readUTF message protocol.</li>
+</ul>
+<h2>Overview</h2>
+<p>SOCRobotBrain is a dedicated Thread created by SOCRobotClient, one per game the bot is seated in. Its run() loop blocks on gameEventQ (a CappedQueue&lt;SOCMessage&gt;) fed by the network client plus a once-per-second TIMINGPING from SOCRobotPinger. For each message it first folds protocol updates into a local SOCGame mirror (handlePUTPIECE_updateGameData, handlePLAYERELEMENT, handleDICERESULT, ACCEPTOFFER, etc.), recomputes ourTurn from the game’s current player number, and on TURN clears most per-turn state. It then consults the expect*/waitingFor* flag machine to recognize the awaited GAMESTATE and, when it is the bot’s turn, delegates planning to SOCRobotDM and trade/strategy collaborators, issuing ordinary SOCMessage requests back to the server exactly as a human client would. Authoritative state lives at the server; the brain holds only the partial view it maintains from these messages.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCRobotBrain</strong>: A Thread that owns one bot’s per-game decision loop. run() drains the game-event queue, mutates a local SOCGame mirror, tracks expected next states via expect*/waitingFor* flags, and emits the same SOCMessage requests a human client would.</li>
+<li><strong>setStrategyFields()</strong> (referenced; defined externally): Factory seam selecting the pluggable decision components (decisionMaker, negotiator, bseFactory, discardStrategy, monopolyStrategy, openingBuildStrategy, robberStrategy) so third-party bots can override behavior.</li>
+<li><strong>buildingPlan (SOCBuildPlanStack)</strong> (referenced; defined externally): The current plan of what to build next; shared instance with SOCRobotDM.buildingPlan, cleared each turn via resetBuildingPlan().</li>
+<li><em><em>expect</em>/waitingFor</em> flag fields** (referenced; defined externally): An explicit hand-rolled state machine mirroring server game-state transitions (e.g. expectPLACING_ROBBER, waitingForGameState) so the brain knows which incoming GAMESTATE/PUTPIECE message it is awaiting after a sent action.</li>
+<li><strong>counter / SOCTimingPing timekeeping</strong> (referenced; defined externally): Incremented once per second by SOCRobotPinger’s TIMINGPING; gives the brain a clock to bound waits for other players and to detect a wedged turn.</li>
+<li>*<em>SOCRobotDM / SOCRobotNegotiator / <em>Strategy classes</em></em> (referenced; defined externally): Decision-making is delegated out of the loop: planStuff/planBuilding choose the build plan; negotiator/considerOffer handle trades; RobberStrategy, MonopolyStrategy, DiscardStrategy, OpeningBuildStrategy handle specific sub-decisions.</li>
+<li><strong>game-model types (integration, not owned)</strong> (referenced; defined externally): SOCGame, SOCPlayer, SOCBoard/SOCBoardLarge, SOCInventory, SOCPlayingPiece, SOCResourceSet, SOCTradeOffer are read to derive state and choose moves; they are defined in soc.game and only integrated here.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>SOCRobotClient</strong> (inbound) — via Constructs the brain via createBrain(…), supplies SOCRobotParameters and the CappedQueue&lt;SOCMessage&gt; gameEventQ, and routes debug chat commands; brain calls back through client (getClient()/resend()). (evidence: src/main/java/soc/robot/SOCRobotBrain.java constructor (client = rc; gameEventQ = mq) and class javadoc on SOCRobotClient.createBrain.)</li>
+<li><strong>SOCRobotPinger</strong> (inbound) — via Enqueues a TIMINGPING into gameEventQ once per second to drive the brain’s counter. (evidence: src/main/java/soc/robot/SOCRobotBrain.java: pinger = new SOCRobotPinger(gameEventQ, …); run() increments counter on TIMINGPING.)</li>
+<li><strong>server (via SOCMessage protocol)</strong> (outbound) — via Issues player-action messages (SOCPutPiece, SOCMakeOffer, SOCBankTrade, SOCMoveRobber, SOCDiscard, SOCAcceptOffer, etc.) through its client exactly like a human client. (evidence: src/main/java/soc/robot/SOCRobotBrain.java imports of soc.message.* action types and their handlers in run().)</li>
+<li><strong>soc.game model (SOCGame, SOCPlayer, SOCBoardLarge, SOCInventory)</strong> (bidirectional) — via Reads state to plan moves and applies server updates into the local SOCGame mirror (game.updateAtTurn(), game.moveShip(), getPlayer(pn).setCurrentOffer()). (evidence: src/main/java/soc/robot/SOCRobotBrain.java run() updates to the game object and imports of soc.game types.)</li>
+<li><strong>SOCPlayerTracker</strong> (bidirectional) — via One tracker per player created in setOurPlayerData()/addPlayerTracker(); brain feeds piece placements to trackers and reads predictions for planning. (evidence: src/main/java/soc/robot/SOCRobotBrain.java::playerTrackers, setOurPlayerData(), addPlayerTracker(int).)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Bots are ordinary protocol clients, not a privileged in-process API</strong>: The brain reads state and acts solely by consuming and emitting SOCMessage through its client and queue (no direct server-state mutation). This keeps the bot interface identical to a human/non-Java client, so third-party bots can interoperate over the same wire protocol.</li>
+<li><strong>One Thread per game, driven by a blocking message queue</strong>: run() sleeps on gameEventQ.get() and reacts event-by-event; a separate SOCRobotPinger injects TIMINGPING so the same loop also has a 1-second clock without a second timer thread.</li>
+<li><strong>Decision logic is factored into replaceable strategy objects behind factory methods</strong>: setStrategyFields()/createDM()/createNegotiator() let subclasses (e.g. soc.robot.sample3p.Sample3PBrain) swap individual behaviors without rewriting the loop, supporting the bot subsystem’s first-class, extensible design intent.</li>
+<li><strong>Bounded retry counters cap denied actions per turn</strong>: failedBuildingAttempts/failedBankTrades/declinedOurPlayerTrades plus the high-counter bail-out prevent a buggy bot from looping forever on moves the server keeps rejecting, keeping the game moving.</li>
+<li><strong>Adaptive pause speed instead of a fixed think-time</strong>: pauseFaster (6-player or ALWAYS_PAUSE_FASTER) and BOTS_ONLY_FAST_PAUSE_FACTOR shorten delays when no humans are watching, while BOTS_PAUSE_FOR_HUMAN_TRADE / TRADE_RESPONSE_TIMEOUT_SEC_HUMANS deliberately slow bots when humans can compete on trades.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> setOurPlayerData() MUST be called before the brain is used or its thread is started. — src/main/java/soc/robot/SOCRobotBrain.java::SOCRobotBrain (constructor javadoc: “Please call setOurPlayerData() before using this brain or starting its thread”); strategy/player fields are null until then.</li>
+<li><strong>[HARD]</strong> After this many server-denied build/decline requests in a turn, the bot MUST stop retrying that build. — src/main/java/soc/robot/SOCRobotBrain.java::MAX_DENIED_BUILDING_PER_TURN (=3), checked against failedBuildingAttempts.</li>
+<li><strong>[HARD]</strong> After this many server-rejected bank/port trades in a turn, the bot MUST stop attempting bank trades. — src/main/java/soc/robot/SOCRobotBrain.java::MAX_DENIED_BANK_TRADES_PER_TURN (=9), checked against failedBankTrades.</li>
+<li><strong>[HARD]</strong> After this many server-rejected player trade offers/counter-offers in a turn, the bot MUST stop offering. — src/main/java/soc/robot/SOCRobotBrain.java::MAX_DENIED_PLAYER_TRADES_PER_TURN (=9), checked against declinedOurPlayerTrades.</li>
+<li><strong>[SOFT]</strong> Trades offered to humans MUST wait no longer than the human timeout before the brain stops waiting for responses. — src/main/java/soc/robot/SOCRobotBrain.java::TRADE_RESPONSE_TIMEOUT_SEC_HUMANS (=30) vs TRADE_RESPONSE_TIMEOUT_SEC_BOTS_ONLY (=5).</li>
+<li><strong>[SOFT]</strong> If waitingForGameState persists too long (counter &gt; 10000) the brain SHOULD resend rather than hang. — src/main/java/soc/robot/SOCRobotBrain.java run(): if (waitingForGameState &amp;&amp; (counter &gt; 10000)) client.resend().</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — The brain self-terminates (alive=false) or resends when its counter grows too high, and the server can force an inactive bot to end its turn so a wedged bot cannot stall a game. — src/main/java/soc/robot/SOCRobotBrain.java counter field javadoc and run() resend; class javadoc references soc.server.SOCForceEndTurnThread.</li>
+<li><strong>performance</strong> — Bot pacing is reduced when no humans observe (bots-only and 6-player games) to speed gameplay. — src/main/java/soc/robot/SOCRobotBrain.java::BOTS_ONLY_FAST_PAUSE_FACTOR, pauseFaster, ALWAYS_PAUSE_FASTER.</li>
+<li><strong>observability</strong> — Full brain state (all expect/waitingFor flags, game state, prior/current-turn message history) is dumpable for debugging, and build plans can be recorded. — src/main/java/soc/robot/SOCRobotBrain.java::debugPrintBrainStatus and DebugRecorder[] dRecorder / getDRecorder().</li>
+<li><strong>error-handling</strong> — Per-turn exceptions are counted and per-turn message history is retained to diagnose faults without crashing the loop. — src/main/java/soc/robot/SOCRobotBrain.java::turnExceptionCount, turnEventsCurrent/turnEventsPrev.</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Shows the loop gating action on robot parameters: trading-disabled bots still fold the message into game data but take no action.</em>
+<em>Source: <code>src/main/java/soc/robot/SOCRobotBrain.java</code></em></p>
+<pre><code>case SOCMessage.MAKEOFFER:
+    if (robotParameters.getTradeFlag() == 1)
+        handleMAKEOFFER((SOCMakeOffer) mes);
+    else
+        isDataUpdateOnly = true;
+    break;
+</code></pre>
+<p><em>Illustrates ping-counter timekeeping bounding how long the brain waits on another player before giving up.</em>
+<em>Source: <code>src/main/java/soc/robot/SOCRobotBrain.java</code></em></p>
+<pre><code>if (waitingForTradeResponse &amp;&amp; (counter &gt; tradeResponseTimeoutSec))
+{
+    // Remember other players' responses, call client.clearOffer,
+    // clear waitingForTradeResponse and counter.
+    tradeStopWaitingClearOffer();
+}
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCRobotBrain {
+        +SOCRobotBrain()
+        +public SOCRobotParameters getRobotParameters()
+        +public SOCRobotClient getClient()
+        +public SOCPlayerTracker[] getPlayerTrackers()
+        +public SOCPlayerTracker getOurPlayerTracker()
+        +public void addPlayerTracker(int pn)
+        +public SOCGame getGame()
+        +public SOCPlayer getOurPlayerData()
+        +public final int getOurPlayerNumber()
+        +public SOCBuildPlanStack getBuildingPlan()
+        +public void resetBuildingPlan()
+        +public SOCRobotDM getDecisionMaker()
+        +public OpeningBuildStrategy getOpeningBuildStrategy()
+        +public void turnOnDRecorder()
+        +public void turnOffDRecorder()
+        +public DebugRecorder getDRecorder()
+        +public DebugRecorder getOldDRecorder()
+        +public SOCPossiblePiece getLastMove()
+        +public SOCPossiblePiece getLastTarget()
+        +public void setOurPlayerData()
+        -protected void setStrategyFields()
+        +debugPrintBrainStatus()
+        -debugPrintTurnMessages()
+        +@Override
+    public void run()
+        -protected void handleGAMESTATE(final int newState)
+        -handleBOTGAMEDATACHECK()
+        -handleDECLINEPLAYERREQUEST()
+        -protected void resetFieldsAndBuildingPlan()
+        -protected void resetFieldsAtEndTurn()
+        -protected boolean considerScenarioTurnFinalActions()
+        -protected void planAndDoActionForPLAY1()
+        -protected void handleDICERESULT(SOCDiceResult mes)
+        -protected void robberMoved(final int newHex)
+        -protected void handleROBBERYRESULT(SOCRobberyResult mes)
+        -protected void tradeStopWaitingClearOffer()
+        -private void playKnightCardIfShould()
+        -protected void placeIfExpectPlacing()
+        -private void playKnightCard()
+        -protected void rollOrPlayKnightOrExpectDice()
+        -buildOrGetResourceByTradeOrCard()
+        -planAndPlaceInvItem()
+        -fallbackUnknownInvItemPlacement()
+        -planAndPlaceInvItemPlacement_SC_FTRI()
+        -handlePUTPIECE_updateGameData()
+        -handleCANCELBUILDREQUEST()
+        -private void handleUNDOPUTPIECE(final SOCUndoPutPiece mes)
+        -handleTradeResponse()
+        -protected void handleMAKEOFFER(SOCMakeOffer mes)
+        -protected void handleREJECTOFFER(SOCRejectOffer mes)
+        -protected void handleDEVCARDACTION(SOCDevCardAction mes)
+        +handlePUTPIECE_updateTrackers()
+        -protected void buildRequestPlannedPiece()
+        -protected void planBuilding()
+        -protected void handlePLAYERELEMENTS(SOCPlayerElements mes)
+        -@SuppressWarnings(
+        -handlePLAYERELEMENT_numRsrc()
+        -trackNewSettlement()
+        -trackNewCity()
+        -trackNewRoadOrShip()
+        -cancelWrongPiecePlacement()
+        -cancelWrongPiecePlacementLocal()
+        +public void kill()
+        +public void pause(int msec)
+        -placeFirstSettlement()
+        -placeInitSettlement()
+        -protected void planAndPlaceInitRoad()
+        -protected void moveRobber()
+        -protected void discard(final int numDiscards)
+        -protected boolean tradeWithBank(SOCBuildPlan buildPlan)
+        -protected int considerOffer(SOCTradeOffer offer)
+        -protected boolean makeOffer(SOCBuildPlan buildPlan)
+        -protected boolean makeCounterOffer(SOCTradeOffer offer)
+        +clearTradingFlags()
+        +public void setDoneTrading(final boolean isDone)
+        -handleResources()
+        -protected SOCRobotDM createDM()
+        +public void recreateDM()
+        -protected SOCRobotNegotiator createNegotiator()
+        -createEstimatorFactory()
+        -protected void startTurnMainActions()
+        -protected boolean endTurnActions()
+        -protected void handleGAMESTATS(SOCGameStats message)
+        +public SOCBuildingSpeedEstimate getEstimator()
+        +getEstimatorFactory()
+        -protected void debugInfo()
+        -protected void printResources()
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_robot_SOCRobotBrain_java["SOCRobotBrain.java"]
+
+
+    ext_src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java["SOCDisplaylessPlayerClient.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java
+    ext_src_main_java_soc_game_SOCBoard_java["SOCBoard.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoard_java
+    ext_src_main_java_soc_game_SOCBoardLarge_java["SOCBoardLarge.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCBoardLarge_java
+    ext_src_main_java_soc_game_SOCCity_java["SOCCity.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCCity_java
+    ext_src_main_java_soc_game_SOCDevCardConstants_java["SOCDevCardConstants.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCDevCardConstants_java
+    ext_src_main_java_soc_game_SOCGame_java["SOCGame.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    ext_src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    ext_src_main_java_soc_game_SOCInventory_java["SOCInventory.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCInventory_java
+    ext_src_main_java_soc_game_SOCInventoryItem_java["SOCInventoryItem.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCInventoryItem_java
+    ext_src_main_java_soc_game_SOCPlayer_java["SOCPlayer.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayer_java
+    ext_src_main_java_soc_game_SOCPlayerNumbers_java["SOCPlayerNumbers.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayerNumbers_java
+    ext_src_main_java_soc_game_SOCPlayingPiece_java["SOCPlayingPiece.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayingPiece_java
+    ext_src_main_java_soc_game_SOCResourceConstants_java["SOCResourceConstants.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceConstants_java
+    ext_src_main_java_soc_game_SOCResourceSet_java["SOCResourceSet.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCResourceSet_java
+    ext_src_main_java_soc_game_SOCRoad_java["SOCRoad.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoad_java
+    ext_src_main_java_soc_game_SOCRoutePiece_java["SOCRoutePiece.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCRoutePiece_java
+    ext_src_main_java_soc_game_SOCSettlement_java["SOCSettlement.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCSettlement_java
+    ext_src_main_java_soc_game_SOCShip_java["SOCShip.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCShip_java
+    ext_src_main_java_soc_game_SOCSpecialItem_java["SOCSpecialItem.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCSpecialItem_java
+    ext_src_main_java_soc_game_SOCTradeOffer_java["SOCTradeOffer.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_game_SOCTradeOffer_java
+    ext_src_main_java_soc_message_SOCBotGameDataCheck_java["SOCBotGameDataCheck.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_message_SOCBotGameDataCheck_java
+    ext_src_main_java_soc_message_SOCUndoPutPiece_java["SOCUndoPutPiece.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_message_SOCUndoPutPiece_java
+    ext_src_main_java_soc_util_CappedQueue_java["CappedQueue.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_util_CappedQueue_java
+    ext_src_main_java_soc_util_DebugRecorder_java["DebugRecorder.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_util_DebugRecorder_java
+    ext_src_main_java_soc_util_SOCRobotParameters_java["SOCRobotParameters.java"]:::default
+    src_main_java_soc_robot_SOCRobotBrain_java -.->|"imports"| ext_src_main_java_soc_util_SOCRobotParameters_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCRobotBrain decision-loop class</code></li>
+<li><code class="code-ref" title="source file in your repository">run() per-message decision loop</code></li>
+<li><code class="code-ref" title="source file in your repository">Strategy factory seam</code></li>
+<li><code class="code-ref" title="source file in your repository">Player-data/tracker initialization</code></li>
+<li><code class="code-ref" title="source file in your repository">Brain-state observability dump</code></li>
+<li><code class="code-ref" title="source file in your repository">Denied-build retry cap constant</code></li>
+<li><code class="code-ref" title="source file in your repository">Game-model state read by loop</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">robot-decision-loop-socrobotbrain.feature.md</span>
+Scope architecture: <a href="robot-ai-players.arch.html">robot-ai-players.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCRobotBrain decision-loop class</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java:838-901</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: run() per-message decision loop</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java:1318-2189</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Strategy factory seam</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java:1173-1182</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Player-data/tracker initialization</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java:1111-1148</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Brain-state observability dump</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java:1196-1277</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Denied-build retry cap constant</td>
+<td></td>
+<td>src/main/java/soc/robot/SOCRobotBrain.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Game-model state read by loop</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java:1637-1732</td>
+<td style="text-align:right">0.95</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+<h2>Contract Gaps Detected</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Declared Field</th>
+<th>Accepting Function</th>
+<th>Gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>web/src/protocol/messages/SOCMakeOffer.ts</code></td>
+<td><code>TradeOffer.get</code></td>
+<td><code>constructor(offer: TradeOffer)</code></td>
+<td>No same-file read of <code>offer.get</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="101.8"/>
+        </svg>
+        <div class="ring-num">0.55</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

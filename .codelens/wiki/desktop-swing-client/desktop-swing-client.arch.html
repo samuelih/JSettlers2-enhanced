@@ -1,0 +1,268 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Desktop Swing Client · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item active" href="../desktop-swing-client/desktop-swing-client.arch.html"><span class="nm">Desktop Swing Client</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../desktop-swing-client/board-rendering-visual-themes.design.html"><span class="nm">Board Rendering &amp; Visual Themes</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/client-preferences-settings.design.html"><span class="nm">Client Preferences &amp; Settings</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.api-boundary.html"><span class="nm">Desktop Swing Client API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/in-game-player-interface.design.html"><span class="nm">In-Game Player Interface</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/network-game-list-client.design.html"><span class="nm">Network &amp; Game-List Client</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.gateway.html"><span class="nm">Desktop Swing Client Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.testplan.html"><span class="nm">Desktop Swing Client Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Desktop Swing Client</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-arch">ARCH</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:60%"></i></span>
+      <span class="conf-val">0.60</span></span></div>
+        <h1 class="doc-title">Desktop Swing Client</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Desktop Swing Client</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>2.0 display-abstraction seam (Paul Bilnoski refactor)</strong> — Per doc/Readme.developer.md, the 2.0 refactor spliced the PlayerClientListener and GameDisplay interfaces between SOCPlayerClient and the AWT/Swing UI specifically so inbound network handling never touches Swing directly — this is why MessageHandler drives the UI only through SOCPlayerInterface’s ClientBridge and SwingMainDisplay rather than calling widgets, and why this scope can be re-skinned/replaced without changing protocol handling.</li>
+<li><strong>One lobby over three connection kinds</strong> — The client is deliberately built to host remote-TCP, locally-hosted-TCP, and in-JVM stringport (practice) servers simultaneously behind a single shared game list (Network &amp; Game-List Client design), so online play and offline practice-against-bots share one lobby surface instead of separate code paths.</li>
+<li><strong>Presentation-only client by design</strong> — This scope holds only partial game state and defers all rule enforcement to the server, which is the defining constraint that makes every rendering/UI component a read-only consumer of SOCGame/SOCPlayer and gives the desktop client no authority over game outcomes.</li>
+<li><strong>2026-06 presentation upgrades</strong> — Per doc/Improvements-2026-06.md, recent work in this scope added a central Preferences dialog backed by a preference registry, board rendering-quality controls (antialiasing, image-scaling interpolation), a color-blind assist palette, externalized per-graphics-set themes, startup font-size scaling, and in-game build hotkeys plus left-click confirm-to-build — concentrating accessibility and rendering-quality concerns in the client without protocol changes.</li>
+</ul>
+<h2>Overview</h2>
+<p>Network &amp; Game-List Client (SOCPlayerClient): the client’s network and lobby surface. At construction it resolves locale/i18n strings, reads persistent Preferences, and wires ClientNetwork (socket), an injected MessageHandler (inbound dispatch) and GameMessageSender (outbound). Designed to host three coexisting server connections — remote TCP, locally-hosted TCP, and in-JVM stringport practice — behind one shared game list; keeps only partial state with the server authoritative; gates i18n/scenario localization on negotiated server version; resolves per-game version with practice games handled specially; includes failsafe overrides for unjoinable games and graceful network-failure degradation. In-Game Player Interface (SOCPlayerInterface): the Swing host for one active game, reading the partial client-side model to paint board, hand panels, building panel and chat. All inbound game/network events route through the ClientBridge (PlayerClientListener) inner class rather than letting the network layer touch Swing. A single role-parameterized TradePanel (offer vs counter, paired via setOfferCounterPartner) chooses Normal vs Compact layout from the height its parent assigns; the auto-reject countdown reserves layout height via a single-space label; sounds are shared static Clips played through a single-thread executor gated by a per-game mute pref; frame-resize events are coalesced by one restartable Swing Timer; trade/special-build shortcuts bind through InputMap/ActionMap dispatched by PIHotkeyActionListener. Board Rendering &amp; Visual Themes (SOCBoardPanel): a package-private renderer of the mirrored game state. Two-layer rendering caches the empty terrain buffer once (drawBoardEmpty) and composites robber and placed pieces over it each repaint (drawBoard); a single internal unscaled/un-rotated coordinate system applies transforms only at the boundary. The color-blind palette is applied once via a static initializer; per-graphics-set theme.properties enables re-skinning with hardcoded fallbacks; rendering-hint preferences are cached rather than read per frame; only hex terrain uses bitmap textures, everything else is vector primitives; larger squares come from a ColorSquareLarger subclass instead of mutating base dimensions. Client Preferences &amp; Settings: the persistent preference layer. UserPreferences statically wraps a java.util.prefs.Preferences node keyed to the soc.client package, exposing typed getPref/putPref plus a lazily-built LinkedHashMap registry of PreferenceDescriptor metadata (insertion order determines dialog order). SwingMainDisplay’s ‘Preferences…’ button opens PreferencesDialog, which builds one localized editor control per descriptor under section headers. Design choices: an additive descriptor mini-registry layered over the existing static API; CHOICE values stored as String or as an integer index; apply-on-OK / discard-on-Cancel writing back only changed values; split immediate- vs deferred-effect preferences; KEY_* constants declared on PreferenceDescriptor.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCPlayerClient</strong>: Orchestrate connection lifecycle and the shared game list across three server connections (remote TCP, locally-hosted TCP, in-JVM stringport practice); gate i18n/scenario string requests on negotiated server version; resolve per-game version (practice games handled specially).</li>
+<li><strong>ClientNetwork</strong>: Open and own the socket(s)/stringport, push outbound SOCMessage bytes, and degrade gracefully on network failure.</li>
+<li><strong>MessageHandler</strong>: Route decoded messages to SOCPlayerInterface (ClientBridge) and SwingMainDisplay, and apply server updates onto the partial client-side game model.</li>
+<li><strong>GameMessageSender</strong>: Serialize player intents (build, trade, roll, etc.) into protocol messages for the server.</li>
+<li><strong>SwingMainDisplay</strong>: Render the lobby/game list and channel UI; launch the PreferencesDialog; host per-game SOCPlayerInterface frames.</li>
+<li><strong>SOCPlayerInterface</strong>: Compose the in-game UI (board panel, hand panels, TradePanel, modal dialogs, sound, build/trade hotkeys via PIHotkeyActionListener) and translate listener callbacks into UI updates.</li>
+<li><strong>SOCBoardPanel</strong>: Visualize the mirrored SOCGame/SOCBoard(Large) state; bitmap textures only for hex terrain, everything else as vector primitives; host BoardPopupMenu, BoardToolTip and BoardPanelSendBuildTask.</li>
+<li><strong>SOCHandPanel</strong>: Render a single player’s hand/state from the partial model and surface seat-level actions.</li>
+<li><strong>ColorSquare</strong>: Provide a reusable colored count/indicator cell used across hand panels and the board, with color-blind-assist coloring.</li>
+<li><strong>Client Preferences &amp; Settings</strong>: Register, display, persist and apply client preferences (apply-on-OK / discard-on-Cancel, immediate- vs deferred-effect), additively over the existing static accessor API.</li>
+<li><strong>SnippingTextArea</strong>: Hold scrolling textual output with a capped retained length.</li>
+</ul>
+<h2>Boundaries</h2>
+<ul>
+<li><strong>SOCPlayerClient</strong> boundary: Top-level desktop client controller: owns network bootstrap, the game-list/lobby surface, locale + i18n resolution (SOCStringManager) and persistent Preferences reads; wires the ClientNetwork, MessageHandler and GameMessageSender collaborators and the MainDisplay. Does NOT own Swing rendering (delegates to MainDisplay) or game rules (server authoritative). <em>[unverified: no imports/calls edge src/main/java/soc/client/SOCPlayerClient.java::SOCPlayerClient -&gt; MessageHandler, src/main/java/soc/client/SOCPlayerClient.java::SOCPlayerClient -&gt; GameMessageSender, src/main/java/soc/client/SOCPlayerClient.java::SOCPlayerClient -&gt; MainDisplay in code graph]</em></li>
+<li><strong>ClientNetwork</strong> boundary: Transport layer — the only client component that touches a server socket. Owns the outbound byte path (putNet for the TCP connection, putPractice for the in-JVM stringport) and the connect-off-the-UI-thread bootstrap.</li>
+<li><strong>MessageHandler</strong> boundary: Inbound SOCMessage dispatch. Decodes wire messages arriving from the server and drives the rest of the client ONLY through the PlayerClientListener and GameDisplay/MainDisplay seams — it does not call AWT/Swing widgets directly. <em>[unverified: no imports/calls edge src/main/java/soc/client/MessageHandler.java -&gt; PlayerClientListener, src/main/java/soc/client/MessageHandler.java -&gt; MainDisplay in code graph]</em></li>
+<li><strong>GameMessageSender</strong> boundary: Outbound game-action encoder: constructs the SOCMessage commands for in-game player actions and hands them to ClientNetwork. Black-box counterpart to MessageHandler. <em>[unverified: no imports/calls edge src/main/java/soc/client/GameMessageSender.java::GameMessageSender -&gt; MessageHandler in code graph]</em></li>
+<li><strong>SwingMainDisplay</strong> boundary: The concrete Swing main-display surface (game-list window, channels, the ‘Preferences…’ button) implementing the MainDisplay/GameDisplay abstraction that decouples SOCPlayerClient from AWT/Swing.</li>
+<li><strong>SOCPlayerInterface</strong> boundary: Swing host for a single active game. Holds one SOCGame reference and reads the partial client-side model (SOCPlayer, SOCBoard, SOCResourceSet, SOCTradeOffer) to paint board, hand panels, building panel and chat. Inbound events enter through the ClientBridge inner class (a PlayerClientListener); never owns rules.</li>
+<li><strong>SOCBoardPanel</strong> boundary: Package-private Swing board renderer. Owns a single internal unscaled/un-rotated coordinate system with transforms applied only at the boundary; two-layer rendering (cached empty-terrain buffer composited with placed pieces and robber per repaint); the per-graphics-set theme-color subsystem and rendering-hint/quality cache.</li>
+<li><strong>SOCHandPanel</strong> boundary: Per-player hand panel widget — one component instance per seat showing resources, pieces and player status, built from ColorSquare widgets.</li>
+<li><strong>ColorSquare</strong> boundary: Shared small resource-count/indicator widget plus the color-blind palette subsystem applied once at class load via a static initializer; a ColorSquareLarger subclass provides larger squares without changing base WIDTH/HEIGHT. <em>[unverified: no imports/calls edge src/main/java/soc/client/ColorSquare.java::ColorSquare -&gt; ColorSquareLarger in code graph]</em></li>
+<li><strong>Client Preferences &amp; Settings</strong> boundary: Persistent user-preference layer: UserPreferences statically wraps a java.util.prefs.Preferences node keyed to the soc.client package (not a class name) with typed getPref/putPref, a LinkedHashMap registry of PreferenceDescriptor metadata (insertion order = dialog order), and PreferencesDialog as the editor. <em>[unverified: no imports/calls edge src/main/java/soc/client/UserPreferences.java::UserPreferences -&gt; PreferencesDialog in code graph]</em></li>
+<li><strong>SnippingTextArea</strong> boundary: Bounded-length Swing text area for chat/message and recording logs; trims oldest content (snipText) on append/replaceRange/setText so the log cannot grow without bound.</li>
+</ul>
+<h2>Integration Points</h2>
+<ul>
+<li><strong>Client⇄Server SOCMessage connection</strong>: All lobby and game traffic flows between the desktop client and the authoritative SOCServer; the client holds only partial state and the server is authoritative for all rules. — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+<li><strong>Partial client-side game-model reads</strong>: Rendering and UI components read the locally-mirrored partial game model to paint the board, hand panels and building panel; they never mutate authoritative rules state. — see <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a></li>
+<li><strong>Inbound dispatch via PlayerClientListener / GameDisplay seam</strong>: MessageHandler decodes inbound SOCMessages and drives the Swing layer only through the PlayerClientListener (SOCPlayerInterface.ClientBridge) and GameDisplay/MainDisplay (SwingMainDisplay) interfaces, keeping network handling decoupled from AWT/Swing.</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Architecture</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+
+    Client_Preferences___Settings["Client Preferences & Settings"]
+    ClientNetwork["ClientNetwork"]
+    ColorSquare["ColorSquare"]
+    GameMessageSender["GameMessageSender"]
+    MessageHandler["MessageHandler"]
+    SOCBoardPanel["SOCBoardPanel"]
+    SOCHandPanel["SOCHandPanel"]
+    SOCPlayerClient["SOCPlayerClient"]
+    SOCPlayerInterface["SOCPlayerInterface"]
+    SnippingTextArea["SnippingTextArea"]
+    SwingMainDisplay["SwingMainDisplay"]
+
+    ClientNetwork -->|"SOCMessage over TCP (writeUTF/readUTF... — calls (2)"| MessageHandler
+    ClientNetwork -->|"calls (3)"| SOCPlayerClient
+    ClientNetwork -->|"calls (6)"| SwingMainDisplay
+    GameMessageSender -->|"calls (2)"| ClientNetwork
+    GameMessageSender -->|"calls (1)"| SOCPlayerClient
+    MessageHandler -->|"calls (1)"| ClientNetwork
+    MessageHandler -->|"calls (13)"| SOCPlayerClient
+    MessageHandler -->|"calls (63)"| SOCPlayerInterface
+    MessageHandler -->|"calls (2)"| SnippingTextArea
+    MessageHandler -->|"in-process Java interface callbacks (... — calls (20)"| SwingMainDisplay
+    SOCBoardPanel -->|"calls (20)"| ColorSquare
+    SOCBoardPanel -->|"calls (2)"| GameMessageSender
+    SOCBoardPanel -->|"calls (6), inherits (1)"| SOCHandPanel
+    SOCBoardPanel -->|"in-process Java method calls"| SOCPlayerClient
+    SOCBoardPanel -->|"calls (8)"| SOCPlayerInterface
+    SOCBoardPanel -->|"calls (3)"| SnippingTextArea
+    SOCHandPanel -->|"calls (23)"| ColorSquare
+    SOCHandPanel -->|"calls (10)"| SOCBoardPanel
+    SOCHandPanel -->|"calls (15)"| SOCPlayerInterface
+    SOCHandPanel -->|"calls (2)"| SnippingTextArea
+    SOCHandPanel -->|"calls (2)"| SwingMainDisplay
+    SOCPlayerClient -->|"calls (3)"| ClientNetwork
+    SOCPlayerClient -->|"calls (1)"| ColorSquare
+    SOCPlayerClient -->|"calls (2)"| SOCPlayerInterface
+    SOCPlayerClient -->|"calls (9)"| SwingMainDisplay
+    SOCPlayerInterface -->|"calls (4)"| ColorSquare
+    SOCPlayerInterface -->|"calls (4)"| GameMessageSender
+    SOCPlayerInterface -->|"calls (26)"| SOCBoardPanel
+    SOCPlayerInterface -->|"calls (54)"| SOCHandPanel
+    SOCPlayerInterface -->|"calls (3)"| SOCPlayerClient
+    SOCPlayerInterface -->|"calls (13)"| SnippingTextArea
+    SOCPlayerInterface -->|"calls (8)"| SwingMainDisplay
+    SwingMainDisplay -->|"calls (10)"| ClientNetwork
+    SwingMainDisplay -->|"calls (5)"| ColorSquare
+    SwingMainDisplay -->|"calls (1)"| SOCBoardPanel
+    SwingMainDisplay -->|"calls (7)"| SOCHandPanel
+    SwingMainDisplay -->|"calls (10)"| SOCPlayerClient
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCPlayerClient — network &amp; game-list controller</code></li>
+<li><code class="code-ref" title="source file in your repository">ClientNetwork — socket/stringport transport</code></li>
+<li><code class="code-ref" title="source file in your repository">MessageHandler — inbound SOCMessage dispatch</code></li>
+<li><code class="code-ref" title="source file in your repository">GameMessageSender — outbound game-action encoder</code></li>
+<li><code class="code-ref" title="source file in your repository">SwingMainDisplay — main display / MainDisplay impl</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCPlayerInterface — in-game UI host</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCBoardPanel — board renderer &amp; themes</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCHandPanel — per-player hand panel</code></li>
+<li><code class="code-ref" title="source file in your repository">ColorSquare — resource widget &amp; color-blind palette</code></li>
+<li><code class="code-ref" title="source file in your repository">UserPreferences — persistent preference layer</code></li>
+<li><code class="code-ref" title="source file in your repository">SnippingTextArea — bounded chat/log text area</code></li>
+<li><code class="code-ref" title="source file in your repository">PlayerClientListener / GameDisplay 2.0 display seam</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCPlayerClient — network &amp; game-list controller</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java:526-583</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: ClientNetwork — socket/stringport transport</td>
+<td></td>
+<td>src/main/java/soc/client/ClientNetwork.java:230-235</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: MessageHandler — inbound SOCMessage dispatch</td>
+<td></td>
+<td>src/main/java/soc/client/MessageHandler.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: GameMessageSender — outbound game-action encoder</td>
+<td></td>
+<td>src/main/java/soc/client/GameMessageSender.java:87-96</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: SwingMainDisplay — main display / MainDisplay impl</td>
+<td></td>
+<td>src/main/java/soc/client/SwingMainDisplay.java:570-608</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCPlayerInterface — in-game UI host</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerInterface.java:849-1103</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCBoardPanel — board renderer &amp; themes</td>
+<td></td>
+<td>src/main/java/soc/client/SOCBoardPanel.java:1972-2167</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCHandPanel — per-player hand panel</td>
+<td></td>
+<td>src/main/java/soc/client/SOCHandPanel.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: ColorSquare — resource widget &amp; color-blind palette</td>
+<td></td>
+<td>src/main/java/soc/client/ColorSquare.java:527-614</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: UserPreferences — persistent preference layer</td>
+<td></td>
+<td>src/main/java/soc/client/UserPreferences.java:47-625</td>
+<td style="text-align:right">0.92</td>
+</tr>
+<tr>
+<td>Source Linkage: SnippingTextArea — bounded chat/log text area</td>
+<td></td>
+<td>src/main/java/soc/client/SnippingTextArea.java:186-212</td>
+<td style="text-align:right">0.75</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="90.5"/>
+        </svg>
+        <div class="ring-num">0.60</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -1,0 +1,226 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Functional Test Suite (extraTest) · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../quality-infrastructure/quality-infrastructure.arch.html"><span class="nm">Quality Infrastructure</span><span class="tt tt-arch">arch</span></a><a class="nav-item active" href="../quality-infrastructure/functional-test-suite-extratest.design.html"><span class="nm">Functional Test Suite (extraTest)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/java-unit-test-suite.design.html"><span class="nm">Java Unit Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/protocol-message-sequence-consistency-tests.design.html"><span class="nm">Protocol Message-Sequence Consistency Tests</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.api-boundary.html"><span class="nm">Quality Infrastructure API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/web-client-test-suite.design.html"><span class="nm">Web Client Test Suite</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.gateway.html"><span class="nm">Quality Infrastructure Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../quality-infrastructure/contracts/quality-infrastructure.testplan.html"><span class="nm">Quality Infrastructure Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Quality Infrastructure</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:40%"></i></span>
+      <span class="conf-val">0.40</span></span></div>
+        <h1 class="doc-title">Functional Test Suite (extraTest)</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Functional Test Suite (extraTest)</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Isolating heavyweight e2e from build artifacts</strong> — Per doc/Readme.developer.md, the extraTest source set has its own classpath wired in build.gradle and is excluded from the shipped JARs — the distinctive intent is to host expensive end-to-end checks (documented message sequences, multi-round layouts, client-version compatibility) without slowing the default build or contaminating released binaries.</li>
+</ul>
+<h2>Overview</h2>
+<p>The extraTest feature is a dedicated Gradle source set that aggregates the heavyweight, long-running functional tests living under src/extraTest/java/soctest and src/extraTest/python. The Gradle extraTest task depends on the standard test task, so the fast unit pass runs first as a gate before the lengthy end-to-end checks execute. Java functional classes such as TestActionsMessages and TestClientVersion bring up an in-JVM stringport server in @BeforeClass and shut it down in @AfterClass, then connect bots/clients exactly like real peers to replay the documented SOCMessage sequences for each game action. Because the source set carries its own classpath and is excluded from the shipped JARs, these expensive checks never bloat the released server/full artifacts. Python tests run in the same task to exercise non-Java startup and environment paths.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>extraTest source set</strong> (referenced; defined externally)</li>
+<li><strong>TestActionsMessages</strong></li>
+<li><strong>TestBoardLayoutsRounds</strong></li>
+<li><strong>TestClientVersion</strong></li>
+<li><strong>Python functional tests</strong> (referenced; defined externally)</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>Gradle test task</strong> (inbound) — via extraTest task dependsOn test (build.gradle) (evidence: build.gradle; doc/Readme.developer.md)</li>
+<li><strong>soc.extra (RecordingSOCServer / GameEventLog / GameActionExtractor)</strong> (outbound) — via extraTest classpath references reusable test/dev infrastructure (evidence: src/main/java/soc/extra/robot/GameActionExtractor.java)</li>
+<li><strong>SOCMessage protocol / documented game-action sequences</strong> (outbound) — via TestActionsMessages replays sequences from doc/Message-Sequences-for-Game-Actions.md against a stringport server (evidence: src/extraTest/java/soctest/server/TestActionsMessages.java; doc/Message-Sequences-for-Game-Actions.md)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Place heavyweight end-to-end tests in a separate extraTest source set rather than in the standard test set.</strong>: Keeps the routine <code>gradle test</code> pass fast for everyday development while still allowing exhaustive functional coverage on demand via <code>gradle extraTest</code>.</li>
+<li><strong>Wire extraTest with its own classpath in build.gradle and exclude it from the shipped server/full JARs.</strong>: Functional/dev-only test scaffolding must never become part of released artifacts; an isolated classpath also lets extraTest depend on soc.extra reusable test infrastructure.</li>
+<li><strong>Make the extraTest task depend on the test task.</strong>: Runs the cheap unit pass first so an obvious unit regression fails fast before paying for the long functional run.</li>
+<li><strong>Drive functional game-action tests against an in-process stringport server brought up in @BeforeClass / torn down in @AfterClass.</strong>: Bots and clients connect over the SOCMessage protocol exactly like production peers, so tests validate real client⇄server sequences without binding a TCP port or spawning external processes.</li>
+<li><strong>Include Python tests in the same extraTest aggregation.</strong>: The wire protocol is deliberately language-neutral; Python functional tests assert that non-Java clients and startup-parameter handling stay interoperable.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[SOFT]</strong> The extraTest functional run SHOULD execute only after the standard unit test pass succeeds (extraTest depends on test). — build.gradle (extraTest task dependsOn test); doc/Readme.developer.md</li>
+<li><strong>[SOFT]</strong> extraTest code MUST NOT be packaged into the shipped server/full JARs; its classpath is wired separately. — build.gradle source-set/JAR include lists; doc/Readme.developer.md</li>
+<li><strong>[SOFT]</strong> Functional server-backed test classes SHOULD start the in-JVM stringport server in @BeforeClass and shut it down in @AfterClass to avoid leaking server state across the suite. — TestActionsMessages.startStringportServer/shutdownServer; TestClientVersion.startStringportServer/shutdownServer</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>performance</strong> — Long-running functional tests are segregated into extraTest so the default <code>gradle test</code>/<code>build</code> pass stays fast for routine development. — doc/Readme.developer.md; build.gradle extraTest source set</li>
+<li><strong>reliability</strong> — Server-backed functional tests bracket an in-JVM stringport server with @BeforeClass startup and @AfterClass shutdown to ensure deterministic setup/teardown per class. — TestActionsMessages @BeforeClass startStringportServer / @AfterClass shutdownServer</li>
+<li><strong>error-handling</strong> — The standard unit pass runs first (extraTest dependsOn test), failing fast on basic regressions before the expensive functional run starts. — build.gradle task dependency; doc/Readme.developer.md</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class TestBoardLayoutsRounds {
+        +@Test
+    public void testGameLayouts()
+    }
+    class TestGame0 {
+        +def test_trivial(self)
+    }
+    class test_0_env {
+        +def test_env(self)
+    }
+    class TestClientVersion {
+        +@BeforeClass
+    public static void startStringportServer()
+        +@AfterClass
+    public static void shutdownServer()
+        +testGameOpportunistic()
+    }
+    class test_startup_params {
+        +def test_params_main(self)
+    }
+    class TestActionsMessages {
+        +@BeforeClass
+    public static void startStringportServer()
+        +@AfterClass
+    public static void shutdownServer()
+        +testBasics_Loadgame()
+        +testSaveLoadBasicSequences()
+        +testBuildAndMove()
+        -testOne_BuildAndMove()
+        +testUndoBuildAndMove()
+        -testOne_UndoBuildAndMove()
+        -testOne_UndoBuildAndMove_buildAndUndoPiece()
+        +testUndoBuild_SVP_SC_SANY()
+        +testUndoBuild_SVP_SC_SEAC()
+        -testOne_testUndoBuild_SVP_SC_SANY_SEAC()
+        +testUndoBuild_SC_FTRI_specialEdges()
+        -testOne_UndoBuild_SC_FTRI_specialEdges()
+        -testOne_UndoBuild_SC_FTRI_specialEdges_fromShip()
+        -testOne_UndoBuild_SC_FTRI_specialEdges_buildOrMoveAtSpecialEdge()
+        -testOne_UndoBuild_SC_FTRI_specialEdges_undoBuildOrMoveAtSpecialEdge()
+        +testBuyDevCard()
+        -testOne_BuyDevCard()
+        +testPlayDevCards()
+        -testOne_PlayDevCards()
+        +testPlayCancelKnightDevCard()
+        -testOne_PlayCancelKnightDevCard()
+        +testPlayCancelKnightDevCard_SC_PIRI()
+        -testOne_PlayCancelKnightDevCard_SC_PIRI()
+        -testOne_PlayCancelKnightDevCard_SC_PIRI_convertToWarship()
+        +testRollDiceRsrcsOrMoveRobber()
+        -testOne_RollDiceRsrcsOrMoveRobber()
+        +testRollDiceGoldHexGain()
+        -testOne_RollDiceGoldHexGain()
+        +testBankPortTrades()
+        -testOne_BankPortTrades()
+        +testTradeCounterAccept()
+        -testOne_TradeCounterAccept()
+        +testEndTurn()
+        -testOne_EndTurn()
+        +test6pAskSpecialBuild()
+        -testOne_6pAskSpecialBuild()
+        +testWinGame()
+        -testOne_WinGame()
+        -startGame2pAwaitClientPlacementTurn()
+        -putPiece()
+        -movePiece()
+        -undoPutOrMovePiece()
+    }
+
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Functional test root (extraTest source set)</code></li>
+<li><code class="code-ref" title="source file in your repository">Functional actions test</code></li>
+<li><code class="code-ref" title="source file in your repository">extraTest Gradle task wiring</code></li>
+<li><code class="code-ref" title="source file in your repository">Stringport server lifecycle helper</code></li>
+<li><code class="code-ref" title="source file in your repository">Reusable test infrastructure</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">functional-test-suite-extratest.feature.md</span>
+Scope architecture: <a href="quality-infrastructure.arch.html">quality-infrastructure.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Functional test root (extraTest source set)</td>
+<td></td>
+<td>src/extraTest/java/soctest</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Functional actions test</td>
+<td></td>
+<td>src/extraTest/java/soctest/server/TestActionsMessages.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: extraTest Gradle task wiring</td>
+<td>Sammys-Settlers build script for gradle 6 or 7</td>
+<td>build.gradle</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: Reusable test infrastructure</td>
+<td></td>
+<td>src/main/java/soc/extra/robot/GameActionExtractor.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="135.7"/>
+        </svg>
+        <div class="ring-num">0.40</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

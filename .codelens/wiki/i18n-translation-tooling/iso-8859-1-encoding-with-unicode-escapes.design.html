@@ -1,0 +1,252 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ISO-8859-1 encoding with Unicode escapes · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><div class="nav-sub"><a class="nav-item" href="../i18n-translation-tooling/editor-launch-and-file-pair-selection.design.html"><span class="nm">Editor launch and file-pair selection</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../i18n-translation-tooling/contracts/i18n-translation-tooling.api-boundary.html"><span class="nm">i18n Translation Tooling API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../i18n-translation-tooling/iso-8859-1-encoding-with-unicode-escapes.design.html"><span class="nm">ISO-8859-1 encoding with Unicode escapes</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../i18n-translation-tooling/side-by-side-properties-translation-editing.design.html"><span class="nm">Side-by-side properties translation editing</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../i18n-translation-tooling/contracts/i18n-translation-tooling.gateway.html"><span class="nm">i18n Translation Tooling Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../i18n-translation-tooling/contracts/i18n-translation-tooling.testplan.html"><span class="nm">i18n Translation Tooling Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">i18n Translation Tooling</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:45%"></i></span>
+      <span class="conf-val">0.45</span></span></div>
+        <h1 class="doc-title">ISO-8859-1 encoding with Unicode escapes</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>ISO-8859-1 encoding with Unicode escapes</h1>
+<h2>Overview</h2>
+<p>A translator opens a source/destination <code>.properties</code> PTE. <code>PropsFileParser.parseOneFile</code> reads each file from disk, decoding <code>\uXXXX</code> sequences back to live characters via <code>unescapeUnicodes</code>, and produces ordered <code>FileEntry</code> rows (comment blocks and key/value lines) that <code>ParsedPropsFilePair</code> aligns into a source-vs-destination grid for the editor table. The translator edits values as ordinary in-memory Java strings — no manual encoding bookkeeping. On save, <code>PropsFileWriter</code> walks the rows and re-serializes them: <code>escValue</code>/<code>appendEsc</code> test each character with <code>isValidHighISO8859_1</code> and emit any character outside the writable ISO-8859-1 range as a <code>\uXXXX</code> escape, so the on-disk file is always valid for a Java <code>ResourceBundle</code> regardless of the translator’s editor encoding. This read-decode / edit / encode-write loop is the core round-trip; <code>PropsFilePseudoLocalizer</code> drives the same path programmatically to produce pseudo-locale files.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>PropsFileWriter</strong>: Serializes translation key/value pairs back to a Java <code>.properties</code> file in ISO-8859-1, escaping out-of-range characters as <code>\uXXXX</code>. Owns the write half of the round-trip: <code>escValue</code>, <code>appendEsc</code>, <code>isValidHighISO8859_1</code>, and <code>writeOne</code>/<code>write</code>/<code>flush</code>/<code>close</code>.</li>
+<li><strong>PropsFileParser</strong>: Reads a <code>.properties</code> file, parsing it into <code>FileEntry</code> rows (comment lines and key/value lines) and reversing the <code>\uXXXX</code> escapes via <code>unescapeUnicodes</code>; also detects duplicate keys with <code>findDuplicateKeys</code>. Owns the read half of the round-trip.</li>
+<li><strong>ParsedPropsFilePair</strong>: Holds a source/destination <code>.properties</code> pair as aligned <code>FileEntry</code> rows, mediating parse (<code>parseSrc</code>/<code>parseDest</code>) and edit operations (<code>insertRow</code>, <code>convertInsertedRows</code>, dest-only key tracking) consumed by the editor UI.</li>
+<li><strong>FileEntry / FileKeyEntry / FileCommentEntry / KeyPairLine</strong> (referenced; defined externally): Row model for a parsed <code>.properties</code> file: <code>FileKeyEntry</code> (a key + its value and surrounding comment), <code>FileCommentEntry</code> (a standalone comment block), and <code>KeyPairLine</code> carry the in-memory representation between parser and writer.</li>
+<li><strong>PropsFilePseudoLocalizer</strong>: Generates a pseudo-localized <code>.properties</code> file from a base file (<code>makePseudoPropFilename</code>, <code>pseudoLocalizeFile</code>) — exercises the parse/escape/write path for test/QA without a human translator.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>PropertiesTranslatorEditor (PTE) UI</strong> (inbound) — via ParsedPropsFilePair consumed by PTEMain editor table (evidence: src/main/java/net/nand/util/i18n/gui/PTEMain.java)</li>
+<li><strong>Java ResourceBundle / StringManager</strong> (outbound) — via Serialized <code>.properties</code> files loaded at runtime for i18n string lookup (evidence:  StringManager.get)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Round-trip the escape layer in code (parser unescapes on read, writer re-escapes on write) rather than trusting the editor’s file encoding</strong>: Java <code>ResourceBundle</code> requires <code>.properties</code> in ISO-8859-1 with <code>\uXXXX</code> for out-of-range characters; hand-editing in a UTF-8 editor silently corrupts strings. Centralizing decode in <code>PropsFileParser.unescapeUnicodes</code> and encode in <code>PropsFileWriter.escValue</code>/<code>appendEsc</code> lets the translator work with natural characters in memory while the persisted form is guaranteed valid.</li>
+<li><strong>Split read and write into separate single-responsibility classes (<code>PropsFileParser</code> vs <code>PropsFileWriter</code>) with a neutral row model (<code>FileEntry</code> subtypes) between them</strong>: The parsed row model preserves comments and key ordering, so a save reproduces file structure rather than just a flattened key/value map. Keeping the writer independent lets <code>PropsFilePseudoLocalizer</code> reuse the encode path without going through the interactive editor.</li>
+<li><strong>Detect duplicate keys at parse time (<code>findDuplicateKeys</code>) and expose dest-only keys via <code>ParsedPropsFilePair</code></strong>: A translation file pair can drift (keys present in one file but not the other, or accidental duplicates); surfacing these to the editor prevents silently writing an ambiguous or lossy <code>.properties</code> file.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> Characters outside the writable ISO-8859-1 range MUST be emitted as <code>\uXXXX</code> escapes when serializing a <code>.properties</code> file. — src/main/java/net/nand/util/i18n/PropsFileWriter.java::isValidHighISO8859_1 / escValue / appendEsc</li>
+<li><strong>[SOFT]</strong> Java <code>.properties</code> files SHOULD be authored/saved through the PTE tooling rather than hand-edited in a UTF-8 editor, to avoid corrupting out-of-range characters. — <a href="http://CLAUDE.md">CLAUDE.md</a> i18n conventions; net.nand.util.i18n round-trip</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>reliability</strong> — Save output must remain a valid ISO-8859-1 <code>.properties</code> file consumable by Java <code>ResourceBundle</code> independent of the translator’s editor encoding, via programmatic Unicode escaping on write. — src/main/java/net/nand/util/i18n/PropsFileWriter.java::escValue / appendEsc / isValidHighISO8859_1</li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class StringManager {
+        +StringManager()
+        +parseLocale()
+        +get()
+    }
+    class FileCommentEntry {
+        +FileCommentEntry()
+        +public final String toString()
+    }
+    class FileKeyEntry {
+        +public FileKeyEntry(final List<String> srcComment)
+        +public final String toString()
+    }
+    class FileEntry {
+    }
+    class KeyPairLine {
+        +public KeyPairLine(final List<String> comment)
+        +public final String toString()
+    }
+    class PropsFileParser {
+        +parseOneFile()
+        +findDuplicateKeys()
+        -private static String unescapeUnicodes(String valStr)
+    }
+    class PropsFileWriter {
+        +isValidHighISO8859_1()
+        +appendEsc()
+        +public static final String escValue(final String val)
+        +writeOne()
+        +PropsFileWriter()
+        +public void flush()
+        +public void close()
+        +write()
+    }
+    class RequestFocusListener {
+        +public void ancestorAdded(final AncestorEvent e)
+        +public void ancestorMoved(AncestorEvent e)
+        +public void ancestorRemoved(AncestorEvent e)
+    }
+    class ParsedPropsFilePair {
+        +public ParsedPropsFilePair(final File src, final File dest)
+        +public int size()
+        +public Iterator<FileEntry> getContents()
+        +extractContentsHalf()
+        +getRow()
+        +public boolean isKeyDestOnly(final String key)
+        +public int getDestOnlySize()
+        +public Iterator<PropsFileParser.KeyPairLine> getDestOnly()
+        +public Map<String, String> getSrcDupeKeys()
+        +public Map<String, String> getDestDupeKeys()
+        +parseSrc()
+        +setDestIsNew()
+        +parseDest()
+        -buildContFromSrcDest()
+        -expandCommentLinesIntoCont()
+        +insertRow()
+        +public boolean convertInsertedRows()
+    }
+    class PTEMain {
+        +tryEditFromDestOnly()
+        +public static void main(String[] args)
+        -static void showAbout(final JFrame parent)
+        +public PTEMain()
+        +public void initAndShow()
+        +openPropsEditor()
+        -private void tryGetPrefLastEditedDir()
+        -private void trySetPrefLastEditedDir()
+        -addBtn()
+        -addToGrid()
+        +public void actionPerformed(ActionEvent e)
+        -private final void clickedNewDest()
+        -private final void clickedOpenDestSrc()
+        -chooseFile()
+        -checkUnsaved()
+        -askUnsaved()
+        +public void windowClosing(WindowEvent e)
+        +public void windowActivated(WindowEvent e)
+        +public void windowClosed(WindowEvent e)
+        +public void windowDeactivated(WindowEvent e)
+        +public void windowDeiconified(WindowEvent e)
+        +public void windowIconified(WindowEvent e)
+        +public void windowOpened(WindowEvent e)
+    }
+    class PropsFilePseudoLocalizer {
+        +makePseudoPropFilename()
+        +pseudoLocalizeFile()
+        +public static void main(String[] args)
+    }
+    class NewDestSrcDialog {
+        +public NewDestSrcDialog(final File src)
+        +public void actionPerformed(final ActionEvent ae)
+        -private void recalcDestName()
+        -private void doDocEvent(DocumentEvent e)
+        +public void insertUpdate(DocumentEvent e)
+        +public void changedUpdate(DocumentEvent e)
+        +public void removeUpdate(DocumentEvent e)
+    }
+
+    FileCommentEntry --|> FileEntry : extends
+    FileKeyEntry --|> FileEntry : extends
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">PropsFileWriter ISO-8859-1 + Unicode escape on write</code></li>
+<li><code class="code-ref" title="source file in your repository">PropsFileParser unescape on read</code></li>
+<li><code class="code-ref" title="source file in your repository">ParsedPropsFilePair source/dest alignment</code></li>
+<li><code class="code-ref" title="source file in your repository">Duplicate-key detection at parse</code></li>
+<li><code class="code-ref" title="source file in your repository">Pseudo-localization reuse of escape path</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">iso-8859-1-encoding-with-unicode-escapes.feature.md</span>
+Scope architecture: <span class="dead-ref" title="referenced doc not present in this generation">i18n-translation-tooling.arch.md</span></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: PropsFileWriter ISO-8859-1 + Unicode escape on write</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/PropsFileWriter.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: PropsFileParser unescape on read</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/PropsFileParser.java</td>
+<td style="text-align:right">0.72</td>
+</tr>
+<tr>
+<td>Source Linkage: ParsedPropsFilePair source/dest alignment</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/ParsedPropsFilePair.java</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Duplicate-key detection at parse</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/PropsFileParser.java:241-271</td>
+<td style="text-align:right">0.72</td>
+</tr>
+<tr>
+<td>Source Linkage: Pseudo-localization reuse of escape path</td>
+<td></td>
+<td>src/main/java/net/nand/util/i18n/PropsFilePseudoLocalizer.java</td>
+<td style="text-align:right">0.16</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="124.4"/>
+        </svg>
+        <div class="ring-num">0.45</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -1,0 +1,201 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Optional Database · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><div class="nav-sub"><a class="nav-item active" href="../optional-database/optional-database.arch.html"><span class="nm">Optional Database</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../optional-database/jdbc-persistence-helper-schema-upgrades.design.html"><span class="nm">JDBC Persistence Helper &amp; Schema Upgrades</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../optional-database/player-accounts-game-stats-persistence.design.html"><span class="nm">Player Accounts &amp; Game Stats Persistence</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../optional-database/sql-schema-templating-generation.design.html"><span class="nm">SQL Schema Templating &amp; Generation</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../optional-database/contracts/optional-database.gateway.html"><span class="nm">Optional Database Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../optional-database/contracts/optional-database.testplan.html"><span class="nm">Optional Database Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Optional Database</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-arch">ARCH</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:60%"></i></span>
+      <span class="conf-val">0.60</span></span></div>
+        <h1 class="doc-title">Optional Database</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Optional Database</h1>
+<h2>Overview</h2>
+<p>JDBC Persistence Helper &amp; Schema Upgrades: At startup SOCDBHelper.initialize reads the JDBC URL/driver/credentials, calls connect, then detectSchemaVersion to learn the on-disk schema generation, and prepareStatements builds the reusable statements every later read/write reuses. All application code (account creation, login, score saving, robot-parameter lookup) flows exclusively through SOCDBHelper, which returns plain values so callers never touch JDBC. When detectSchemaVersion reports an older generation, fast DDL is applied inline and slow data migration is deferred to UpgradeBGTasksThread. Key decisions: concentrate all JDBC access and schema definition in one class; treat the database as entirely optional with graceful degradation; apply schema upgrades at runtime, splitting fast DDL from slow data migration; fail closed on settings inconsistency (DBSettingMismatchException); bundle a self-contained BCrypt implementation for credentials. SQL Schema Templating &amp; Generation: A single-source-of-truth code-generation pipeline for the optional database’s table and index DDL. A developer edits only the vendor-neutral template jsettlers-tables-tmpl.sql; <a href="http://render.py">render.py</a> (parse_cmdline selects a target DBMS, render_one reads the input and setup_tokens/render emit the output) produces one concrete jsettlers-tables-*.sql per supported vendor (MySQL, PostgreSQL, SQLite, Oracle). The generated scripts are checked into src/main/bin/sql instead of being rendered at runtime/install. Key decisions: generate per-vendor SQL from one template rather than hand-maintaining each; ship the generated .sql files in the repo; enforce template/output consistency as a hard build gate (testSrcDBTemplateTokens / testSrcDBTemplates) rather than a manual convention; implement the renderer in Python rather than in the Java build. Player Accounts &amp; Game Stats Persistence: The optional, opt-in persistence layer. Repository evidence: <code>src/main/java/soc/server/database/SOCDBHelper.java</code>. On account creation or login the server calls createAccount / authenticateUserPassword, which hash and compare credentials via BCrypt; verification runs asynchronously via AuthPasswordRunnable. Key decisions: funnel every persistence operation through one vendor-neutral helper; make the database entirely optional and runtime-detected; store passwords as bcrypt hashes and migrate legacy plaintext on upgrade; run schema upgrades online in a background thread; fail closed on persisted-setting drift; adapt 6-player game results into a 4-player-shaped score schema.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCDBHelper</strong>: Persistence facade + connection lifecycle + schema versioning for the optional database.</li>
+<li><strong>Runtime Schema Upgrade</strong>: Online, split-phase schema upgrade (inline DDL vs. deferred data migration).</li>
+<li><strong>Credential Hashing (BCrypt)</strong>: Password hashing/verification for stored account credentials; legacy-plaintext migration on upgrade.</li>
+<li><strong>Async Password Verification</strong>: Callback-based (non-blocking) password authentication path.</li>
+<li><strong>Persisted-Settings Guard</strong>: Detect persisted-setting drift and fail closed via a dedicated exception.</li>
+<li><strong>SQL Schema Template &amp; Generator</strong>: Build-time per-vendor SQL generation from one template.</li>
+<li><strong>Template Consistency Build Gate</strong>: Enforce template/generated-output consistency as a build gate.</li>
+</ul>
+<h2>Boundaries</h2>
+<ul>
+<li><strong>SOCDBHelper</strong> boundary: Owns ALL JDBC access and the entire persisted schema for the server. It is the single gateway: account creation/login, completed-game score saving, and robot-parameter lookup pass through its methods, which return plain values so no caller touches JDBC. Holds the connection, the prepared-statement cache, and the schema-generation detection logic; the rest of the server only sees its boolean availability flag and value-returning methods.</li>
+<li><strong>Runtime Schema Upgrade</strong> boundary: Owns the online schema-migration path invoked when the detected on-disk schema generation lags the code’s expected generation. Fast DDL is applied inline during initialization; slow row-by-row data migration is deferred to a background thread so server startup is not blocked. This responsibility lives inside the database package and is distinct from the steady-state read/write facade.</li>
+<li><strong>Credential Hashing (BCrypt)</strong> boundary: A self-contained bcrypt implementation bundled inside the database package so the persistence layer can hash new passwords and compare on login without an external dependency. Owned here because it is defined within this epic’s directories; consumed only by the persistence facade’s account-creation and authentication paths.</li>
+<li><strong>Async Password Verification</strong> boundary: Owns the asynchronous credential-check contract: authentication is performed off the calling thread and the result delivered via a callback runnable rather than a blocking return. Bounds the persistence layer’s interaction with the server’s connection-handling threads.</li>
+<li><strong>Persisted-Settings Guard</strong> boundary: Owns the fail-closed check that compares persisted server settings against the running configuration and aborts rather than silently proceeding when they drift. A distinct boundary because its job is to STOP initialization, not to read or write game data.</li>
+<li><strong>SQL Schema Template &amp; Generator</strong> boundary: Owns the single-source-of-truth DDL pipeline: developers edit only the vendor-neutral template jsettlers-tables-tmpl.sql, and <a href="http://render.py">render.py</a> emits one concrete jsettlers-tables-*.sql per supported vendor (MySQL, PostgreSQL, SQLite, Oracle). The generated scripts are checked into src/main/bin/sql rather than rendered at install/runtime. Boundary is offline/build-time code generation — it produces the DDL that SOCDBHelper later executes, but shares no runtime path with it.</li>
+<li><strong>Template Consistency Build Gate</strong> boundary: Owns the hard build-time enforcement that the checked-in generated SQL matches what the template would currently produce, so the two never drift. Implemented as build tasks (testSrcDBTemplateTokens / testSrcDBTemplates) that run under the test task; failure breaks the build rather than relying on developer discipline.</li>
+</ul>
+<h2>Integration Points</h2>
+<ul>
+<li><strong>Server → persistence facade</strong>: The server runtime initializes the database (reading JDBC URL/driver/credentials at startup) and routes every durable operation — account creation, login, completed-game score saving, robot-parameter lookup — through SOCDBHelper. When no database is configured the facade’s initialized flag stays false and the server runs unchanged, losing only persistence. This is the sole runtime entry into the epic. <em>[unverified: no imports/calls edge SOCDBHelper -&gt; SOCServer in code graph]</em> — see <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></li>
+<li><strong>Facade → relational database</strong>: SOCDBHelper opens and owns a JDBC connection to the configured external RDBMS and issues all reads/writes through cached prepared statements. The connection target and driver are vendor-neutral across MySQL/MariaDB, PostgreSQL, SQLite, and Oracle, selected by the startup configuration.</li>
+<li><strong>Generated DDL → runtime schema</strong>: The build-time generator emits the per-vendor table/index DDL that defines the schema SOCDBHelper expects at runtime; the connect/detectSchemaVersion path reads against tables created by those generated scripts. The two components share no live call path — the contract between them is the schema shape itself, version-stamped so the runtime can detect an older generation and trigger upgrade.</li>
+<li><strong>Build gate → generated SQL</strong>: The consistency build tasks read both the template and the checked-in generated scripts and fail the build if they diverge, guaranteeing the DDL shipped in the repo is exactly what the current template produces. Enforced under the Gradle test task, not at runtime. — see <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a></li>
+</ul>
+<h2>Diagrams</h2>
+<h3>Architecture</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    Async_Password_Verification["Async Password Verification"]
+    Credential_Hashing__BCrypt_["Credential Hashing (BCrypt)"]
+    Persisted_Settings_Guard["Persisted-Settings Guard"]
+    Runtime_Schema_Upgrade["Runtime Schema Upgrade"]
+    SOCDBHelper["SOCDBHelper"]
+    SQL_Schema_Template___Generator["SQL Schema Template & Generator"]
+    Template_Consistency_Build_Gate["Template Consistency Build Gate"]
+
+    ext_External_RDBMS__MySQL_PostgreSQL_SQLite_Oracle_["External RDBMS (MySQL/PostgreSQL/SQLite/Oracle)"]:::default
+
+    SOCDBHelper -.->|"JDBC"| ext_External_RDBMS__MySQL_PostgreSQL_SQLite_Oracle_
+    SQL_Schema_Template___Generator -->|"Generated jsettlers-tables-*.sql DDL ..."| SOCDBHelper
+    Template_Consistency_Build_Gate -->|"testSrcDBTemplateTokens / testSrcDBTe..."| SQL_Schema_Template___Generator
+
+
+
+
+
+
+
+</pre>
+<h3>Sequence</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}, 'sequence': {'mirrorActors': false, 'useMaxWidth': true, 'wrap': true, 'actorMargin': 40}}}%%
+sequenceDiagram
+    autonumber
+    participant main as main
+    participant render_one as render_one
+    participant parse_cmdline as parse_cmdline
+    participant read as read
+    participant render as render
+    participant setup_tokens as setup_tokens
+    participant print_usage as print_usage
+    participant len as len
+
+    main ->> render_one: render_one(dbtype, infile, outfile, compfile)
+    main ->> parse_cmdline: parse_cmdline()
+    render_one ->> read: public ArrayList<Integer> read(final JsonReader…
+    render_one ->> render: render(in_str)
+    render_one ->> setup_tokens: setup_tokens(dbtype, infile_name)
+    parse_cmdline ->> print_usage: print_usage()
+    parse_cmdline ->> len: private static final int len(final SOCPlayer pl,…
+    Note over len: +1 more calls truncated
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCDBHelper</code></li>
+<li><code class="code-ref" title="source file in your repository">SOCDBHelper.connect</code></li>
+<li><code class="code-ref" title="source file in your repository">SQL template</code></li>
+<li><code class="code-ref" title="source file in your repository">SQL generator</code></li>
+<li><code class="code-ref" title="source file in your repository">Server→DB integration</code></li>
+<li><code class="code-ref" title="source file in your repository">Template consistency build gate</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCDBHelper</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java:134-5022</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SOCDBHelper.connect</td>
+<td></td>
+<td>src/main/java/soc/server/database/SOCDBHelper.java:1201-1224</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SQL template</td>
+<td></td>
+<td>src/main/bin/sql/template/jsettlers-tables-tmpl.sql</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+<tr>
+<td>Source Linkage: SQL generator</td>
+<td><a href="http://render.py">render.py</a> - Simple template renderer for SQL DML/DDL to specific DBMS types.</td>
+<td>src/main/bin/sql/template/render.py:224-230</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Server→DB integration</td>
+<td></td>
+<td>src/main/java/soc/server/SOCServer.java</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: Template consistency build gate</td>
+<td>Sammys-Settlers build script for gradle 6 or 7</td>
+<td>build.gradle</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="90.5"/>
+        </svg>
+        <div class="ring-num">0.60</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -87,8 +87,17 @@ describe('MapEditorScreen', () => {
 
   it('zooms the editor canvas from the workflow bar', () => {
     expect(screen.getByTestId('editor-zoom-readout')).toHaveTextContent('100%');
+    expect(screen.getByRole('button', { name: 'Zoom out' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Zoom in' })).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('editor-zoom-in'));
     expect(screen.getByTestId('editor-zoom-readout')).toHaveTextContent('112%');
+  });
+
+  it('labels repeated stepper controls for assistive tech', () => {
+    expect(screen.getByRole('button', { name: 'Decrease board height' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Increase board height' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Decrease board width' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Increase board width' })).toBeInTheDocument();
   });
 
   it('surfaces an error when mutated to an invalid state', () => {
@@ -171,6 +180,30 @@ describe('MapEditorScreen', () => {
       { area: 1, count: 7 },
       { area: 2, count: 4 },
     ]);
+  });
+
+  it('clears a hex from the canvas with the hex tool (right-click/context menu)', () => {
+    fireEvent.click(screen.getByTestId('editor-load-sample'));
+
+    const hexGroup = screen.getByTestId('editor-hex-0x0309');
+    const polygon = hexGroup.querySelector('polygon') as SVGPolygonElement;
+    fireEvent.contextMenu(polygon);
+
+    expect(screen.getByTestId('editor-valid')).toBeInTheDocument();
+    expect(screen.getByTestId('editor-hex-0x0309')).toHaveAttribute('data-hextype', '');
+  });
+
+  it('shows one canonical 3:1 port choice in editor selects', () => {
+    const palettePortSelect = screen.getByTestId('editor-port-type');
+    expect(within(palettePortSelect).getAllByRole('option', { name: '3:1 (misc)' })).toHaveLength(1);
+
+    fireEvent.click(screen.getByTestId('editor-template-classic'));
+    const portCircle = document.querySelector('[data-testid^="editor-port-"] circle') as SVGCircleElement | null;
+    expect(portCircle).not.toBeNull();
+    fireEvent.click(portCircle as SVGCircleElement);
+
+    const inspectorPortSelect = screen.getByTestId('editor-inspector-port-type');
+    expect(within(inspectorPortSelect).getAllByRole('option', { name: '3:1 (misc)' })).toHaveLength(1);
   });
 
   it('assigns a placed hex to a land area and exports authoritative area ranges', () => {

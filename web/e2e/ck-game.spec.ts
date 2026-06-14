@@ -106,11 +106,14 @@ async function handleSevenInterludes(page: Page): Promise<void> {
   const s = await snapshot(page);
   const PLACING_ROBBER = 33;
   if (s && s.gameState === PLACING_ROBBER && s.currentPlayerNumber === s.mySeat) {
-    const LAND_KINDS = new Set(['clay', 'ore', 'sheep', 'wheat', 'wood']);
+    const LAND_KINDS = new Set(['clay', 'ore', 'sheep', 'wheat', 'wood', 'desert', 'gold']);
     for (const h of await page.locator('[data-testid^="hex-"]').all()) {
+      const tid = await h.getAttribute('data-testid');
       const kind = await h.getAttribute('data-hexkind');
+      const coord = tid ? Number(tid.replace('hex-', '')) : Number.NaN;
+      if (Number.isFinite(coord) && coord === s.robberHex) continue;
       if (kind === null || !LAND_KINDS.has(kind)) continue;
-      await h.click().catch(() => undefined);
+      await h.locator('polygon').nth(1).click().catch(() => undefined);
       const after = await snapshot(page);
       if (!after || after.gameState !== PLACING_ROBBER) return;
     }

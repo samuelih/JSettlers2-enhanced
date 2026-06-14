@@ -1,0 +1,170 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Source Doc Redocumentation: Sammys-Settlers - Custom Maps (User-Defined Board Layouts) · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Source Document Redocumenta…</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:75%"></i></span>
+      <span class="conf-val">0.75</span></span></div>
+        <h1 class="doc-title">Source Doc Redocumentation: Sammys-Settlers - Custom Maps (User-Defined Board Layouts)</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Source Doc Redocumentation: Sammys-Settlers - Custom Maps (User-Defined Board Layouts)</h1>
+<h2>Overview</h2>
+<p>This deterministic SGD record represents one source markdown document discovered during Stage 0. It preserves the source path, section map, and bounded digest so the generated corpus can prove that the input document was seen and carried forward. It is not a ratified replacement for the source file; unresolved claims remain obligations for deeper synthesis or human review.</p>
+<h2>Source Document</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">doc/Custom-Maps.md</code></li>
+</ul>
+<h2>Section Inventory</h2>
+<ul>
+<li>H1 Sammys-Settlers - Custom Maps (User-Defined Board Layouts)</li>
+<li>H2 Contents</li>
+<li>H2 Quick start</li>
+<li>H2 Enabling custom maps on the server</li>
+<li>H2 File format</li>
+<li>H3 Top-level fields</li>
+<li>H3 Land hexes</li>
+<li>H3 Land areas</li>
+<li>H3 Ports</li>
+<li>H3 Robber and pirate start</li>
+<li>H3 Coordinates</li>
+<li>H2 The sample map, field by field</li>
+<li>H2 Scenario keys (how custom maps are named)</li>
+<li>H2 What is validated</li>
+<li>H2 What is NOT validated</li>
+<li>H2 Troubleshooting</li>
+</ul>
+<h2>Content Digest</h2>
+<pre><code># Sammys-Settlers - Custom Maps (User-Defined Board Layouts)
+
+Server-side support for user-defined board layouts, loaded from JSON files at
+server startup and offered to players as custom scenarios. **Standard rules only
+(v1):** custom maps change the board layout (land hexes, dice numbers, ports,
+land areas, robber/pirate start), but not the game rules. They run on the sea
+board (the same large board used by built-in scenarios) and use the standard
+win condition.
+
+Clients need no changes: the server sends a custom map's layout to clients with
+the same `SOCBoardLayout2` message used by every other scenario, so any current
+client can play a custom map.
+
+
+## Contents
+
+- Quick start
+- Enabling custom maps on the server
+- File format
+  - Top-level fields
+  - Land hexes
+  - Land areas
+  - Ports
+  - Robber and pirate start
+  - Coordinates
+- The sample map, field by field
+- Scenario keys (how custom maps are named)
+- What is validated
+- What is NOT validated
+- Troubleshooting
+
+
+## Quick start
+
+1. Create a directory for your maps, e.g. `custommaps/`.
+2. Copy `src/main/bin/custommaps/sample-island.map.json` into it, or write your own.
+3. Start the server with `-Djsettlers.custommaps.dir=custommaps`
+   (and make sure `gson.jar` is on the classpath — see below).
+4. The server logs each loaded map at startup, e.g.
+   `Custom map loaded: sample-island.map.json -&gt; scenario SC_XSAMP (&quot;Sample Two Islands&quot;)`.
+5. Players choosing a new game will see the custom map in the scenario list.
+
+
+## Enabling custom maps on the server
+
+Set the server property `jsettlers.custommaps.dir` to the directory to scan.
+The server scans it once at startup for files ending in `.map.json`.
+
+```
+java -jar Sammys-SettlersServer-&lt;ver&gt;.jar -Djsettlers.custommaps.dir=/path/to/custommaps
+```
+
+or in `jsserver.properties`:
+
+```
+jsettlers.custommaps.dir=custommaps
+```
+
+Custom maps use **GSON** for JSON parsing, exactly like the savegame feature.
+If `gson.jar` isn't on the classpath, the server still starts normally and just
+logs a warning that custom maps are disabled. (The shipped JARs declare
+`gson.jar` on their `Class-Path`.)
+
+Each valid map is registered as a scenario. Invalid maps are logged with an
+actionable warning and skipped; a bad map file never crashes the server.
+
+
+## File format
+
+A custom map is a UTF-8 JSON file whose name ends in `.map.json`. The base
+
+[...digest truncated by CodeLens...]
+</code></pre>
+<h2>Redocumentation Obligations</h2>
+<ul>
+<li>Preserve this source document’s claims in a generated feature, design, architecture, gateway, testplan, or invariant record before treating the corpus as a full semantic replacement for the original docs tree.</li>
+<li>Reconcile any conflict between this digest and direct source-code evidence through the source-truth audit, not by repeating doc-only claims as implemented behavior.</li>
+</ul>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">doc/Custom-Maps.md</code></li>
+</ul>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="56.5"/>
+        </svg>
+        <div class="ring-num">0.75</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

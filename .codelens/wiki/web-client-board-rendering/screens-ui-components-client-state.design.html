@@ -1,0 +1,356 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Screens, UI Components &amp; Client State · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../web-client-board-rendering/web-client-board-rendering.arch.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../web-client-board-rendering/board-geometry-svg-rendering.design.html"><span class="nm">Board Geometry &amp; SVG Rendering</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/custom-map-editor.design.html"><span class="nm">Custom Map Editor</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../web-client-board-rendering/screens-ui-components-client-state.design.html"><span class="nm">Screens, UI Components &amp; Client State</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/server-protocol-websocket-connectivity.design.html"><span class="nm">Server Protocol &amp; WebSocket Connectivity</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.api-boundary.html"><span class="nm">Web Client &amp; Board Rendering API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.gateway.html"><span class="nm">Web Client &amp; Board Rendering Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.testplan.html"><span class="nm">Web Client &amp; Board Rendering Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Web Client &amp; Board Rendering</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:65%"></i></span>
+      <span class="conf-val">0.65</span></span></div>
+        <h1 class="doc-title">Screens, UI Components &amp; Client State</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Screens, UI Components &amp; Client State</h1>
+<h2>Overview</h2>
+<p>Inbound protocol messages decoded by the net layer’s GameConnection are dispatched into useGameStore, whose pure synchronous reducers fold them into connection status, the lobby list, registries, and the joined CurrentGame room (board, pieces, per-seat PlayerViews, inventory, trade and robber prompts, and Cities &amp; Knights counters). React screens subscribe to these stores and render from them. In the outbound direction, UI interactions invoke action senders (playDevCard, pickMonopoly, playYearOfPlenty, ckKnightRequest) that build SOCMessage requests and write them back to the server through the same connection. Presentation concerns flow separately: useSettingsStore derives theme/color-blind/font-scale attributes and pushes them onto the DOM via applySettingsToDom, while useUiStore tracks only top-level navigation, so in-game state churn does not re-render the shell.</p>
+<ul>
+<li><a class="inv-cite" href="../invariants/INV-CL-005.invariant.html">INV-CL-005</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-006.invariant.html">INV-CL-006</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-007.invariant.html">INV-CL-007</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-008.invariant.html">INV-CL-008</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-009.invariant.html">INV-CL-009</a></li>
+<li><a class="inv-cite" href="../invariants/INV-CL-010.invariant.html">INV-CL-010</a></li>
+</ul>
+<h2>Components</h2>
+<ul>
+<li><strong>useGameStore (gameStore.ts)</strong> (referenced; defined externally): Single source of client-side game state: connection lifecycle status, server version, chat channels, the lobby game list, option/scenario registries, and the joined CurrentGame room (board, pieces, per-seat PlayerViews, dev-card inventory, trade offers, discard/robber prompts, and Cities &amp; Knights state). Exposes pure synchronous reducers plus action senders that emit protocol messages.</li>
+<li><strong>Action senders (playDevCard / pickMonopoly / playYearOfPlenty / ckKnightRequest)</strong> (referenced; defined externally): Translate UI intent into SOCMessage requests over the GameConnection. Each guards on the live connection and currentGame; ckKnightRequest additionally requires a seated player (cg.mySeat &gt;= 0) before sending its SOCSimpleRequest.</li>
+<li><strong>View reducers (applyElementAction / applyElementToView / deriveVp / updateView)</strong> (referenced; defined externally): Fold server-authoritative element/view updates into per-seat PlayerView records immutably — updateView replaces only the changed seat object, applyElementAction applies SET/GAIN/LOSE with a floor of 0, and deriveVp recomputes victory points from views and placed pieces.</li>
+<li><strong>useSettingsStore (settingsStore.ts)</strong> (referenced; defined externally): Holds presentation preferences (theme mode, color-blind mode, render quality, font scale) and derives the concrete DOM presentation via resolveTheme, colorBlindAttr, clampFontScale, and applySettingsToDom.</li>
+<li><strong>useUiStore (uiStore.ts)</strong> (referenced; defined externally): Minimal UI-navigation store holding the top-level AppView (‘lobby’ | ‘mapEditor’) and the Settings panel open/closed flag, kept deliberately separate from game/connection state.</li>
+<li><strong>Components barrel (index.ts)</strong> (referenced; defined externally): Re-exports the shared design-system primitives (Button, Panel, Dialog/Modal, Spinner, ToastProvider/useToast, AppFrame) and their prop types as a single import surface for screens.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>GameConnection (net layer)</strong> (bidirectional) — via import of GameConnection/ConnectionState from ‘…/net/GameConnection’; connectStore() wires inbound messages to reducers and senders write requests out (evidence: web/src/store/gameStore.ts import { ConnectionState, DEFAULT_HOST, DEFAULT_PORT, GameConnection } from ‘…/net/GameConnection’)</li>
+<li><strong>Protocol message types (web/src/protocol)</strong> (bidirectional) — via import of SOCMessage subclasses and enums used to decode inbound and build outbound requests (evidence: web/src/store/gameStore.ts import { … SOCPlayDevCardRequest, SOCSimpleRequest, … } from ‘…/protocol’)</li>
+<li><strong>Board model (web/src/board)</strong> (inbound) — via import of boardFromLayout2 and board types to decode SOCBoardLayout2 into the renderer’s BoardModel (evidence: web/src/store/gameStore.ts import { boardFromLayout2 } from ‘…/board/boardModel’)</li>
+<li><strong>Player view types (web/src/store/types)</strong> (outbound) — via import of PlayerView/ResourceCounts/makePlayerView and colorForSeat used by the view reducers (evidence: web/src/store/gameStore.ts import { PlayerView, makePlayerView, colorForSeat } from ‘./types’)</li>
+<li><strong>Sound utility (web/src/util/sound)</strong> (outbound) — via settingsStore import for audio feedback tied to settings (evidence: diagram_dependency: web_src_store_settingsStore_ts imports util/sound.ts)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Split client state across three independent Zustand stores rather than one</strong>: uiStore.ts is kept separate from the game/connection store ‘so that in-game state churn doesn’t re-render the shell and vice-versa’ (uiStore.ts module doc). Settings (presentation) and UI navigation change on a different cadence than per-message game state, so isolating them bounds React re-render scope.</li>
+<li><strong>Action senders early-return instead of optimistically mutating local state</strong>: The server is authoritative and clients hold only partial state, so playDevCard/pickMonopoly/etc. return early when there is no live connection or currentGame, and ckKnightRequest also returns when cg.mySeat &lt; 0. Senders emit a request and let the server’s reply drive the reducers, avoiding divergent local truth.</li>
+<li><strong>Reducers are pure and immutable, with one changed object per update</strong>: updateView returns the same array reference on a no-op and a single new view object for the changed seat (updateView doc), and reducers carry no network side effects — connectStore() wires the GameConnection to them. This keeps state transitions referentially transparent so React/zustand can diff cheaply.</li>
+<li><strong>Settings derive DOM presentation through dedicated pure helpers</strong>: resolveTheme, colorBlindAttr, clampFontScale, and applySettingsToDom separate stored preference values from their DOM projection, so the same store value maps deterministically to document attributes (theme, color-blind data attribute, clamped font scale).</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[UNVERIFIED]</strong> Action senders MUST NOT emit a protocol request when there is no live connection or current game — web/src/store/gameStore.ts::playDevCard (early return when conn === null || cg === null); same guard in pickMonopoly (cross-document reconciliation: not verified against <code>web/src/store/gameStore.ts</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> A C&amp;K knight request MUST be sent only when the local client is seated (mySeat &gt;= 0) — web/src/store/gameStore.ts::ckKnightRequest (early return when cg.mySeat &lt; 0) (cross-document reconciliation: not verified against <code>web/src/store/gameStore.ts</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[HARD]</strong> Element SET/GAIN/LOSE application MUST clamp the resulting value at 0 — web/src/store/gameStore.ts::applyElementAction (doc: ‘clamping at 0’)</li>
+<li><strong>[SOFT]</strong> The rolling game log SHOULD be capped so it does not grow without bound — web/src/store/gameStore.ts const GAME_LOG_MAX = 200</li>
+<li><strong>[SOFT]</strong> Structured trade activity SHOULD be capped to the recent decisions shown in the sidebar — web/src/store/gameStore.ts const TRADE_ACTIVITY_MAX = 12</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>performance</strong> — Top-level navigation state is isolated from game state so in-game message churn does not trigger shell/settings re-renders — web/src/store/uiStore.ts (UiStoreState module doc)</li>
+<li><strong>reliability</strong> — Reducers are synchronous and pure with no network side effects; the GameConnection is wired to them in connectStore(), keeping the server authoritative — web/src/store/gameStore.ts (GameStoreState doc; connectStore)</li>
+<li><strong>reliability</strong> — Unbounded server-driven collections are capped (game log at 200 entries, trade activity at 12) to prevent unbounded memory growth — web/src/store/gameStore.ts GAME_LOG_MAX / TRADE_ACTIVITY_MAX</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Shows the connection + seated guard that keeps the partial-state client from sending requests the authoritative server would reject.</em>
+<em>Source: <code>web/src/store/gameStore.ts::ckKnightRequest</code></em></p>
+<pre><code>function ckKnightRequest(reqType: number): void {
+  const conn = connection;
+  const cg = useGameStore.getState().currentGame;
+  if (conn === null || cg === null || cg.mySeat &lt; 0) {
+    return; // &lt;--- Early return: not seated ---
+</code></pre>
+<p><em>Illustrates derived read-only predicates computed from server-supplied state rather than tracked separately.</em>
+<em>Source: <code>web/src/store/gameStore.ts::isGameStarted</code></em></p>
+<pre><code>export function isGameStarted(cg: CurrentGame | null): boolean {
+  return cg !== null &amp;&amp; cg.gameState &gt;= GAME_STATE_MIN_STARTED;
+}
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class UiStoreState {
+        <<interface>>
+    }
+    class MockGlobalWS {
+        +static instances: MockGlobalWS[] = []
+        +sent: string[] = []
+        +readyState = 1
+        +onopen: ((ev: unknown) => void) | null = null
+        +onclose: ((ev: unknown) => void) | null = null
+        +onerror: ((ev: unknown) => void) | null = null
+        +onmessage: ((ev:
+        +constructor(readonly url: string)
+        +send(data: string): void
+        +close(): void
+        +open(): void
+        +receive(raw: string): void
+        +drop(): void
+    }
+    class SettingsState {
+        <<interface>>
+    }
+    class EditorHistory {
+        <<interface>>
+    }
+    class Highlights {
+        <<interface>>
+    }
+    class MaritimeOption {
+        <<interface>>
+    }
+    class PlayableCard {
+        <<interface>>
+    }
+    class CKBarbarianAttack {
+        <<interface>>
+    }
+    class CurrentGame {
+        <<interface>>
+    }
+    class DevCardInventory {
+        <<interface>>
+    }
+    class DiceGainEvent {
+        <<interface>>
+    }
+    class DiceRoll {
+        <<interface>>
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    web_src_components_index_ts["index.ts"]
+    web_src_store_gameStore_ts["gameStore.ts"]
+    web_src_store_settingsStore_ts["settingsStore.ts"]
+    web_src_store_uiStore_ts["uiStore.ts"]
+
+
+    ext_web_src_store____board_boardModel_ts["boardModel.ts"]:::default
+    web_src_store_gameStore_ts -.->|"imports"| ext_web_src_store____board_boardModel_ts
+    ext_web_src_store____board_types_ts["types.ts"]:::default
+    web_src_store_gameStore_ts -.->|"imports"| ext_web_src_store____board_types_ts
+    ext_web_src_store____net_GameConnection_ts["GameConnection.ts"]:::default
+    web_src_store_gameStore_ts -.->|"imports"| ext_web_src_store____net_GameConnection_ts
+    ext_web_src_store____protocol_index_ts["index.ts"]:::default
+    web_src_store_gameStore_ts -.->|"imports"| ext_web_src_store____protocol_index_ts
+    ext_web_src_store____util_sound_ts["sound.ts"]:::default
+    web_src_store_settingsStore_ts -.->|"imports"| ext_web_src_store____util_sound_ts
+    ext_web_src_store_types_ts["types.ts"]:::default
+    web_src_store_gameStore_ts -.->|"imports"| ext_web_src_store_types_ts
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Client game state store and action senders</code></li>
+<li><code class="code-ref" title="source file in your repository">Play dev card action sender (early-returns when not in a game)</code></li>
+<li><code class="code-ref" title="source file in your repository">C&amp;K knight request (requires seated, mySeat &gt;= 0)</code></li>
+<li><code class="code-ref" title="source file in your repository">Element SET/GAIN/LOSE applier (clamps at 0)</code></li>
+<li><code class="code-ref" title="source file in your repository">Immutable per-seat view reducer</code></li>
+<li><code class="code-ref" title="source file in your repository">Immutable single-seat view updater</code></li>
+<li><code class="code-ref" title="source file in your repository">Client settings store with DOM application</code></li>
+<li><code class="code-ref" title="source file in your repository">Settings theme resolver</code></li>
+<li><code class="code-ref" title="source file in your repository">Top-level UI view state</code></li>
+<li><code class="code-ref" title="source file in your repository">Design-system component barrel</code></li>
+<li><code class="code-ref" title="source file in your repository">Frontend dependency surface (zustand/react)</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">screens-ui-components-client-state.feature.md</span>
+Scope architecture: <a href="web-client-board-rendering.arch.html">web-client-board-rendering.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Client game state store and action senders</td>
+<td>gameStore — Zustand store for connection + lobby state.</td>
+<td>web/src/store/gameStore.ts:1123-2247</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Play dev card action sender (early-returns when not in a game)</td>
+<td>/** Internal: send a SOCPlayDevCardRequest for the given card type. */</td>
+<td>web/src/store/gameStore.ts:3557-3564</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: C&amp;K knight request (requires seated, mySeat &gt;= 0)</td>
+<td>/** Internal: send a C&amp;K knight SOCSimpleRequest with our seat (values 0,0). */</td>
+<td>web/src/store/gameStore.ts:3717-3724</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Element SET/GAIN/LOSE applier (clamps at 0)</td>
+<td>/** Apply a SET/GAIN/LOSE action to a current value, clamping at 0. */</td>
+<td>web/src/store/gameStore.ts:818-829</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Immutable per-seat view reducer</td>
+<td>gameStore — Zustand store for connection + lobby state.</td>
+<td>web/src/store/gameStore.ts:843-909</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Immutable single-seat view updater</td>
+<td>gameStore — Zustand store for connection + lobby state.</td>
+<td>web/src/store/gameStore.ts:2497-2508</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Client settings store with DOM application</td>
+<td></td>
+<td>web/src/store/settingsStore.ts:119-146</td>
+<td style="text-align:right">0.64</td>
+</tr>
+<tr>
+<td>Source Linkage: Settings theme resolver</td>
+<td></td>
+<td>web/src/store/settingsStore.ts:85-95</td>
+<td style="text-align:right">0.64</td>
+</tr>
+<tr>
+<td>Source Linkage: Top-level UI view state</td>
+<td>Top-level app views that sit alongside the connection/game flow. */</td>
+<td>web/src/store/uiStore.ts:12-20</td>
+<td style="text-align:right">0.40</td>
+</tr>
+<tr>
+<td>Source Linkage: Design-system component barrel</td>
+<td>Design-system primitives barrel. Import from ‘…/components’ for convenience.</td>
+<td>web/src/components/index.ts</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Frontend dependency surface (zustand/react)</td>
+<td></td>
+<td>web/package.json</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a>, <a href="../web-protocol-map-editor/web-protocol-map-editor.arch.html">Web Protocol &amp; Map Editor</a></p>
+<h2>Contract Gaps Detected</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Declared Field</th>
+<th>Accepting Function</th>
+<th>Gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>web/src/store/gameStore.ts</code></td>
+<td><code>CurrentGame.gameState</code></td>
+<td><code>applyRobberyResultToViews(cg: CurrentGame)</code></td>
+<td>No same-file read of <code>cg.gameState</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/store/gameStore.ts</code></td>
+<td><code>CurrentGame.mySeat</code></td>
+<td><code>seatLabel(cg: CurrentGame)</code></td>
+<td>No same-file read of <code>cg.mySeat</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/store/gameStore.ts</code></td>
+<td><code>CurrentGame.gameState</code></td>
+<td><code>seatLabel(cg: CurrentGame)</code></td>
+<td>No same-file read of <code>cg.gameState</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/store/gameStore.ts</code></td>
+<td><code>CurrentGame.mySeat</code></td>
+<td><code>guardGame(cg: CurrentGame)</code></td>
+<td>No same-file read of <code>cg.mySeat</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/store/gameStore.ts</code></td>
+<td><code>CurrentGame.gameState</code></td>
+<td><code>guardGame(cg: CurrentGame)</code></td>
+<td>No same-file read of <code>cg.gameState</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/store/gameStore.ts</code></td>
+<td><code>CurrentGame.mySeat</code></td>
+<td><code>isGameStarted(cg: CurrentGame)</code></td>
+<td>No same-file read of <code>cg.mySeat</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+<tr>
+<td><code>web/src/store/gameStore.ts</code></td>
+<td><code>CurrentGame.gameState</code></td>
+<td><code>isMyTurn(cg: CurrentGame)</code></td>
+<td>No same-file read of <code>cg.gameState</code> was detected; document it as declared intent, not enforced behavior.</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="79.2"/>
+        </svg>
+        <div class="ring-num">0.65</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+      <div class="rail-card"><h4>Cited invariants</h4><div class="rail-list"><a href="../invariants/INV-CL-005.invariant.html"><span class="b">INV-CL-005</span><span>single writer prevdicetotal c…</span></a><a href="../invariants/INV-CL-006.invariant.html"><span class="b">INV-CL-006</span><span>single writer prevpiececount…</span></a><a href="../invariants/INV-CL-007.invariant.html"><span class="b">INV-CL-007</span><span>single writer prevmyturn curr…</span></a><a href="../invariants/INV-CL-008.invariant.html"><span class="b">INV-CL-008</span><span>single writer viewport scroll…</span></a><a href="../invariants/INV-CL-009.invariant.html"><span class="b">INV-CL-009</span><span>single writer viewport scroll…</span></a><a href="../invariants/INV-CL-010.invariant.html"><span class="b">INV-CL-010</span><span>single writer panref current</span></a></div></div>
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

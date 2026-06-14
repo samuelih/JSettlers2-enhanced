@@ -1,0 +1,276 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Network &amp; Game-List Client · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../desktop-swing-client/desktop-swing-client.arch.html"><span class="nm">Desktop Swing Client</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../desktop-swing-client/board-rendering-visual-themes.design.html"><span class="nm">Board Rendering &amp; Visual Themes</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/client-preferences-settings.design.html"><span class="nm">Client Preferences &amp; Settings</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.api-boundary.html"><span class="nm">Desktop Swing Client API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/in-game-player-interface.design.html"><span class="nm">In-Game Player Interface</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../desktop-swing-client/network-game-list-client.design.html"><span class="nm">Network &amp; Game-List Client</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.gateway.html"><span class="nm">Desktop Swing Client Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../desktop-swing-client/contracts/desktop-swing-client.testplan.html"><span class="nm">Desktop Swing Client Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Desktop Swing Client</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:40%"></i></span>
+      <span class="conf-val">0.40</span></span></div>
+        <h1 class="doc-title">Network &amp; Game-List Client</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Network &amp; Game-List Client</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Practice-against-robots as a first-class client mode</strong> — Per <a href="http://CLAUDE.md">CLAUDE.md</a> and doc/Readme.developer.md, the project originated as a robot/AI dissertation, so the bot subsystem is first-class; <code>SOCPlayerClient</code> reflects this by embedding a stringport practice server and robot launch path so a user can play fully offline, distinct from a thin remote-only lobby client.</li>
+<li><strong>Network/UI separation introduced in the 2.0 refactor</strong> — doc/Readme.developer.md attributes the splicing of network communication away from the Swing UI to the 2.0 refactor; this is why SOCPlayerClient holds <code>MainDisplay</code>/<code>PlayerClientListener</code> abstractions rather than driving AWT widgets directly — distinctive to this client surface, not a platform-wide statement.</li>
+</ul>
+<h2>Overview</h2>
+<p><code>SOCPlayerClient</code> is the desktop client’s network and lobby surface. At construction it resolves locale and i18n strings (<code>SOCStringManager</code>), reads persistent <code>Preferences</code>, and wires three collaborators: <code>ClientNetwork</code> (<code>net</code>) for the socket, an injected <code>MessageHandler</code> for inbound dispatch, and a <code>GameMessageSender</code> for outbound traffic. <code>connect(...)</code> hands username/password to <code>MainDisplay</code> then runs <code>net.connect</code> off the UI thread. Inbound <code>SOCMessage</code> traffic arrives at the <code>MessageHandler</code>, which mutates the partial client-side <code>games</code> map and notifies per-game <code>PlayerClientListener</code>s; the authoritative game model remains at the server. The single shared game list spans a remote/local TCP server plus an optional stringport practice server, with each <code>SOCGame.isPractice</code> flag selecting the connection. Version and <code>SOCFeatureSet</code> data captured during the handshake gate behavior such as i18n string requests and lazy scenario-info fetches.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCPlayerClient</strong>: Standalone desktop client: owns network connectivity, the shared game list, channel list, ignore list, persistent user preferences, and per-game client listeners. Holds only partial game state in its <code>games</code> Hashtable while the authoritative model lives at the server.</li>
+<li><strong>net (ClientNetwork)</strong> (referenced; defined externally): Helper field that owns TCP/stringport connectivity (remote server, locally-launched TCP server, and the stringport practiceServer); SOCPlayerClient delegates connect/putNet/putLeaveAll to it. Defined elsewhere in soc.client (not in supplied context); described as integration, not owned here.</li>
+<li><strong>messageHandler (MessageHandler)</strong> (referenced; defined externally): Injected helper that dispatches inbound SOCMessage traffic (handleVERSION, handleGAMES, handleNEWGAMEWITHOPTIONS, etc.); constructor accepts one so tests can substitute it. Definition not in supplied context.</li>
+<li><strong>gameMessageSender (GameMessageSender)</strong> (referenced; defined externally): Helper that forms and sends outbound game-action traffic to the server; constructed with the client and its clientListeners map. Definition not in supplied context.</li>
+<li><strong>mainDisplay (MainDisplay)</strong> (referenced; defined externally): Display abstraction for the lobby/game-list/channel UI; SOCPlayerClient calls it for connect, addToGameList, error panels, keeping network logic out of the AWT/Swing layer. Definition not in supplied context.</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>ClientNetwork</strong> (outbound) — via net field; net.connect / net.putNet / net.putLeaveAll / net.startPracticeGame (evidence: src/main/java/soc/client/SOCPlayerClient.java:net)</li>
+<li><strong>MessageHandler</strong> (inbound) — via messageHandler field; dispatches inbound SOCMessage handle(…) (evidence: src/main/java/soc/client/SOCPlayerClient.java:messageHandler)</li>
+<li><strong>GameMessageSender</strong> (outbound) — via gameMessageSender field constructed with clientListeners (evidence: src/main/java/soc/client/SOCPlayerClient.java:gameMessageSender)</li>
+<li><strong>MainDisplay</strong> (bidirectional) — via mainDisplay field; connect/addToGameList/showErrorPanel/channelsClosed (evidence: src/main/java/soc/client/SOCPlayerClient.java:mainDisplay)</li>
+<li><strong>soc.server.SOCServer</strong> (outbound) — via SOCServer.startupKnownOpts.put(gameopt3p) in constructor; net.connect for runtime traffic (evidence: src/main/java/soc/client/SOCPlayerClient.java::SOCPlayerClient(MessageHandler))</li>
+<li><strong>SOCStringManager</strong> (outbound) — via strings = SOCStringManager.getClientManager(cliLocale); VERSION_FOR_I18N gate (evidence: src/main/java/soc/client/SOCPlayerClient.java:strings)</li>
+<li><em><em>soc.message.</em> (SOCMessage subclasses)</em>* (bidirectional) — via import soc.message.*; SOCScenarioInfo/SOCLocalizedStrings/SOCLeaveChannel toCmd() (evidence: src/main/java/soc/client/SOCPlayerClient.java::checkGameoptsForUnknownScenario, leaveChannel)</li>
+<li><strong>SOCFeatureSet</strong> (inbound) — via sFeatures field populated from server SOCVersion handshake (evidence: src/main/java/soc/client/SOCPlayerClient.java:sFeatures)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Three coexisting server connections (remote TCP, locally-hosted TCP, stringport practice) behind one shared game list</strong>: A client may connect to at most one TCP server plus the always-local practice server; <code>SOCGame.isPractice</code> routes each game to the right connection. This lets users practice offline against robots with no network or DB while reusing the same list UI and message-handling code, rather than maintaining a separate offline client.</li>
+<li><strong>Separate network handling from the AWT/Swing display via injected helper objects</strong>: <code>net</code>, <code>messageHandler</code>, <code>gameMessageSender</code>, and <code>mainDisplay</code> are distinct collaborators so inbound/outbound traffic and the UI evolve independently; the 2.0-era refactor (doc/Readme.developer.md) drove this split. The <code>MessageHandler</code> is constructor-injected so tests/subclasses can supply their own.</li>
+<li><strong>Client keeps only partial state; server is authoritative</strong>: The <code>games</code> Hashtable is accessed from both the GUI and the network thread and is updated from server <code>SOCMessage</code> traffic rather than computed locally, avoiding client/server divergence and keeping hidden information (e.g. opponents’ cards) server-side until revealed (see <code>updateGameEndStats</code> revealing true VP scores at game end).</li>
+<li><strong>Gate i18n string requests and scenario localization on negotiated server version</strong>: <code>wantsI18nStrings</code> requests localized text only when the server meets <code>SOCStringManager.VERSION_FOR_I18N</code> (practice server always qualifies) and the locale differs from the en_US fallback, avoiding wasted requests to older servers. <code>checkGameoptsForUnknownScenario</code> further branches on whether the server version matches the client: a differing version fetches full <code>SOCScenarioInfo</code>, an equal version fetches only <code>SOCLocalizedStrings</code>.</li>
+<li><strong>Per-game version resolution treats practice games specially</strong>: <code>getServerVersion</code> returns the client’s own <code>Version.versionNumber()</code> for practice games and the remote <code>sVersion</code> otherwise, so feature-availability checks need a single accessor instead of every call site re-checking <code>isPractice</code> against two version fields.</li>
+<li><strong>Failsafe override for unjoinable games and graceful network-failure degradation</strong>: <code>gamesUnjoinableOverride</code> lets a user retry joining a game the client believed unjoinable, guarding against client/server version-recognition bugs. On network trouble, <code>shutdownFromNetwork</code> consults <code>net.putLeaveAll()</code> and keeps practice games playable when possible instead of tearing down everything.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[UNVERIFIED]</strong> The constructor MUST reject a null MessageHandler. — src/main/java/soc/client/SOCPlayerClient.java::SOCPlayerClient(MessageHandler) — throws IllegalArgumentException(“mh”) when mh == null (cross-document reconciliation: not verified against <code>src/main/java/soc/client/SOCPlayerClient.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> setMainDisplay MUST reject a null MainDisplay. — src/main/java/soc/client/SOCPlayerClient.java::setMainDisplay — throws IllegalArgumentException(“null”) (cross-document reconciliation: not verified against <code>src/main/java/soc/client/SOCPlayerClient.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> Code MUST check SOCGame.isPractice before reading sVersion/sFeatures, because a practice game’s effective version is the client’s own and those remote fields do not apply. — src/main/java/soc/client/SOCPlayerClient.java::getServerVersion and sVersion/sFeatures javadoc (cross-document reconciliation: not verified against <code>src/main/java/soc/client/SOCPlayerClient.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> checkGameoptsForUnknownScenario MUST NOT be called for practice games (it assumes the TCP server already lacks full scenario info locally). — src/main/java/soc/client/SOCPlayerClient.java::checkGameoptsForUnknownScenario javadoc (cross-document reconciliation: not verified against <code>src/main/java/soc/client/SOCPlayerClient.java</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[HARD]</strong> main MUST abort startup with a packaging error when the build version cannot be determined (versionNumber() == 0). — src/main/java/soc/client/SOCPlayerClient.java::main — early return after showErrorPanel(“Packaging error…”)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>observability</strong> — Inbound/outbound message traffic can be debug-printed when the jsettlers.debug.traffic property is set. — src/main/java/soc/client/SOCPlayerClient.java:debugTraffic (set from SOCDisplaylessPlayerClient.PROP_JSETTLERS_DEBUG_TRAFFIC)</li>
+<li><strong>reliability</strong> — On network failure the client degrades gracefully, preserving in-progress practice games when net.putLeaveAll() permits and tearing down only networked games. — src/main/java/soc/client/SOCPlayerClient.java::shutdownFromNetwork</li>
+<li><strong>error-handling</strong> — Board-graphics reload runs on the UI thread inside a try/catch(Throwable) so a redraw failure cannot crash the event loop. — src/main/java/soc/client/SOCPlayerClient.java::reloadBoardGraphics</li>
+<li><strong>reliability</strong> — Network connect attempts are dispatched via EventQueue.invokeLater to keep the blocking connect off the UI repaint path. — src/main/java/soc/client/SOCPlayerClient.java::connect</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Centralizes the practice-vs-remote version distinction so feature checks need one accessor.</em>
+<em>Source: <code>src/main/java/soc/client/SOCPlayerClient.java::getServerVersion</code></em></p>
+<pre><code>public int getServerVersion(SOCGame game)
+{
+    if (game.isPractice)
+        return Version.versionNumber();
+    else
+        return sVersion;
+}
+</code></pre>
+<p><em>Shows the version-and-locale gate that avoids requesting i18n strings from older servers or for the fallback locale.</em>
+<em>Source: <code>src/main/java/soc/client/SOCPlayerClient.java::wantsI18nStrings</code></em></p>
+<pre><code>return (isPractice || (sVersion &gt;= SOCStringManager.VERSION_FOR_I18N))
+    &amp;&amp; (cliLocale != null)
+    &amp;&amp; ! (&quot;en&quot;.equals(cliLocale.getLanguage()) &amp;&amp; &quot;US&quot;.equals(cliLocale.getCountry()));
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCPlayerClient {
+        -SOCPlayerClient()
+        +setMainDisplay()
+        +connect()
+        +public String getNickname(final boolean forPractice)
+        -MainDisplay getMainDisplay()
+        -ClientNetwork getNet()
+        -PlayerClientListener getClientListener(String gameName)
+        -Map<String, PlayerClientListener> getClientListeners()
+        -void reloadBoardGraphics()
+        -HashMap<String, Map<String, Object>> getGameReqLocalPrefs()
+        +public GameMessageSender getGameMessageSender()
+        -final MessageHandler getMessageHandler()
+        -final boolean wantsI18nStrings(final boolean isPractice)
+        -checkGameoptsForUnknownScenario()
+        -localizeGameScenarios()
+        +doesGameExist()
+        +addToGameList()
+        +updateGameEndStats()
+        +public void leaveChannel(String ch)
+        -protected boolean onIgnoreList(String name)
+        -protected void addToIgnoreList(String name)
+        -protected void removeFromIgnoreList(String name)
+        +startPracticeGame()
+        -putGameReqLocalPrefs()
+        +public int getServerVersion(SOCGame game)
+        +public void shutdownFromNetwork()
+        +public static void usage()
+        +public static void main(String[] args)
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_client_SOCPlayerClient_java["SOCPlayerClient.java"]
+
+
+    ext_src_main_java_net_nand_util_i18n_mgr_StringManager_java["StringManager.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_net_nand_util_i18n_mgr_StringManager_java
+    ext_src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java["SOCDisplaylessPlayerClient.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_baseclient_SOCDisplaylessPlayerClient_java
+    ext_src_main_java_soc_game_SOCGame_java["SOCGame.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGame_java
+    ext_src_main_java_soc_game_SOCGameOption_java["SOCGameOption.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOption_java
+    ext_src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCGameOptionSet_java
+    ext_src_main_java_soc_game_SOCPlayer_java["SOCPlayer.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCPlayer_java
+    ext_src_main_java_soc_game_SOCScenario_java["SOCScenario.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_game_SOCScenario_java
+    ext_src_main_java_soc_util_I18n_java["I18n.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_util_I18n_java
+    ext_src_main_java_soc_util_SOCFeatureSet_java["SOCFeatureSet.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    ext_src_main_java_soc_util_SOCGameList_java["SOCGameList.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_util_SOCGameList_java
+    ext_src_main_java_soc_util_SOCStringManager_java["SOCStringManager.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_util_SOCStringManager_java
+    ext_src_main_java_soc_util_Version_java["Version.java"]:::default
+    src_main_java_soc_client_SOCPlayerClient_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">SOCPlayerClient (network + game-list window)</code></li>
+<li><code class="code-ref" title="source file in your repository">Three-connection model with isPractice routing</code></li>
+<li><code class="code-ref" title="source file in your repository">Partial client-side game state map</code></li>
+<li><code class="code-ref" title="source file in your repository">Version/feature handshake support</code></li>
+<li><code class="code-ref" title="source file in your repository">Localized text resolution gated on min client/server version</code></li>
+<li><code class="code-ref" title="source file in your repository">Lazy version-aware scenario info fetch</code></li>
+<li><code class="code-ref" title="source file in your repository">Graceful network-failure degradation to practice</code></li>
+<li><code class="code-ref" title="source file in your repository">MessageHandler injection / null guard</code></li>
+<li><code class="code-ref" title="source file in your repository">Build config (Docker, web deps/ports)</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">network-game-list-client.feature.md</span>
+Scope architecture: <a href="desktop-swing-client.arch.html">desktop-swing-client.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: SOCPlayerClient (network + game-list window)</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java:526-583</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Three-connection model with isPractice routing</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java:1038-1044</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Partial client-side game state map</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java:881-902</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Version/feature handshake support</td>
+<td></td>
+<td>src/main/java/soc/util/SOCFeatureSet.java:219-224</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Localized text resolution gated on min client/server version</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java:742-747</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Lazy version-aware scenario info fetch</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java:760-778</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Graceful network-failure degradation to practice</td>
+<td></td>
+<td>src/main/java/soc/client/SOCPlayerClient.java:1056-1089</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Build config (Docker, web deps/ports)</td>
+<td>syntax=docker/dockerfile:1</td>
+<td>Dockerfile</td>
+<td style="text-align:right">0.08 (resolved, uncited)</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../game-model-rules-engine/game-model-rules-engine.arch.html">Game Model &amp; Rules Engine</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="135.7"/>
+        </svg>
+        <div class="ring-num">0.40</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

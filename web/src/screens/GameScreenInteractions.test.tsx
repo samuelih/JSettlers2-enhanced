@@ -259,6 +259,18 @@ describe('state-driven dialogs', () => {
     expect(screen.getByTestId('discard-confirm')).toBeDisabled();
   });
 
+  it('does not offer End turn while discarding', () => {
+    seedCurrentPlayer(0);
+    useGameStore.getState().setGameState(GAME, GameState.WAITING_FOR_DISCARDS);
+    useGameStore.getState().applyDiscardRequest(GAME, 2);
+    renderGame();
+    expect(screen.getByTestId('discard-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('controls-prompt')).toHaveTextContent(
+      'Resolve required discards before play continues.',
+    );
+    expect(screen.queryByTestId('end-turn')).toBeNull();
+  });
+
   it('shows the victim chooser after a CHOOSEPLAYERREQUEST', () => {
     seedCurrentPlayer(0);
     // candidate victims: seats 1 and 2
@@ -270,6 +282,15 @@ describe('state-driven dialogs', () => {
     expect(screen.getByTestId('rob-victim-1')).toBeInTheDocument();
     expect(screen.getByTestId('rob-victim-2')).toBeInTheDocument();
     expect(screen.getByTestId('rob-victim-1')).toHaveTextContent('0 cards');
+  });
+
+  it('does not offer End turn while choosing or moving the robber', () => {
+    seedCurrentPlayer(0);
+    useGameStore.getState().setGameState(GAME, GameState.WAITING_FOR_ROBBER_OR_PIRATE);
+    renderGame();
+    expect(screen.getByTestId('robber-or-pirate-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('controls-prompt')).toHaveTextContent('Choose whether to move');
+    expect(screen.queryByTestId('end-turn')).toBeNull();
   });
 });
 

@@ -1,0 +1,184 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Desktop Swing Client Gateway · ZimWiki</title>
+<link rel="stylesheet" href="../../assets/zimwiki.css">
+</head><body>
+<script src="../../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../../desktop-swing-client/desktop-swing-client.arch.html"><span class="nm">Desktop Swing Client</span><span class="tt tt-arch">arch</span></a><a class="nav-item" href="../../desktop-swing-client/board-rendering-visual-themes.design.html"><span class="nm">Board Rendering &amp; Visual Themes</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/client-preferences-settings.design.html"><span class="nm">Client Preferences &amp; Settings</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/contracts/desktop-swing-client.api-boundary.html"><span class="nm">Desktop Swing Client API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/in-game-player-interface.design.html"><span class="nm">In-Game Player Interface</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../../desktop-swing-client/network-game-list-client.design.html"><span class="nm">Network &amp; Game-List Client</span><span class="tt tt-design">design</span></a><a class="nav-item active" href="../../desktop-swing-client/contracts/desktop-swing-client.gateway.html"><span class="nm">Desktop Swing Client Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../../desktop-swing-client/contracts/desktop-swing-client.testplan.html"><span class="nm">Desktop Swing Client Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../../index.html">Overview</a> <span class="sep">/</span><a href="../_scope.html">Desktop Swing Client</a> <span class="sep">/</span><a href="_scope.html">Desktop Swing Client Contra…</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-gateway">GATEWAY</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:85%"></i></span>
+      <span class="conf-val">0.85</span></span></div>
+        <h1 class="doc-title">Desktop Swing Client Gateway</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Desktop Swing Client Gateway</h1>
+<blockquote>
+<p>Capability Index — public-API contract for the <code>Desktop Swing Client</code> epic. Cross-scope callers depend on the symbols listed below.</p>
+</blockquote>
+<h2>Rationale</h2>
+<p>Bounded public-capability contract for cross-scope callers — see <a href="../../documentation-conventions.html#gateway-rationale">documentation conventions</a>.</p>
+<h2>Capability Index</h2>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>File:Symbol</th>
+<th>Guarantee</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/client/UserPreferences.java:464</code> <code>UserPreferences.PreferenceDescriptor.Type</code></td>
+<td>Exports the Type enum contract.</td>
+</tr>
+<tr>
+<td><code>listener</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/client/stats/SOCGameStatistics.java:43</code> <code>SOCGameStatistics.Listener</code></td>
+<td>Exports the Listener type contract.</td>
+</tr>
+<tr>
+<td><code>listener-registration</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/client/stats/SOCGameStatistics.java:52</code> <code>SOCGameStatistics.ListenerRegistration</code></td>
+<td>Exports the ListenerRegistration type contract.</td>
+</tr>
+<tr>
+<td><code>action-type</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/game/GameAction.java:316</code> <code>GameAction.ActionType</code></td>
+<td>Exports the ActionType enum contract.</td>
+</tr>
+<tr>
+<td><code>effect-type</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/game/GameAction.java:651</code> <code>GameAction.EffectType</code></td>
+<td>Exports the EffectType enum contract.</td>
+</tr>
+<tr>
+<td><code>seat-lock-state</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/game/SOCGame.java:11804</code> <code>SOCGame.SeatLockState</code></td>
+<td>Exports the SeatLockState enum contract.</td>
+</tr>
+<tr>
+<td><code>s-o-c-game-event</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/game/SOCGameEvent.java:40</code> <code>SOCGameEvent</code></td>
+<td>Exports the SOCGameEvent enum contract.</td>
+</tr>
+<tr>
+<td><code>s-o-c-player-event</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/game/SOCPlayerEvent.java:40</code> <code>SOCPlayerEvent</code></td>
+<td>Exports the SOCPlayerEvent enum contract.</td>
+</tr>
+<tr>
+<td><code>g-e-type</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/message/SOCGameElements.java:58</code> <code>SOCGameElements.GEType</code></td>
+<td>Exports the GEType enum contract.</td>
+</tr>
+<tr>
+<td><code>p-e-type</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/message/SOCPlayerElement.java:116</code> <code>SOCPlayerElement.PEType</code></td>
+<td>Exports the PEType enum contract.</td>
+</tr>
+<tr>
+<td><code>option-type-name</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/game/SOCGameOption.java:1946</code> <code>SOCGameOption.optionTypeName</code></td>
+<td>For user output, the string name of the option type’s constant.</td>
+</tr>
+<tr>
+<td><code>s-o-c-displayless-player-client</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:97</code> <code>SOCDisplaylessPlayerClient</code></td>
+<td>“Headless” standalone client for connecting to the SOCServer.</td>
+</tr>
+<tr>
+<td><code>s-o-c-displayless-player-client</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:263</code> <code>SOCDisplaylessPlayerClient.SOCDisplaylessPlayerClient</code></td>
+<td>Constructor to set up using this server connect info.</td>
+</tr>
+<tr>
+<td><code>get-nickname</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:279</code> <code>SOCDisplaylessPlayerClient.getNickname</code></td>
+<td>@return the nickname of this user</td>
+</tr>
+<tr>
+<td><code>get-game</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:290</code> <code>SOCDisplaylessPlayerClient.getGame</code></td>
+<td>Get a game that we’ve joined in this client.</td>
+</tr>
+<tr>
+<td><code>run</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:301</code> <code>SOCDisplaylessPlayerClient.run</code></td>
+<td>Continuously read from the net in a separate thread.</td>
+</tr>
+<tr>
+<td><code>resend</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:347</code> <code>SOCDisplaylessPlayerClient.resend</code></td>
+<td>resend the last message</td>
+</tr>
+<tr>
+<td><code>put</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:360</code> <code>SOCDisplaylessPlayerClient.put</code></td>
+<td>write a message to the net @param s  the message @return true if the message was sent, false if not @throws IllegalArgumentException if {@code s} is {@code null}</td>
+</tr>
+<tr>
+<td><code>handle-g-a-m-e-s-t-a-t-s</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:1326</code> <code>SOCDisplaylessPlayerClient.handleGAMESTATS</code></td>
+<td>Handle the “game stats” message: static version to share with SOCPlayerClient.</td>
+</tr>
+<tr>
+<td><code>handle-d-i-c-e-r-e-s-u-l-t-r-e-s-o-u-r-c-e-s</code></td>
+<td><code class="code-ref" title="source file in your repository">src/main/java/soc/baseclient/SOCDisplaylessPlayerClient.java:1388</code> <code>SOCDisplaylessPlayerClient.handleDICERESULTRESOURCES</code></td>
+<td>Handle all players’ dice roll result resources: static version to share with SOCPlayerClient.</td>
+</tr>
+<tr>
+<td><code>_overflow</code></td>
+<td>—</td>
+<td>3396 additional documented exports omitted to keep this gateway within its token budget; the omitted symbols remain in the  and should be promoted into narrower gateways only when they become cross-scope contracts.</td>
+</tr>
+</tbody>
+</table>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="33.9"/>
+        </svg>
+        <div class="ring-num">0.85</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../../assets/zimwiki.js"></script>
+</body></html>

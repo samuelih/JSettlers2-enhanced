@@ -1384,4 +1384,23 @@ public class TestToCmdToStringParse
         assertEquals("", li.get(0));
     }
 
+    /** Tests malformed parser inputs from audit findings don't throw low-level runtime exceptions. */
+    @Test
+    public void testMalformedParserInputs()
+    {
+        assertNull("SOCBoardLayout2 missing bef param",
+            SOCBoardLayout2.stripAttribNames("game=ga"));
+
+        assertNull("SOCPlayerElements empty element",
+            SOCPlayerElements.stripAttribsToList("game=ga|playerNum=2|actionType=GAIN|e1=1,,e3=2"));
+
+        assertNull("SOCGameElements empty element",
+            SOCGameElements.stripAttribsToList("game=ga|e1=1,,e3=2"));
+
+        assertNull("SOCServerPing bad int",
+            SOCServerPing.parseDataStr("notAnInt"));
+        assertNull("SOCServerPing bad int via SOCMessage.toMsg",
+            SOCMessage.toMsg("9999|notAnInt"));
+    }
+
 }

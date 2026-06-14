@@ -11,6 +11,7 @@ export type {
 export {
   HEX_TYPE_NAMES,
   PORT_TYPE_NAMES,
+  CANONICAL_PORT_TYPE_NAMES,
   FACING_NAMES,
   SUPPORTED_PLAYER_COUNTS,
   DEFAULT_BOARD_HEIGHT,
@@ -30,6 +31,7 @@ export {
   fromRaw,
   mapWithInferredLandAreas,
   mapWithCanonicalLandAreas,
+  canonicalPortTypeName,
   serializeMapJson,
   emptyMap,
 } from './mapSchema';

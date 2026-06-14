@@ -29,6 +29,7 @@ import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.TimerTask;
 
 import javax.swing.JButton;
@@ -36,6 +37,7 @@ import javax.swing.JLabel;
 
 import soc.game.SOCGame;
 import soc.game.SOCPlayer;
+import soc.game.SOCResourceConstants;
 import soc.game.SOCResourceSet;
 import soc.game.SOCTradeOffer;
 import soc.util.SOCStringManager;
@@ -48,6 +50,7 @@ import soc.util.SOCStringManager;
  * <LI> Text above the trading squares (1 or 2 lines)
  * <LI> A 2-row grid of trading squares, with labels to the left of each row such as "They Get",
  *      updated by {@link #setTradeOffer(SOCTradeOffer)} or {@link #setTradeResources(SOCResourceSet, SOCResourceSet)}
+ * <LI> A short summary line below the trading squares
  * <LI> 3 buttons, appearing below the trading squares, or to their right if no room below ("compact mode")
  * <LI> Optional text below the trading squares, showing the Bot Offer Auto-Reject Countdown timer text,
  *      for offers made to client player if preference {@link SOCPlayerInterface#getBotTradeRejectSec()} is set
@@ -228,6 +231,18 @@ public class TradePanel extends ShadowedBox
     private final JLabel lineBelow;
 
     /**
+     * Summary of the resources currently shown in {@link #squares}; hidden when empty.
+     * @since 2.7.00
+     */
+    private final JLabel lineSummary;
+
+    /**
+     * Comparison of a counteroffer against the original offer; hidden when not applicable.
+     * @since 2.7.00
+     */
+    private final JLabel lineCompare;
+
+    /**
      * Buttons with user-specified text.
      * One ({@link #buttonVis}) or all ({@link #buttonRowVis}) can be hidden.
      * When clicked by user, callback methods are called.
@@ -324,8 +339,17 @@ public class TradePanel extends ShadowedBox
 
         line1 = new JLabel();
         line2 = (hasLine2) ? new JLabel() : null;
+        lineSummary = new JLabel();
+        lineCompare = new JLabel();
         lineBelow = new JLabel();
         squares = new SquaresPanel(true, displayScale);
+        squares.setValueChangeListener(new SquaresPanel.ValueChangeListener()
+        {
+            public void squareValuesChanged(SquaresPanel panel)
+            {
+                updateTradeSummaryFromSquares();
+            }
+        });
         sqLabRow1 = new JLabel(sqLabelTexts[0]);
         sqLabRow2 = new JLabel(sqLabelTexts[1]);
         add(sqLabRow1);
@@ -344,6 +368,10 @@ public class TradePanel extends ShadowedBox
         add(line1);
         if (hasLine2)
             add(line2);
+        lineSummary.setVisible(false);
+        add(lineSummary);
+        lineCompare.setVisible(false);
+        add(lineCompare);
         lineBelow.setVisible(false);
         add(lineBelow);
 
@@ -429,8 +457,152 @@ public class TradePanel extends ShadowedBox
     public void setTradeResources(SOCResourceSet line1, SOCResourceSet line2)
     {
         squares.setValues(line1, line2);
+        updateTradeSummary(line1, line2);
         if (panelIsCounterOffer)
             updateOfferButtons();
+    }
+
+    /**
+     * Update {@link #lineSummary} from the current {@link #squares} values.
+     * @since 2.7.00
+     */
+    private void updateTradeSummaryFromSquares()
+    {
+        final SOCResourceSet[] res = getTradeResources();
+        updateTradeSummary(res[0], res[1]);
+        if (panelIsCounterOffer)
+            updateOfferButtons();
+    }
+
+    /**
+     * Update {@link #lineSummary} with the current trade resources.
+     * @param line1Set Resources in row 1, or {@code null}
+     * @param line2Set Resources in row 2, or {@code null}
+     * @since 2.7.00
+     */
+    private void updateTradeSummary(final SOCResourceSet line1Set, final SOCResourceSet line2Set)
+    {
+        final boolean line1Empty = (line1Set == null) || line1Set.isEmpty(),
+                      line2Empty = (line2Set == null) || line2Set.isEmpty();
+        if (line1Empty && line2Empty)
+        {
+            setTradeSummaryText(null);
+            setTradeCompareText(null);
+            return;  // <--- Early return: No resources to summarize ---
+        }
+
+        final String key = panelIsCounterOffer
+            ? "trade.summary.you_give_get"
+            : "trade.summary.they_give_get";
+        setTradeSummaryText(strings.getSpecial
+            (hpan.getGame(), key,
+             (line1Empty) ? SOCResourceSet.EMPTY_SET : line1Set,
+             (line2Empty) ? SOCResourceSet.EMPTY_SET : line2Set));
+        updateTradeComparison
+            ((line1Empty) ? SOCResourceSet.EMPTY_SET : line1Set,
+             (line2Empty) ? SOCResourceSet.EMPTY_SET : line2Set);
+    }
+
+    /**
+     * Set or clear {@link #lineSummary}'s text and tooltip.
+     * @param text Summary text, or {@code null} or empty to hide the summary
+     * @since 2.7.00
+     */
+    private void setTradeSummaryText(final String text)
+    {
+        final boolean hasText = (text != null) && (text.length() != 0);
+
+        lineSummary.setText(hasText ? text : "");
+        lineSummary.setToolTipText(hasText ? text : null);
+        lineSummary.setVisible(hasText);
+    }
+
+    /**
+     * Update {@link #lineCompare} for editable counteroffers.
+     * @param counterGive Resources the client gives in the counteroffer
+     * @param counterGet  Resources the client gets in the counteroffer
+     * @since 2.7.00
+     */
+    private void updateTradeComparison(final SOCResourceSet counterGive, final SOCResourceSet counterGet)
+    {
+        if ((! panelIsCounterOffer) || (panelPairOtherMember == null))
+        {
+            setTradeCompareText(null);
+            return;  // <--- Early return: Comparisons are only for counteroffers ---
+        }
+
+        final SOCResourceSet[] offerRows = panelPairOtherMember.getTradeResources();
+        final SOCResourceSet offerGive = offerRows[1],  // from client's point of view
+                             offerGet  = offerRows[0];
+        if (offerGive.isEmpty() && offerGet.isEmpty())
+        {
+            setTradeCompareText(null);
+            return;  // <--- Early return: No original offer to compare ---
+        }
+
+        final ArrayList<String> parts = new ArrayList<String>(4);
+        addTradeComparisonPart
+            (parts, "trade.compare.give_more", resourceDifference(counterGive, offerGive));
+        addTradeComparisonPart
+            (parts, "trade.compare.give_less", resourceDifference(offerGive, counterGive));
+        addTradeComparisonPart
+            (parts, "trade.compare.get_more", resourceDifference(counterGet, offerGet));
+        addTradeComparisonPart
+            (parts, "trade.compare.get_less", resourceDifference(offerGet, counterGet));
+
+        setTradeCompareText
+            (parts.isEmpty()
+             ? strings.get("trade.compare.same")
+             : strings.getSpecial(hpan.getGame(), "trade.compare.changed", parts));
+    }
+
+    /**
+     * Add one non-empty comparison part to a localized list.
+     * @param parts List of localized comparison fragments
+     * @param key String key for this fragment
+     * @param diff Difference resource set
+     * @since 2.7.00
+     */
+    private void addTradeComparisonPart
+        (final ArrayList<String> parts, final String key, final SOCResourceSet diff)
+    {
+        if (! diff.isEmpty())
+            parts.add(strings.getSpecial(hpan.getGame(), key, diff));
+    }
+
+    /**
+     * Difference between two resource sets, clamped at 0 for each resource type.
+     * @param more Resource set to subtract from
+     * @param less Resource set to subtract
+     * @return Positive per-resource difference
+     * @since 2.7.00
+     */
+    private static SOCResourceSet resourceDifference(final SOCResourceSet more, final SOCResourceSet less)
+    {
+        final int[] diff = new int[5];
+
+        for (int res = SOCResourceConstants.CLAY; res <= SOCResourceConstants.WOOD; ++res)
+        {
+            final int amount = more.getAmount(res) - less.getAmount(res);
+            if (amount > 0)
+                diff[res - 1] = amount;
+        }
+
+        return new SOCResourceSet(diff);
+    }
+
+    /**
+     * Set or clear {@link #lineCompare}'s text and tooltip.
+     * @param text Comparison text, or {@code null} or empty to hide the comparison
+     * @since 2.7.00
+     */
+    private void setTradeCompareText(final String text)
+    {
+        final boolean hasText = (text != null) && (text.length() != 0);
+
+        lineCompare.setText(hasText ? text : "");
+        lineCompare.setToolTipText(hasText ? text : null);
+        lineCompare.setVisible(hasText);
     }
 
     /**
@@ -730,6 +902,10 @@ public class TradePanel extends ShadowedBox
             ++nLines;
         h = (lineHeight + lineSpace) * nLines + lineSpace
             + (SquaresPanel.HEIGHT_PX + SHADOW_SIZE) * displayScale + lineSpace;
+        if (lineSummary.getText().length() > 0)
+            h += lineHeight + lineSpace;
+        if (lineCompare.getText().length() > 0)
+            h += lineHeight + lineSpace;
         if ((! ignoreButtonRow) && buttonRowVis)
             h += (BUTTON_HEIGHT + 2) * displayScale + lineSpace;
         if (! hasLineBelow)
@@ -836,6 +1012,9 @@ public class TradePanel extends ShadowedBox
         sqLabRow2.setBounds(inset, y, squaresLabelW, lineHeight);
         y += (ColorSquareLarger.HEIGHT_L * displayScale) + lineSpace;
 
+        final boolean hasSummary = (lineSummary.getText().length() > 0);
+        final boolean hasCompare = (lineCompare.getText().length() > 0);
+
         // - 3 buttons at right position, etc, based on compact mode.
         //   Might be hidden (offer panel while showing counteroffer).
         if (compactMode)
@@ -859,9 +1038,31 @@ public class TradePanel extends ShadowedBox
             // or the bottom of the stacked button column, so it never overlaps the buttons.
             if (buttonY > y)
                 y = buttonY;
+
+            if (hasSummary)
+            {
+                lineSummary.setBounds(inset, y, dim.width - (2 * inset), lineHeight);
+                y += lineHeight + lineSpace;
+            }
+            if (hasCompare)
+            {
+                lineCompare.setBounds(inset, y, dim.width - (2 * inset), lineHeight);
+                y += lineHeight + lineSpace;
+            }
         }
         else if (buttonRowVis)
         {
+            if (hasSummary)
+            {
+                lineSummary.setBounds(inset, y, dim.width - (2 * inset), lineHeight);
+                y += lineHeight + lineSpace;
+            }
+            if (hasCompare)
+            {
+                lineCompare.setBounds(inset, y, dim.width - (2 * inset), lineHeight);
+                y += lineHeight + lineSpace;
+            }
+
             // Buttons below offer squares and their labels, centered across width
             int buttonX =
                 (dim.width - (SHADOW_SIZE * displayScale) - ((3 * BUTTON_WIDTH + 10) * displayScale)) / 2;
@@ -878,6 +1079,17 @@ public class TradePanel extends ShadowedBox
             // Advance past the button row plus a blank gap, so the countdown text
             // below always sits on its own line and never overlaps the buttons.
             y += (BUTTON_HEIGHT * displayScale) + (2 * lineSpace);
+        } else if (hasSummary) {
+            lineSummary.setBounds(inset, y, dim.width - (2 * inset), lineHeight);
+            y += lineHeight + lineSpace;
+            if (hasCompare)
+            {
+                lineCompare.setBounds(inset, y, dim.width - (2 * inset), lineHeight);
+                y += lineHeight + lineSpace;
+            }
+        } else if (hasCompare) {
+            lineCompare.setBounds(inset, y, dim.width - (2 * inset), lineHeight);
+            y += lineHeight + lineSpace;
         }
 
         // - countdown / text below: on its own line beneath the button row

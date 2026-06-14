@@ -58,6 +58,27 @@ export const PORT_TYPE_NAMES: readonly PortTypeName[] = [
   'wood',
 ];
 
+/** Canonical port-type choices for editor controls; excludes the import-only "3:1" alias. */
+export const CANONICAL_PORT_TYPE_NAMES: readonly PortTypeName[] = [
+  'misc',
+  'clay',
+  'ore',
+  'sheep',
+  'wheat',
+  'wood',
+];
+
+/** Normalize accepted aliases to the canonical value new editor changes should write. */
+export function canonicalPortTypeName(type: string): PortTypeName {
+  const normalized = (type ?? '').toLowerCase();
+  if (normalized === '3:1') {
+    return 'misc';
+  }
+  return (CANONICAL_PORT_TYPE_NAMES as readonly string[]).includes(normalized)
+    ? (normalized as PortTypeName)
+    : 'misc';
+}
+
 /** Port facing-direction names accepted by the Java loader. */
 export type FacingName = 'NE' | 'E' | 'SE' | 'SW' | 'W' | 'NW';
 

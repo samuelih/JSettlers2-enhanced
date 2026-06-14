@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Source Doc Redocumentation: Overview · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Source Document Redocumenta…</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf high" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:75%"></i></span>
+      <span class="conf-val">0.75</span></span></div>
+        <h1 class="doc-title">Source Doc Redocumentation: Overview</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Source Doc Redocumentation: Overview</h1>
+<h2>Overview</h2>
+<p>This deterministic SGD record represents one source markdown document discovered during Stage 0. It preserves the source path, section map, and bounded digest so the generated corpus can prove that the input document was seen and carried forward. It is not a ratified replacement for the source file; unresolved claims remain obligations for deeper synthesis or human review.</p>
+<h2>Source Document</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">doc/Message-Sequences-for-Game-Actions.md</code></li>
+</ul>
+<h2>Section Inventory</h2>
+<ul>
+<li>H1 Overview</li>
+<li>H1 Game actions and their message sequences</li>
+<li>H2 Roll dice</li>
+<li>H3 Roll 7</li>
+<li>H3 Roll other than 7</li>
+<li>H2 Buy and build piece</li>
+<li>H3 Initial Placement</li>
+<li>H4 Basic example with player 2’s first initial road, second initial settlement:</li>
+<li>H4 Cancel and re-place initial settlement location</li>
+<li>H4 Building ship (or settlement) reveals non-gold hex from fog</li>
+<li>H4 Building ship (or settlement) reveals gold hex from fog</li>
+<li>H3 Settlement</li>
+<li>H3 City</li>
+<li>H3 Road (may set Longest Route)</li>
+<li>H3 Ship (may set Longest Route)</li>
+<li>H2 Undo build or move piece</li>
+<li>H3 Road</li>
+<li>H3 City (upgrade from settlement)</li>
+<li>H3 Ship (undo build)</li>
+<li>H3 Ship (undo move)</li>
+<li>H2 Move piece (move ship)</li>
+<li>H2 Buy dev card</li>
+<li>H2 Use/Play each dev card type</li>
+<li>H3 Road Building</li>
+</ul>
+<h2>Content Digest</h2>
+<pre><code>Message Sequences for Game Actions
+
+# Overview
+
+This is a list of the basic actions players can take in a game (roll dice, build settlements, etc)
+and the network message sequences that convey them, for reference.
+
+Doesn't include some scenario-specific actions such as placing a &quot;gift port&quot; in the Forgotten Tribe.
+
+These messages assume server and client version 2.5.00 or newer.
+That version updated and reorganized many sequences to be more efficient
+and easier for bots and other automated readers to recognize.
+Since the server and built-in robots are packaged together,
+the bots also use these updated message sequences.
+When recording game event sequences, the server records using the latest version format,
+even when it actually sent different messages to an older client to be compatible.
+
+If you're curious about older versions, see the code and comments in message classes like `SOCPutPiece`
+and server classes like `SOCGameMessageHandler` and `SOCGameHandler` which communicate with clients.
+
+Sequences are tested for consistency during unit tests and release testing:
+- `/src/test/java/soctest/server/TestRecorder.java` `testLoadAndBasicSequences()` runs through some basic game actions
+- `/src/extraTest/java/soctest/server/TestActionsMessages.java` runs through the rest of them
+- `src/test/java/soctest/robot/TestGameActionExtractor.java` tests recognition of hardcoded message sequences
+- `/src/test/resources/resources/gameevent/all-basic-actions.soclog` has all of these sequences and some non-sequence messages
+  (debug commands, a client joins the game, etc).
+
+For sample code which recognizes and extracts game actions from these sequences,
+see GameActionExtractor.md (extra/GameActionExtractor.md).
+
+
+# Game actions and their message sequences
+
+This list isn't exhaustive; some sequences like Roll Dice
+vary depending on game options and scenarios. All sequences
+document their starting and ending messages, which can be relied on
+regardless of game options or scenarios in use.
+
+All `SOCGameServerText` should be considered optional or ignored,
+since server may not localize and send text to bots.
+
+The format used here is from `soc.extra.server.GameEventLog.EventEntry.toString()`.
+It shows the origin of each message from a client player (`f3:`)
+or the audience of each message from server (`all:`, `p3:`, etc).
+
+[...digest truncated by CodeLens...]
+</code></pre>
+<h2>Redocumentation Obligations</h2>
+<ul>
+<li>Preserve this source document’s claims in a generated feature, design, architecture, gateway, testplan, or invariant record before treating the corpus as a full semantic replacement for the original docs tree.</li>
+<li>Reconcile any conflict between this digest and direct source-code evidence through the source-truth audit, not by repeating doc-only claims as implemented behavior.</li>
+</ul>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">doc/Message-Sequences-for-Game-Actions.md</code></li>
+</ul>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#2a8068" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="56.5"/>
+        </svg>
+        <div class="ring-num">0.75</div>
+      </div>
+      <div class="cap" style="color:#2a8068">High confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

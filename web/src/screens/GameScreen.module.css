@@ -1104,7 +1104,23 @@
 }
 
 @media (max-width: 640px) {
+  .wrap {
+    grid-template-columns: 2.85rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(10rem, 28vh);
+  }
+
+  .rail {
+    gap: var(--space-1, 0.25rem);
+    padding: var(--space-2, 0.5rem) 0;
+  }
+
+  .railBtn {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
   .stage {
+    gap: var(--space-2, 0.5rem);
     padding: var(--space-2, 0.5rem);
   }
 
@@ -1117,9 +1133,178 @@
     display: none;
   }
 
+  .turnBanner {
+    max-width: calc(100vw - 4rem);
+    padding: 0.34rem 0.72rem;
+  }
+
+  .turnPlayer {
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+
+  .turnState {
+    min-width: 0;
+    font-size: 0.68rem;
+  }
+
+  .boardWrap {
+    min-height: 14rem;
+  }
+
+  .actionBar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "resources dice"
+      "controls controls";
+    align-items: center;
+    justify-items: stretch;
+    gap: 0.42rem;
+    min-height: 0;
+    padding: 0.45rem;
+    border-radius: 12px;
+  }
+
+  .myResources {
+    grid-area: resources;
+    justify-content: center;
+    gap: 0.28rem;
+    min-width: 0;
+  }
+
+  .actionDivider {
+    display: none;
+  }
+
+  .actionMain {
+    grid-area: controls;
+    width: 100%;
+  }
+
   .resCard {
-    width: 2.6rem;
-    height: 3.5rem;
+    width: 2.2rem;
+    height: 2.8rem;
+    padding: 0.22rem 0.16rem;
+    border-radius: 8px;
+  }
+
+  .resIcon {
+    font-size: 1rem;
+  }
+
+  .resValue {
+    min-width: 1.25rem;
+    padding: 0.02rem 0.2rem;
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+
+  .controls {
+    width: 100%;
+    min-width: 0;
+    gap: 0.32rem;
+    padding: 0;
+  }
+
+  .prompt {
+    font-size: 0.68rem;
+    white-space: normal;
+  }
+
+  .controlButtons {
+    gap: 0.32rem;
+  }
+
+  .rollButton {
+    min-height: 2.35rem;
+    padding: 0.26rem 0.72rem 0.26rem 0.38rem;
+    border-radius: 10px;
+  }
+
+  .buildBtn {
+    min-width: 2.7rem;
+    padding: 0.22rem 0.32rem;
+    border-radius: 10px;
+  }
+
+  .buildIcon {
+    font-size: 1rem;
+  }
+
+  .buildLabel {
+    font-size: 0.6rem;
+  }
+
+  .dice {
+    grid-area: dice;
+    min-width: 0;
+    padding: 0.3rem 0.36rem;
+    border-radius: 10px;
+    gap: 0.12rem;
+  }
+
+  .diceLabel,
+  .diceTotalLabel {
+    display: none;
+  }
+
+  .diceResult {
+    gap: 0.3rem;
+  }
+
+  .diceFaces {
+    gap: 0.22rem;
+  }
+
+  .die {
+    width: 1.62rem;
+    height: 1.62rem;
+    padding: 0.24rem;
+    border-radius: 7px;
+  }
+
+  .diePip {
+    width: 0.23rem;
+    height: 0.23rem;
+  }
+
+  .diceTotal {
+    min-width: 1.6rem;
+    height: 1.6rem;
+    padding: 0 0.28rem;
+    border-radius: 8px;
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+
+  .sidebar {
+    padding: var(--space-2, 0.5rem);
+  }
+
+  .sideScroll {
+    gap: var(--space-1, 0.25rem);
+  }
+
+  .players {
+    padding: 0.3rem;
+    gap: 0.3rem;
+  }
+
+  .playerPanel {
+    padding: 0.42rem 0.5rem 0.42rem 0.68rem;
+    gap: 0.28rem;
+  }
+
+  .log {
+    max-height: 6.8rem;
+    padding: 0.34rem 0.52rem;
+  }
+
+  .chatRow {
+    padding: 0.4rem 0.52rem;
+  }
+
+  .chatInput {
+    padding: 0.34rem var(--space-2, 0.5rem);
+    font-size: var(--font-size-xs, 0.75rem);
   }
 
   .gainBurst {

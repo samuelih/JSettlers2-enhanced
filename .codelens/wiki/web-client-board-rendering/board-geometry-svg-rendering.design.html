@@ -1,0 +1,219 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Board Geometry &amp; SVG Rendering · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../web-client-board-rendering/web-client-board-rendering.arch.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="tt tt-arch">arch</span></a><a class="nav-item active" href="../web-client-board-rendering/board-geometry-svg-rendering.design.html"><span class="nm">Board Geometry &amp; SVG Rendering</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/custom-map-editor.design.html"><span class="nm">Custom Map Editor</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/screens-ui-components-client-state.design.html"><span class="nm">Screens, UI Components &amp; Client State</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/server-protocol-websocket-connectivity.design.html"><span class="nm">Server Protocol &amp; WebSocket Connectivity</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.api-boundary.html"><span class="nm">Web Client &amp; Board Rendering API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.gateway.html"><span class="nm">Web Client &amp; Board Rendering Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../web-client-board-rendering/contracts/web-client-board-rendering.testplan.html"><span class="nm">Web Client &amp; Board Rendering Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Web Client &amp; Board Rendering</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:60%"></i></span>
+      <span class="conf-val">0.60</span></span></div>
+        <h1 class="doc-title">Board Geometry &amp; SVG Rendering</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Board Geometry &amp; SVG Rendering</h1>
+<h2>Overview</h2>
+<p>This feature is the geometry-and-shape substrate beneath the web client’s in-game board. A SOCBoardLayout2 message arriving from the Java server is parsed into a render-friendly BoardModel (types.ts) holding hexes, ports, robber/pirate positions and viewport dimensions; each board element carries a single packed 0xRRCC integer coordinate (row &lt;&lt; 8 | col). The SVG renderer consumes that model and, for every hex/node/edge, calls into coords.ts to translate the packed coordinate into pixel-space points, derive adjacent nodes/edges, and emit SVG polygon/point strings. hexKind() maps the numeric hex type onto a semantic key that selects a CSS class in BoardSVG.module.css, where all color and motion come from theme custom properties. The module deliberately reproduces the server’s SOCBoardLarge rectilinear grid and SOCBoardPanel pixel mapping client-side so pieces stay pixel-aligned to their hexes from the layout alone.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>coords.ts</strong> (referenced; defined externally)</li>
+<li><strong>types.ts</strong> (referenced; defined externally)</li>
+<li><strong>BoardSVG.module.css</strong> (referenced; defined externally)</li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>types.ts (board data model)</strong> (outbound) — via import { FACING_NE, FACING_E, FACING_SE, FACING_SW, FACING_W, FACING_NW } from ‘./types’ (evidence: web/src/board/coords.ts import statement; re-exported for callers)</li>
+<li><strong>SOCBoardLayout2 (server message)</strong> (inbound) — via BoardModel is produced from a parsed SOCBoardLayout2 message (per types.ts module javadoc) (evidence: web/src/board/types.ts module javadoc: ‘Whole-board model produced from a SOCBoardLayout2 message’)</li>
+<li><strong>soc.game.SOCBoardLarge / soc.client.SOCBoardPanel (Java server/Swing client)</strong> (inbound) — via topology and pixel-mapping constants/functions ported from these Java sources (evidence: web/src/board/coords.ts module javadoc and per-function @see/ported-from notes)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Integer-packed 0xRRCC coordinate scheme shared by hexes, nodes, and edges</strong>: coordOf packs (row &lt;&lt; 8 | col) and rowOf/colOf unpack it, mirroring soc.game.SOCBoardLarge’s encoding. Reproducing the server’s single-grid scheme verbatim (rather than inventing a client-native coordinate system) lets the client derive geometry directly from the received layout without a translation layer, and keeps topology code a line-by-line port of the authoritative Java source — reducing the chance of divergence bugs.</li>
+<li><strong>Pure functions with no React/store/network coupling</strong>: coords.ts is documented as ‘no React, no store, no network — so they’re trivially unit-testable.’ Isolating the geometry math from rendering and state means the same primitives drive hexes, nodes, and edges, and can be exercised in isolation; the SVG component and CSS module own presentation separately.</li>
+<li><strong>Linear grid mapping plus a Y-parity slope drop, not trigonometric hexagon math</strong>: gridToPixel applies one linear mapping (x = col<em>HALFDELTA_X, y = row</em>HALFDELTA_Y + TOP_MARGIN) shared by hex centers, node corners and edge endpoints; nodeToPixel then drops ‘Y’-parity nodes by HEXY_OFF_SLOPE. This is ported directly from SOCBoardPanel rather than computed from hexagon trigonometry, so the pointy-top tile shape and — critically — piece-to-hex alignment fall out of the same shared mapping the server’s Swing client uses.</li>
+<li><strong>Deriving hexPolygonPoints corners from the same node deltas pieces use</strong>: The hexagon outline corners are the getAdjacentNodesToHex order mapped through nodeToPixel, so a piece drawn at any node lands exactly on a hex corner. Computing the tile outline and the piece anchor points from one source guarantees visual alignment instead of maintaining two parallel geometries that could drift.</li>
+<li><strong>Hex type → HexKind semantic key indirection</strong>: hexKind() maps raw server hex-type numbers onto stable string keys (‘clay’, ‘ore’, …) used for theming/assets, decoupling the numeric wire encoding from CSS class selection. TOP_MARGIN is intentionally a clean HALFDELTA_Y rather than the server’s exact halfdeltaY+9, since a uniform shift leaves relative geometry — and piece alignment — unaffected.</li>
+<li><strong>Presentation entirely via CSS custom properties and motion-suppression media queries</strong>: BoardSVG.module.css sources every color from theme tokens so light/dark/color-blind themes apply without touching component code, and hard-stops animations under prefers-reduced-motion and [data-render-quality=‘low’] so weak GPUs and motion-sensitive users get a static board — an accessibility/performance separation kept out of the geometry layer.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[UNVERIFIED]</strong> getAdjacentNodeToEdge MUST reject facing values outside 1…6 and facings perpendicular to the edge rather than returning a wrong node. — web/src/board/coords.ts::getAdjacentNodeToEdge throws ‘facing out of range’ and ‘facing N perpendicular from edge’ Errors (cross-document reconciliation: not verified against <code>web/src/board/coords.ts</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> getAdjacentEdgeToNode MUST reject a nodeDir outside 0…2. — web/src/board/coords.ts::getAdjacentEdgeToNode default branch throws ‘nodeDir out of range’ (cross-document reconciliation: not verified against <code>web/src/board/coords.ts</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[UNVERIFIED]</strong> Packed coordinates SHOULD be masked to 16 bits (0xffff) when reconstructed so row/col stay within the 0xRRCC layout. — web/src/board/coords.ts::coordOf returns ((row &lt;&lt; 8) | col) &amp; 0xffff (cross-document reconciliation: not verified against <code>web/src/board/coords.ts</code>; recorded as design intent, not current code fact.)</li>
+<li><strong>[SOFT]</strong> Hex-type numbers MUST match the server soc.game.SOCBoard / SOCBoardLarge v3 ‘LH’ encoding (DESERT=0…FOG=8) which does not remap water/desert. — web/src/board/types.ts HEX_* constants and module javadoc</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>performance</strong> — Geometry helpers are pure, allocation-light functions over integer coordinates with no framework or I/O dependencies, keeping per-hex/node/edge render-path computation cheap. — web/src/board/coords.ts module javadoc (‘Pure functions — no React, no store, no network’)</li>
+<li><strong>accessibility</strong> — Board animations (placement pop, robber/pirate glide, target pulse) MUST be fully suppressed under prefers-reduced-motion: reduce and [data-render-quality=‘low’]. — web/src/board/BoardSVG.module.css @media (prefers-reduced-motion: reduce) and [data-render-quality=‘low’] rules</li>
+<li><strong>reliability</strong> — Hit-test stability — legal-target pulse animates fill-opacity only (not transform/size) so the click target’s bounding box stays stable for hit testing and automated drivers. — web/src/board/BoardSVG.module.css .targetPulse / @keyframes target-pulse comment</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Shows the Y-parity slope drop that turns the shared linear grid mapping into a pointy-top hexagon while keeping nodes and hex corners co-located.</em>
+<em>Source: <code>web/src/board/coords.ts:nodeToPixel</code></em></p>
+<pre><code>export function nodeToPixel(coord: number): Point {
+  const r = coord &gt;&gt; 8;
+  const c = coord &amp; 0xff;
+  const p = gridToPixel(r, c);
+  if (Math.floor(r / 2) % 2 !== c % 2) {
+    p.y += HEXY_OFF_SLOPE;
+  }
+  return p;
+}
+</code></pre>
+<p><em>The single packing primitive mirroring SOCBoardLarge’s 0xRRCC encoding, masked to 16 bits.</em>
+<em>Source: <code>web/src/board/coords.ts:coordOf</code></em></p>
+<pre><code>export function coordOf(row: number, col: number): number {
+  return ((row &lt;&lt; 8) | col) &amp; 0xffff;
+}
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+
+    web_src_board_BoardSVG_module_css["BoardSVG.module.css"]
+    web_src_board_coords_ts["coords.ts"]
+    web_src_board_types_ts["types.ts"]
+
+    web_src_board_coords_ts -->|"imports"| web_src_board_types_ts
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Coordinate packing/unpacking (row&lt;&lt;8 | col)</code></li>
+<li><code class="code-ref" title="source file in your repository">Hex coordinate to pixel mapping</code></li>
+<li><code class="code-ref" title="source file in your repository">Node coordinate to pixel mapping (Y-parity slope drop)</code></li>
+<li><code class="code-ref" title="source file in your repository">Edge coordinate to pixel mapping</code></li>
+<li><code class="code-ref" title="source file in your repository">Node-to-edge / hex adjacency derivation</code></li>
+<li><code class="code-ref" title="source file in your repository">Port facing edge-to-node resolution with validation</code></li>
+<li><code class="code-ref" title="source file in your repository">SVG hexagon points helper</code></li>
+<li><code class="code-ref" title="source file in your repository">Hex type to HexKind classification</code></li>
+<li><code class="code-ref" title="source file in your repository">Board data model shapes</code></li>
+<li><code class="code-ref" title="source file in your repository">SVG board styling</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">board-geometry-svg-rendering.feature.md</span>
+Scope architecture: <a href="web-client-board-rendering.arch.html">web-client-board-rendering.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Coordinate packing/unpacking (row&lt;&lt;8 | col)</td>
+<td></td>
+<td>web/src/board/coords.ts:76-78</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Hex coordinate to pixel mapping</td>
+<td></td>
+<td>web/src/board/coords.ts:283-285</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Node coordinate to pixel mapping (Y-parity slope drop)</td>
+<td></td>
+<td>web/src/board/coords.ts:296-304</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Edge coordinate to pixel mapping</td>
+<td></td>
+<td>web/src/board/coords.ts:329-343</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Node-to-edge / hex adjacency derivation</td>
+<td></td>
+<td>web/src/board/coords.ts:123-131</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Port facing edge-to-node resolution with validation</td>
+<td></td>
+<td>web/src/board/coords.ts:191-259</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SVG hexagon points helper</td>
+<td></td>
+<td>web/src/board/coords.ts:380-394</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Hex type to HexKind classification</td>
+<td></td>
+<td>web/src/board/types.ts:28-30</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: Board data model shapes</td>
+<td></td>
+<td>web/src/board/types.ts:74-86</td>
+<td style="text-align:right">0.75</td>
+</tr>
+<tr>
+<td>Source Linkage: SVG board styling</td>
+<td></td>
+<td>web/src/board/BoardSVG.module.css</td>
+<td style="text-align:right">0.48</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../quality-infrastructure/quality-infrastructure.arch.html">Quality Infrastructure</a>, <a href="../web-protocol-map-editor/web-protocol-map-editor.arch.html">Web Protocol &amp; Map Editor</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="90.5"/>
+        </svg>
+        <div class="ring-num">0.60</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>

@@ -1,0 +1,567 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cities &amp; Knights Scenario (SC_CK) · ZimWiki</title>
+<link rel="stylesheet" href="../assets/zimwiki.css">
+</head><body>
+<script src="../assets/search-index.js"></script>
+<script>window.__ZIMWIKI_BASE__="../";</script>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html"><span class="mark">Zim<b>Wiki</b></span><span class="by">by Zimzora</span></a>
+  <span class="project-pill" title="Codebase Intelligence Report">Codebase Intelligence Report</span>
+  <span class="spacer"></span>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search-input" placeholder="Search the report…" autocomplete="off"><kbd>/</kbd></label>
+  <span class="build-badge">Hypothesis build</span>
+</div><div id="search-results" class="search-results"></div></header>
+<div class="shell with-rail"><nav class="sidebar"><div class="nav-group"><span class="nav-label">Report</span>
+      <a class="nav-item" href="../index.html"><span class="nm">Overview</span></a>
+      <a class="nav-item" href="../_scope.html"><span class="nm">Platform Charter</span></a>
+      <a class="nav-item" href="../invariants.html"><span class="nm">Invariants</span><span class="ct">11</span></a>
+      <a class="nav-item" href="../compliance.html"><span class="nm">Compliance &amp; honesty</span><span class="ct">59</span></a>
+    </div><div class="nav-group"><span class="nav-label">Domains · 9</span><a class="nav-item" href="../desktop-swing-client/_scope.html"><span class="nm">Desktop Swing Client</span><span class="ct">8</span></a><a class="nav-item" href="../game-model-rules-engine/_scope.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="ct">8</span></a><div class="nav-sub"><a class="nav-item" href="../game-model-rules-engine/game-model-rules-engine.arch.html"><span class="nm">Game Model &amp; Rules Engine</span><span class="tt tt-arch">arch</span></a><a class="nav-item active" href="../game-model-rules-engine/cities-knights-scenario-sc-ck.design.html"><span class="nm">Cities &amp; Knights Scenario (SC_CK)</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/core-game-state-board-model.design.html"><span class="nm">Core Game State &amp; Board Model</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/custom-map-loading-validation.design.html"><span class="nm">Custom Map Loading &amp; Validation</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.api-boundary.html"><span class="nm">Game Model &amp; Rules Engine API Boundary</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/game-options-scenarios.design.html"><span class="nm">Game Options &amp; Scenarios</span><span class="tt tt-design">design</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.gateway.html"><span class="nm">Game Model &amp; Rules Engine Gateway</span><span class="tt tt-gateway">gateway</span></a><a class="nav-item" href="../game-model-rules-engine/contracts/game-model-rules-engine.testplan.html"><span class="nm">Game Model &amp; Rules Engine Test Plan</span><span class="tt tt-testplan">test</span></a></div><a class="nav-item" href="../i18n-translation-tooling/_scope.html"><span class="nm">i18n Translation Tooling</span><span class="ct">6</span></a><a class="nav-item" href="../optional-database/_scope.html"><span class="nm">Optional Database</span><span class="ct">6</span></a><a class="nav-item" href="../quality-infrastructure/_scope.html"><span class="nm">Quality Infrastructure</span><span class="ct">8</span></a><a class="nav-item" href="../robot-ai-players/_scope.html"><span class="nm">Robot / AI Players</span><span class="ct">8</span></a><a class="nav-item" href="../server-message-protocol/_scope.html"><span class="nm">Server &amp; Message Protocol</span><span class="ct">8</span></a><a class="nav-item" href="../web-client-board-rendering/_scope.html"><span class="nm">Web Client &amp; Board Rendering</span><span class="ct">8</span></a><a class="nav-item" href="../web-protocol-map-editor/_scope.html"><span class="nm">Web Protocol &amp; Map Editor</span><span class="ct">6</span></a></div><div class="nav-group"><span class="nav-label">Ingested sources</span>
+      <a class="nav-item" href="../source-docs/_scope.html"><span class="nm">Source documents</span><span class="ct">14</span></a></div></nav><main class="main">
+      <div class="crumbs"><a href="../index.html">Overview</a> <span class="sep">/</span><a href="_scope.html">Game Model &amp; Rules Engine</a></div>
+      <div class="doc-head">
+        <div class="doc-kicker"><span class="badge t-design">DESIGN</span><span class="badge lifecycle">hypothesis</span><span class="conf med" title="CodeLens confidence — min(code-evidence·0.8 + doc-evidence·0.3, 1.0); code-only specs cap at 0.75. Emitted per document by the engine.">
+      <span class="conf-bar"><i style="width:55%"></i></span>
+      <span class="conf-val">0.55</span></span></div>
+        <h1 class="doc-title">Cities &amp; Knights Scenario (SC_CK)</h1>
+
+      </div>
+      <div class="hyp-banner"><span class="hi">◑</span><div>This document is a <b>hypothesis</b> CodeLens inferred from your source code. It is pending review and ratification by your team — verify load-bearing claims against the cited files before relying on them.</div></div>
+      <div class="prose"><h1>Cities &amp; Knights Scenario (SC_CK)</h1>
+<h2>Strategic Context</h2>
+<ul>
+<li><strong>Incremental Cities &amp; Knights groundwork</strong> — In-code references to doc/Cities-and-Knights-Design.md (section 3.2) and doc/Cities-and-Knights-Implemented.md frame the <em>CK</em>* options and improvement-track special items as deliberate, not-yet-playable groundwork for a future Cities &amp; Knights scenario, landed in main behind inactive-hidden flags so the work proceeds without exposing incomplete rules to players. Distinct from other scenarios, this one ships intentionally unselectable.</li>
+</ul>
+<h2>Overview</h2>
+<p>Cities &amp; Knights is decomposed into one scenario flag (_SC_CK) plus five capability options (_CK_KNI, _CK_IMP, _CK_PROG, _CK_BARB, _CK_METR) declared in SOCGameOptionSet and registered through getAllKnownOptions(), the codebase’s central scenario-extensibility point. Because the scenario and its constituent options are registered inactive-hidden, a game’s enabled option set never selects them in normal play, so the rules stay inert. When activated, the city-improvement tracks are represented as SOCSpecialItem instances keyed by typeKeys derived from the _CK_IMP option name; makeKnownItem() seeds them and playerPickItem() applies picks, charging commodities rather than resources. SOCGame is the authoritative server-side holder of the resulting per-game and per-player state — barbarian strength, metropolis ownership, knight and progress-card state — which clients only mirror partially.</p>
+<h2>Components</h2>
+<ul>
+<li><strong>SOCGameOptionSet</strong></li>
+<li><strong>SOCSpecialItem</strong></li>
+<li><strong>SOCGame</strong></li>
+<li><strong>CKCardEffect</strong></li>
+</ul>
+<h2>Connections</h2>
+<ul>
+<li><strong>SOCGameOptionSet</strong> (outbound) — via improvement-track typeKeys derive from the K__CK_IMPROV (“_CK_IMP”) option keyname (evidence: src/main/java/soc/game/SOCSpecialItem.java: CK_IMPROV_TRADE = K__CK_IMPROV + “/T”)</li>
+<li><strong>SOCGame</strong> (bidirectional) — via SOCGame stores/retrieves special items (getSpecialItem/setSpecialItem) and calls makeKnownItem from updateAtBoardLayout (evidence: SOCSpecialItem makeKnownItem javadoc references SOCGame#updateAtBoardLayout; SOCGame class-diagram getSpecialItems/getSpecialItem)</li>
+<li><strong>SOCPlayer</strong> (outbound) — via improvement levels are paid in player commodity fields CK_CLOTH / CK_COIN / CK_PAPER (SOCPlayer defined outside this epic) (evidence: src/main/java/soc/game/SOCSpecialItem.java: CK_IMPROV_TYPEKEYS javadoc referencing SOCPlayer.CK_CLOTH/CK_COIN/CK_PAPER)</li>
+<li><strong>SOCServer</strong> (outbound) — via inactive-hidden options are turned on at server startup activation (jsettlers.gameopts.activate) (evidence: src/main/java/soc/game/SOCGameOptionSet.java imports soc.server.SOCServer (for javadocs) and registry comment ‘until activated at server startup’)</li>
+</ul>
+<h2>Design Decisions</h2>
+<ul>
+<li><strong>Ship Cities &amp; Knights as inactive-hidden groundwork rather than on a separate feature branch</strong>: Every <em>CK</em>* option and the _SC_CK scenario stub are registered FLAG_INACTIVE_HIDDEN | FLAG_DROP_IF_UNUSED in getAllKnownOptions(), so the code lands in main but is hidden from the New Game UI and excluded from normal play until explicitly activated at server startup. This lets the incomplete scenario accrete incrementally without exposing unplayable rules.</li>
+<li><strong>Model city-improvement (and knight) tracks as SOCSpecialItem instances, not new SOCMessage types</strong>: Per the SOCSpecialItem class javadoc, cost and requirement constants are initialized identically at server and client and never sent over the network because it is easier to set them up in a factory method than to create, send, and parse messages carrying every special-item detail. New scenario item types reuse existing special-item plumbing instead of widening the ~120-class wire protocol.</li>
+<li><strong>Keep the three commodities outside SOCResourceSet and charge them in playerPickItem</strong>: makeKnownItem leaves cost null for improvement items because levels are paid in commodities (SOCPlayer CK_CLOTH / CK_COIN / CK_PAPER) that are deliberately not part of SOCResourceSet; playerPickItem checks and pays them, where building level N costs N of the track’s commodity. This isolates the new economy from the five base resources.</li>
+<li><strong>Compose multi-item special-item typeKeys as optionName + “/” + shortKey</strong>: CK_IMPROV_TRADE is defined as K__CK_IMPROV + “/T” (likewise /P and /S), following the documented SOCSpecialItem convention so a single game option (_CK_IMP) can own several special-item types while each key remains traceable to its registering option for cross-scenario compatibility.</li>
+<li><strong>Hold all authoritative C&amp;K state in SOCGame at the server</strong>: Consistent with the model that the server’s SOCGame holds complete state while clients hold partial state, the barbarian counter, metropolis ownership, knight state and progress decks are SOCGame fields and ck* methods (e.g. rollDice() advances barbarian strength when _CK_BARB is set) rather than client-reconstructed values.</li>
+</ul>
+<h2>Constraints</h2>
+<ul>
+<li><strong>[HARD]</strong> The <em>CK</em>* options and the _SC_CK scenario stub MUST be registered inactive-hidden (FLAG_INACTIVE_HIDDEN | FLAG_DROP_IF_UNUSED), keeping them out of the New Game UI and normal play until server-activated. — src/main/java/soc/game/SOCGameOptionSet.java::getAllKnownOptions (registry comment for <em>CK</em>* keynames)</li>
+<li><strong>[HARD]</strong> The _SC_CK scenario MUST NOT be selectable in normal play because its constituent <em>CK</em>* options are inactive-hidden. — src/main/java/soc/game/SOCGameOptionSet.java::K_SC_CK (javadoc)</li>
+<li><strong>[HARD]</strong> playerPickItem MUST run at the server only and only when the requester is the current player and game state is PLAY1 or SPECIAL_BUILDING, otherwise it throws IllegalStateException. — src/main/java/soc/game/SOCSpecialItem.java::playerPickItem (current-player / game-state guard)</li>
+<li><strong>[HARD]</strong> Callers MUST hold the game monitor (SOCGame.takeMonitor()) before invoking playerPickItem. — src/main/java/soc/game/SOCSpecialItem.java::playerPickItem (Locks javadoc)</li>
+<li><strong>[HARD]</strong> Any city-improvement track level MUST NOT exceed CK_IMPROV_MAX_LEVEL (5). — src/main/java/soc/game/SOCSpecialItem.java::CK_IMPROV_MAX_LEVEL</li>
+<li><strong>[SOFT]</strong> A special item belonging to a game option with more than one item type SHOULD use a typeKey of optionName + “/” + a short alphanumeric key. — src/main/java/soc/game/SOCSpecialItem.java (class javadoc convention)</li>
+</ul>
+<h2>Non-Functional Requirements</h2>
+<ul>
+<li><strong>error-handling</strong> — Invalid picks (wrong turn, wrong game state, unmet cost/requirements, missing starting-cost piece, or unknown typeKey) are rejected by throwing IllegalStateException rather than mutating game state. — src/main/java/soc/game/SOCSpecialItem.java::playerPickItem (throws clause and guard)</li>
+<li><strong>reliability</strong> — Groundwork C&amp;K rules remain inert by default; the scenario and its options ship disabled and cannot affect live games until activated at server startup. — src/main/java/soc/game/SOCGameOptionSet.java::getAllKnownOptions (inactive-hidden registration)</li>
+<li><strong>security</strong> — C&amp;K state changes are server-authoritative; picks are validated and resources/commodities deducted at the server, with clients holding only partial mirrored state. — src/main/java/soc/game/SOCSpecialItem.java::playerPickItem (‘Called at server, not at client’); SOCGame class javadoc (server holds complete state)</li>
+</ul>
+<h2>Examples</h2>
+<p><em>Shows the optionName + “/” + shortKey typeKey convention binding each track back to the _CK_IMP option.</em>
+<em>Source: <code>src/main/java/soc/game/SOCSpecialItem.java</code></em></p>
+<pre><code>public static final String CK_IMPROV_TRADE = &quot;_CK_IMP/T&quot;;
+public static final String[] CK_IMPROV_TYPEKEYS = { CK_IMPROV_TRADE, CK_IMPROV_POLITICS, CK_IMPROV_SCIENCE };
+</code></pre>
+<p><em>Documents the decision to keep commodities outside SOCResourceSet and charge them in playerPickItem.</em>
+<em>Source: <code>src/main/java/soc/game/SOCSpecialItem.java (makeKnownItem CK branch)</code></em></p>
+<pre><code>// Cities &amp; Knights city-improvement track: level starts at 0, no requirements or
+// string value. Cost is null because levels are paid for in commodities, which aren't
+// part of SOCResourceSet; playerPickItem checks and pays them. See CK_IMPROV_TYPEKEYS.
+</code></pre>
+<p><em>The server-side turn/state guard that fails a pick made out of turn or in the wrong state.</em>
+<em>Source: <code>src/main/java/soc/game/SOCSpecialItem.java (playerPickItem)</code></em></p>
+<pre><code>if ((pl.getPlayerNumber() != ga.getCurrentPlayerNumber())
+    || ((ga.getGameState() != SOCGame.PLAY1) &amp;&amp; (ga.getGameState() != SOCGame.SPECIAL_BUILDING)))
+</code></pre>
+<h2>Diagrams</h2>
+<h3>Class</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+classDiagram
+    class SOCGame {
+        +SOCGame()
+        +public synchronized void takeMonitor()
+        +public synchronized void releaseMonitor()
+        +public final boolean[] getFlagFieldsForSave()
+        +setFieldsForLoad()
+        +public boolean allOriginalPlayers()
+        +public boolean hasHumanPlayers()
+        +public Date getStartTime()
+        +public int getDurationSeconds()
+        +setTimeSinceCreated()
+        +setDurationSecondsFinished()
+        +public long getExpiration()
+        +public boolean hasWarnedExpiration()
+        +public void setWarnedExpiration()
+        +setGameEventListener()
+        +public boolean hasGameEventListener()
+        +public void setExpiration(final long ex)
+        +public String getOwner()
+        +setOwner()
+        +public final String getOwnerLocale()
+        +addPlayer()
+        +removePlayer()
+        +public boolean isSeatVacant(final int pn)
+        +public int getAvailableSeatCount()
+        +public SeatLockState getSeatLock(final int pn)
+        +public SeatLockState[] getSeatLocks()
+        +setSeatLock()
+        +setSeatLocks()
+        +public int getPlayerCount()
+        +public SOCPlayer getPlayer(final String nn)
+        +public boolean isMemberChatAllowed(final String memberName)
+        +setMemberChatAllowed()
+        +public Set<String> getMemberChatAllowList()
+        +public boolean isCurrentPlayerStubbornRobot()
+        +public String getName()
+        +setName()
+        +public SOCGameOptionSet getGameOptions()
+        +public boolean isGameOptionDefined(final String optKey)
+        +public boolean isGameOptionSet(final String optKey)
+        +getGameOptionIntValue()
+        +public String getGameOptionStringValue(final String optKey)
+        +public int getClientVersionMinRequired()
+        +public int getClientVersionMinSitDown()
+        +public SOCFeatureSet getClientFeaturesRequired()
+        +public void setClientFeaturesRequired(SOCFeatureSet feats)
+        +public boolean canClientJoin(final SOCFeatureSet cliFeats)
+        +checkClientFeatures()
+        +public boolean isBoardReset()
+        +public SOCBoard getBoard()
+        +public SOCPlayer[] getPlayers()
+        -protected void setPlayer(final int pn, SOCPlayer pl)
+        +public int getCurrentPlayerNumber()
+        +public void setCurrentPlayerNumber(final int pn)
+        +public int getSpecialBuildingPlayerNumberAfter()
+        +setSpecialBuildingPlayerNumberAfter()
+        +public int getRoundCount()
+        +public void setRoundCount(final int count)
+        +public boolean hasBuiltCity()
+        +public void setHasBuiltCity(final boolean hasBuilt)
+        +public int getCurrentDice()
+        +public void setCurrentDice(final int dr)
+        +public boolean hasRolledSeven()
+        +public int getBarbarianStrength()
+        +public void setBarbarianStrength(final int strength)
+        +public int advanceBarbarianStrength()
+        +public void ckResolveBarbarianAttack(final RollResult rr)
+        +public void ckDowngradeCity(final SOCCity city)
+        +public int getCKMetropolisOwner(final int track)
+        +setCKMetropolisOwner()
+        +public int ckCheckMetropolis(final int track)
+        +ckGetImprovementLevel()
+        +public boolean canCKBuyKnight(final int pn)
+        +public void ckBuyKnight(final int pn)
+        +public boolean canCKActivateKnight(final int pn)
+        +public void ckActivateKnight(final int pn)
+        +public boolean canCKPromoteKnight(final int pn)
+        +public void ckPromoteKnight(final int pn)
+        -private void ckInitProgressDecks()
+        +ckDrawProgressCard()
+        -private void ckReturnProgressCard(final int itype)
+        +canCKPlayProgressCard()
+        +ckPlayProgressCard()
+        -ckGainPerAdjacentHex()
+        -private int ckPickRandomResource(final SOCResourceSet rs)
+        +public int getCKMonopolyCardInPlay()
+        +public CKCardEffect getCKLastCardEffect()
+        +public int[] ckDoMonopolyAction(final int ptype)
+        +ckGetCommoditiesGainedFromRoll()
+        -ckGetCommoditiesGainedFromRollNumber()
+        -ckDrawProgressCardsFromRoll()
+        +public int getGameState()
+        +public void setGameState(final int gs)
+        -private void setGameStateOVER()
+        +getResetOldGameState()
+        +public int getOldGameState()
+        +public final boolean isInitialPlacement()
+        +isInitialPlacementRoundDone()
+        +public boolean isForcingEndTurn()
+        +isPickResourceIncludingPirateFleet()
+        +public int getNumDevCards()
+        +public void setNumDevCards(final int nd)
+        +public int[] getDevCardDeck()
+        +shuffleDevCardDeck()
+        +public Set<String> getSpecialItemTypes()
+        +getSpecialItems()
+        +getSpecialItem()
+        +setSpecialItem()
+        +public SOCInventoryItem getPlacingItem()
+        +public void setPlacingItem(SOCInventoryItem item)
+        +public SOCPlayer getPlayerWithLargestArmy()
+        +public void setPlayerWithLargestArmy(SOCPlayer pl)
+        +public SOCPlayer getPlayerWithLongestRoad()
+        +public void setPlayerWithLongestRoad(SOCPlayer pl)
+        +public SOCPlayer getPlayerWithWin()
+        +setPlayersLandHexCoordinates()
+        +gameOverMessageToPlayer()
+        -protected boolean advanceTurnBackwards()
+        -protected boolean advanceTurn()
+        -private boolean advanceTurnToSpecialBuilding()
+        +revealFogHiddenHex()
+        +canRemovePort()
+        +removePort()
+        +canPlacePort()
+        +placePort()
+        +canPlaceShip()
+        +public List<Integer> getShipsPlacedThisTurn()
+        +public void addShipPlacedThisTurn(final int edge)
+        +public void putPiece(SOCPlayingPiece pp)
+        -putPieceCommon()
+        -putPieceCommon_checkFogHexes()
+        -private boolean advanceTurnStateAfterPutPiece()
+        +public void putTempPiece(SOCPlayingPiece pp)
+        +canMoveShip()
+        +public void moveShip(SOCShip sh, final int toEdge)
+        +canUndoMoveShip()
+        +undoMoveShip()
+        +public void removeShip(SOCShip sh)
+        +canUndoPutPiece()
+        +undoPutPiece()
+        -undoPutPieceCommon()
+        +public void undoPutTempPiece(SOCPlayingPiece pp)
+        +public void undoPutInitSettlement(SOCPlayingPiece pp)
+        -undoActionSideEffects_pre()
+        +setLastActionCannotUndo()
+        -undoActionSideEffects_post()
+        +public void initAtServer()
+        +startGame()
+        -private final void startGame_setupDevCards()
+        +public void setFirstPlayer(final int pn)
+        +public int getFirstPlayer()
+        +public boolean canEndTurn(final int pn)
+        +public void endTurn()
+        +public void updateAtBoardLayout()
+        -private void updateAtGameFirstTurn()
+        +public void updateAtTurn()
+        +forceEndTurn()
+        -forceEndTurnStartState()
+        -forceEndTurnChkDiscardOrGain()
+        +discardOrGainPickRandom()
+        +playerDiscardOrGainRandom()
+        +public boolean canRollDice(int pn)
+        +public RollResult rollDice()
+        -private final void rollDice_update7gameState()
+        +getResourcesGainedFromRoll()
+        -private int getDice2And12PairedRoll(final int roll)
+        -getResourcesGainedFromRollPieces()
+        +public boolean canDiscard(final int pn, ResourceSet rs)
+        +public void discard(final int pn, ResourceSet rs)
+        +canPickGoldHexResources()
+        +pickGoldHexResources()
+        +public boolean canChooseMovePirate()
+        +chooseMovePirate()
+        +public boolean canMoveRobber(final int pn, final int co)
+        +moveRobber()
+        +public boolean canMovePirate(final int pn, final int hco)
+        +movePirate()
+        +public boolean canChoosePlayer(final int pn)
+        +public int choosePlayerForRobbery(final int pn)
+        +public boolean canChooseRobClothOrResource(final int pn)
+        +canAttackPirateFortress()
+        +public int[] attackPirateFortress(final SOCShip adjacent)
+        +getPlayersOnHex()
+        +public List<SOCPlayer> getPlayersShipsOnHex(final int hex)
+        +public SOCFortress getFortress(final int node)
+        +public GameAction getLastAction()
+        +public void setLastAction(final GameAction act)
+        +public boolean isPlacingRobberForKnightCard()
+        +setPlacingRobberForKnightCard()
+        +public SOCMoveRobberResult getRobberyResult()
+        +public boolean getRobberyPirateFlag()
+        +public List<SOCPlayer> getPossibleVictims()
+        +stealFromPlayer()
+        -stealFromPlayerPirateFleet()
+        +public boolean hasTradeOffers()
+        +rejectTradeOffersTo()
+        +canMakeTrade()
+        +makeTrade()
+        +canUndoBankTrade()
+        +canMakeBankTrade()
+        +makeBankTrade()
+        +public boolean couldBuildRoad(final int pn)
+        +public boolean couldBuildSettlement(final int pn)
+        +public boolean couldBuildCity(final int pn)
+        +public boolean couldBuyDevCard(final int pn)
+        +public boolean couldBuildShip(final int pn)
+        +public void buyRoad(final int pn)
+        +public void buySettlement(final int pn)
+        +public void buyCity(final int pn)
+        +public void buyShip(final int pn)
+        +public boolean canCancelBuildPiece(final int buildType)
+        +public boolean doesCancelRoadBuildingReturnCard()
+        +public boolean cancelBuildRoad(final int pn)
+        +public void cancelBuildSettlement(int pn)
+        +public void cancelBuildCity(final int pn)
+        +public boolean cancelBuildShip(final int pn)
+        +cancelPlaceInventoryItem()
+        +public boolean isShipWarship(final SOCShip sh)
+        +setNextDevCard()
+        +public int buyDevCard()
+        +public boolean canPlayKnight(final int pn)
+        +public boolean canPlayRoadBuilding(final int pn)
+        +public boolean canPlayDiscovery(final int pn)
+        +public boolean canPlayMonopoly(final int pn)
+        +canPlayInventoryItem()
+        +public SOCInventoryItem playInventoryItem(final int itype)
+        +public void playKnight()
+        +public void playRoadBuilding()
+        +public void playDiscovery()
+        +public void playMonopoly()
+        +public boolean canCancelPlayCurrentDevCard()
+        +cancelPlayCurrentDevCard()
+        +public boolean canDoDiscoveryAction(ResourceSet pick)
+        +public boolean canDoMonopolyAction()
+        +public void doDiscoveryAction(SOCResourceSet pick)
+        +public int[] doMonopolyAction(final int rtype)
+        +public void updateLargestArmy()
+        +public void saveLargestArmyState()
+        +public void restoreLargestArmyState()
+        +public void updateLongestRoad(final int pn)
+        +public void checkForWinner()
+        -private final boolean checkForWinner_SC_CLVI()
+        +public void destroyGame()
+        +public SOCGame resetAsCopy()
+        +resetVoteBegin()
+        +public int getResetVoteRequester()
+        +public boolean getResetVoteActive()
+        +resetVoteRegister()
+        +public int getResetPlayerVote(final int pn)
+        +public void resetVoteClear()
+        +getResetVoteResult()
+        +public boolean canBuyOrAskSpecialBuild(final int pn)
+        +public boolean isSpecialBuilding()
+        +canAskSpecialBuild()
+        +askSpecialBuild()
+        +public boolean isDebugFreePlacement()
+        +setDebugFreePlacement()
+        +public int getTurnCount()
+        +@Override
+    public String toString()
+    }
+    class SOCGameOptionSet {
+        +SOCGameOptionSet()
+        +public static SOCGameOptionSet getAllKnownOptions()
+        +public int size()
+        +public boolean isEmpty()
+        +contains()
+        +public boolean containsKey(final String optKey)
+        +public boolean add(final SOCGameOption opt)
+        +public SOCGameOption put(final SOCGameOption opt)
+        +public SOCGameOption get(final String optKey)
+        +public Map<String, SOCGameOption> getAll()
+        +public Collection<SOCGameOption> values()
+        +public Set<String> keySet()
+        +public Iterator<SOCGameOption> iterator()
+        +public SOCGameOption remove(final String optKey)
+        +public void clear()
+        +public boolean isOptionSet(final String optKey)
+        +setBoolOption()
+        +setIntOption()
+        +getOptionIntValue()
+        +public String getOptionStringValue(final String optKey)
+        +getKnownOption()
+        +public boolean addKnownOption(final SOCGameOption onew)
+        +activate()
+        +setKnownOptionCurrentValue()
+        +optionsNewerThanVersion()
+        +optionsForVersion()
+        -implOptionsVersionCheck()
+        +adjustOptionsToKnown()
+        +removeOpportunisticIfOlderClients()
+        +optionsNotSupported()
+        +optionsTrimmedForSupport()
+        +optionsWithFlag()
+        +@Override
+    public String toString()
+    }
+    class SOCSpecialItem {
+        +makeKnownItem()
+        +playerPickItem()
+        +playerSetItem()
+        +SOCSpecialItem()
+        +public int getGameIndex()
+        +public void setGameIndex(final int gi)
+        +public SOCPlayer getPlayer()
+        +public void setPlayer(SOCPlayer pl)
+        +public int getCoordinates()
+        +public void setCoordinates(final int co)
+        +public int getLevel()
+        +public void setLevel(final int lv)
+        +public String getStringValue()
+        +public void setStringValue(final String sv)
+        +public SOCResourceSet getCost()
+        +public void setCost(SOCResourceSet co)
+        +public final boolean checkCost(final SOCPlayer pl)
+        +public final int getStartingCostPiecetype()
+        +checkStartingCostPiecetype()
+        +checkRequirements()
+        +@Override
+    public String toString()
+        +@Override
+    public boolean equals(Object other)
+        +clone()
+    }
+    class Requirement {
+        +parse()
+        +Requirement()
+        +public final boolean equals(final Object other)
+        +public final String toString()
+    }
+    class RollResult {
+        +public void update(final int dA, final int dB)
+    }
+    class RemoveOpportunisticResults {
+        +RemoveOpportunisticResults()
+    }
+    class CKCardEffect {
+        +public CKCardEffect(final int itype)
+    }
+
+</pre>
+<h3>Dependency</h3>
+<pre class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111827', 'secondaryTextColor': '#111827', 'tertiaryTextColor': '#111827', 'lineColor': '#6b7280', 'fontFamily': 'Inter, ui-sans-serif, system-ui, sans-serif'}}}%%
+graph TD
+    classDef default fill:#f8fafc,stroke:#475569,color:#111827
+
+    src_main_java_soc_game_SOCGame_java["SOCGame.java"]
+    src_main_java_soc_game_SOCGameOptionSet_java["SOCGameOptionSet.java"]
+    src_main_java_soc_game_SOCSpecialItem_java["SOCSpecialItem.java"]
+
+
+    ext_src_main_java_soc_util_DataUtils_java["DataUtils.java"]:::default
+    src_main_java_soc_game_SOCGame_java -.->|"imports"| ext_src_main_java_soc_util_DataUtils_java
+    src_main_java_soc_game_SOCGameOptionSet_java -.->|"imports"| ext_src_main_java_soc_util_DataUtils_java
+    ext_src_main_java_soc_util_IntPair_java["IntPair.java"]:::default
+    src_main_java_soc_game_SOCGame_java -.->|"imports"| ext_src_main_java_soc_util_IntPair_java
+    ext_src_main_java_soc_util_SOCFeatureSet_java["SOCFeatureSet.java"]:::default
+    src_main_java_soc_game_SOCGame_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    src_main_java_soc_game_SOCGameOptionSet_java -.->|"imports"| ext_src_main_java_soc_util_SOCFeatureSet_java
+    ext_src_main_java_soc_util_SOCGameBoardReset_java["SOCGameBoardReset.java"]:::default
+    src_main_java_soc_game_SOCGame_java -.->|"imports"| ext_src_main_java_soc_util_SOCGameBoardReset_java
+    ext_src_main_java_soc_util_Version_java["Version.java"]:::default
+    src_main_java_soc_game_SOCGameOptionSet_java -.->|"imports"| ext_src_main_java_soc_util_Version_java
+</pre>
+<h2>Source Linkage</h2>
+<ul>
+<li><code class="code-ref" title="source file in your repository">Scenario gating via Known-Options registry (<em>CK</em>* and _SC_CK keynames)</code></li>
+<li><code class="code-ref" title="source file in your repository">City-improvement tracks modeled as SOCSpecialItem typeKeys (levels 0-5)</code></li>
+<li><code class="code-ref" title="source file in your repository">Improvement-item factory and pick validation (commodity-paid, null cost)</code></li>
+<li><code class="code-ref" title="source file in your repository">Server-side pick application with turn/state guard</code></li>
+<li><code class="code-ref" title="source file in your repository">Per-track level ceiling</code></li>
+<li><code class="code-ref" title="source file in your repository">Authoritative barbarian-strength counter advanced on dice roll</code></li>
+<li><code class="code-ref" title="source file in your repository">Knight lifecycle and progress-card / metropolis state in SOCGame</code></li>
+<li><code class="code-ref" title="source file in your repository">Progress-card effect helper</code></li>
+</ul>
+<p>Parent scope: <a href="_scope.html">_scope.md</a>
+Sibling feature: <span class="dead-ref" title="referenced doc not present in this generation">cities-knights-scenario-sc-ck.feature.md</span>
+Scope architecture: <a href="game-model-rules-engine.arch.html">game-model-rules-engine.arch.md</a></p>
+<h2>Source Linkage Grounding</h2>
+<p><em>Per-row confidence; <code>_unverified_</code> rows are disclosed, not verified; <code>0.08 (resolved, uncited)</code> is the resolved-but-uncited baseline, not measured evidence.</em></p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Doc Evidence</th>
+<th>Code Evidence</th>
+<th style="text-align:right">Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source Linkage: Scenario gating via Known-Options registry (<em>CK</em>* and _SC_CK keynames)</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGameOptionSet.java:546-910</td>
+<td style="text-align:right">0.83</td>
+</tr>
+<tr>
+<td>Source Linkage: City-improvement tracks modeled as SOCSpecialItem typeKeys (levels 0-5)</td>
+<td></td>
+<td>src/main/java/soc/game/SOCSpecialItem.java</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Improvement-item factory and pick validation (commodity-paid, null cost)</td>
+<td></td>
+<td>src/main/java/soc/game/SOCSpecialItem.java:280-336</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Server-side pick application with turn/state guard</td>
+<td></td>
+<td>src/main/java/soc/game/SOCSpecialItem.java:378-477</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Per-track level ceiling</td>
+<td></td>
+<td>src/main/java/soc/game/SOCSpecialItem.java</td>
+<td style="text-align:right">0.86</td>
+</tr>
+<tr>
+<td>Source Linkage: Authoritative barbarian-strength counter advanced on dice roll</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java:2934-2937</td>
+<td style="text-align:right">0.95</td>
+</tr>
+<tr>
+<td>Source Linkage: Knight lifecycle and progress-card / metropolis state in SOCGame</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java:1637-1732</td>
+<td style="text-align:right">0.95</td>
+</tr>
+<tr>
+<td>Source Linkage: Progress-card effect helper</td>
+<td></td>
+<td>src/main/java/soc/game/SOCGame.java:3807-3810</td>
+<td style="text-align:right">0.95</td>
+</tr>
+</tbody>
+</table>
+<p>Related scopes: <a href="../desktop-swing-client/desktop-swing-client.arch.html">Desktop Swing Client</a>, <a href="../robot-ai-players/robot-ai-players.arch.html">Robot / AI Players</a>, <a href="../server-message-protocol/server-message-protocol.arch.html">Server &amp; Message Protocol</a></p>
+</div>
+      <footer class="foot"><div class="foot-inner">
+      <span class="fmark">Zim<b>Wiki</b></span>
+      <span class="fnote">Generated by CodeLens from your source code. Every claim carries a confidence score and links back to the code — nothing is fabricated; documents marked “hypothesis” await your team’s review.</span>
+      <code></code>
+    </div><!-- zimwiki-exclusion-9f3a1c27-6b4e-4d2a-8e0f-1a7c5d9b2e84 --></footer>
+    </main><aside class="rail">
+      <div class="rail-card"><div class="conf-ring">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="var(--paper-line)" stroke-width="7"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36" fill="none" stroke="#c2900f" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="226.2" stroke-dashoffset="101.8"/>
+        </svg>
+        <div class="ring-num">0.55</div>
+      </div>
+      <div class="cap" style="color:#c2900f">Moderate confidence</div>
+      <div class="src">CodeLens evidence score</div>
+    </div></div>
+      <div class="rail-card"><h4>Provenance</h4><div class="rail-meta">
+        <div class="row"><span class="k">lifecycle</span><span class="val">hypothesis</span></div>
+        <div class="row"><span class="k">verified</span><span class="val">2026-06-14</span></div>
+        <div class="row"><span class="k">fresh window</span><span class="val">14d</span></div>
+        <div class="row"><span class="k">commit</span><span class="val">3a054b7699</span></div>
+        <div class="row"><span class="k">dikl</span><span class="val">no</span></div>
+      </div></div>
+
+    </aside></div>
+<script src="../assets/zimwiki.js"></script>
+</body></html>
