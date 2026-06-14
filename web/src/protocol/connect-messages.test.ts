@@ -25,6 +25,10 @@ describe('SOCServerPing', () => {
       expect((back as SOCServerPing).sleepTime).toBe(st);
     }
   });
+
+  it('rejects malformed integer payloads', () => {
+    expect(decode('9999|50ms')).toBeNull();
+  });
 });
 
 describe('SOCRejectConnection', () => {

@@ -20,6 +20,12 @@
 
 package soctest.message;
 
+import soc.game.SOCResourceSet;
+import soc.message.SOCGameElements;
+import soc.message.SOCPlayerElement;
+import soc.message.SOCPlayerElements;
+import soc.message.SOCGameElements.GEType;
+import soc.message.SOCPlayerElement.PEType;
 import soc.message.SOCUndoPutPiece;
 
 import org.junit.Test;
@@ -130,6 +136,79 @@ public class TestConstructorParams
             fail("should disallow movedFrom coord < 0");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().startsWith("fromCo < 0: "));
+        }
+    }
+
+    /**
+     * Test array parameters to {@link SOCGameElements}.
+     */
+    @Test
+    public void testSOCGameElements()
+    {
+        assertNotNull("all-ok constructor", new SOCGameElements
+            ("ga", new GEType[]{GEType.CURRENT_PLAYER}, new int[]{1}));
+
+        try {
+            new SOCGameElements("ga", new GEType[0], new int[0]);
+            fail("should disallow empty element arrays");
+        } catch (IllegalArgumentException e) {
+            assertEquals("empty", e.getMessage());
+        }
+
+        try {
+            new SOCGameElements("ga", new GEType[]{GEType.CURRENT_PLAYER}, new int[0]);
+            fail("should disallow short values array");
+        } catch (IllegalArgumentException e) {
+            assertEquals("lengths", e.getMessage());
+        }
+
+        try {
+            new SOCGameElements("ga", new GEType[]{GEType.CURRENT_PLAYER}, new int[]{1, 2});
+            fail("should disallow long values array");
+        } catch (IllegalArgumentException e) {
+            assertEquals("lengths", e.getMessage());
+        }
+    }
+
+    /**
+     * Test array and resource-set parameters to {@link SOCPlayerElements}.
+     */
+    @Test
+    public void testSOCPlayerElements()
+    {
+        assertNotNull("all-ok element arrays constructor", new SOCPlayerElements
+            ("ga", 2, SOCPlayerElement.SET, new PEType[]{PEType.NUMKNIGHTS}, new int[]{1}));
+        assertNotNull("all-ok resource-set constructor", new SOCPlayerElements
+            ("ga", 2, SOCPlayerElement.GAIN, new SOCResourceSet(1, 0, 0, 0, 0, 0)));
+
+        try {
+            new SOCPlayerElements("ga", 2, SOCPlayerElement.SET, new PEType[0], new int[0]);
+            fail("should disallow empty element arrays");
+        } catch (IllegalArgumentException e) {
+            assertEquals("empty", e.getMessage());
+        }
+
+        try {
+            new SOCPlayerElements
+                ("ga", 2, SOCPlayerElement.SET, new PEType[]{PEType.NUMKNIGHTS}, new int[0]);
+            fail("should disallow short amounts array");
+        } catch (IllegalArgumentException e) {
+            assertEquals("lengths", e.getMessage());
+        }
+
+        try {
+            new SOCPlayerElements
+                ("ga", 2, SOCPlayerElement.SET, new PEType[]{PEType.NUMKNIGHTS}, new int[]{1, 2});
+            fail("should disallow long amounts array");
+        } catch (IllegalArgumentException e) {
+            assertEquals("lengths", e.getMessage());
+        }
+
+        try {
+            new SOCPlayerElements("ga", 2, SOCPlayerElement.GAIN, new SOCResourceSet());
+            fail("should disallow empty resource set");
+        } catch (IllegalArgumentException e) {
+            assertEquals("empty", e.getMessage());
         }
     }
 

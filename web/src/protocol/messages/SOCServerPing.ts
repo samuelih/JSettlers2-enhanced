@@ -6,6 +6,14 @@
 import { MessageType, SEP } from '../constants';
 import { registerParser, type SOCMessage } from '../SOCMessage';
 
+/** Strict integer check matching Java Integer.parseInt. */
+function parseIntStrict(s: string): number | null {
+  if (!/^[+-]?\d+$/.test(s)) {
+    return null;
+  }
+  return Number.parseInt(s, 10);
+}
+
 /**
  * Ping message carrying a sleep time (seconds for humans, -1 = being
  * disconnected). Mirrors Java {@code SOCServerPing}.
@@ -27,8 +35,8 @@ export class SOCServerPing implements SOCMessage {
    * integer (Java would throw NumberFormatException, caught by toMsg -> null).
    */
   static parse(params: string): SOCServerPing | null {
-    const st = Number.parseInt(params, 10);
-    if (!Number.isInteger(st)) {
+    const st = parseIntStrict(params);
+    if (st === null) {
       return null;
     }
     return new SOCServerPing(st);

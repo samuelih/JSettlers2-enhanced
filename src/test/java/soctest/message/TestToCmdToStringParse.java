@@ -578,6 +578,11 @@ public class TestToCmdToStringParse
             "1005|cha\000member name\000msg which may,have,delimiters",
             "SOCChannelTextMsg:channel=cha|nickname=member name|text=msg which may,have,delimiters"
         },
+        {
+            new SOCChannelTextMsg("cha", "member name", ""),
+            "1005|cha\000member name\000",
+            "SOCChannelTextMsg:channel=cha|nickname=member name|text="
+        },
             // v1.x was SOCTextMsg:
         {
             new SOCChannelTextMsg("cha", "member name", "txt contents"),
@@ -731,6 +736,11 @@ public class TestToCmdToStringParse
             new SOCGameTextMsg("ga", SOCGameTextMsg.SERVERNAME, "testp3 built a road, text,may=contain,delimiters"),
             "1010|ga\000Server\000testp3 built a road, text,may=contain,delimiters",
             "SOCGameTextMsg:game=ga|nickname=Server|text=testp3 built a road, text,may=contain,delimiters"
+        },
+        {
+            new SOCGameTextMsg("ga", SOCGameTextMsg.SERVERNAME, ""),
+            "1010|ga\000Server\000",
+            "SOCGameTextMsg:game=ga|nickname=Server|text="
         },
         {new SOCImARobot("robot 7", "**", "soc.robot.SomeExample"), "1022|robot 7,**,soc.robot.SomeExample", "SOCImARobot:nickname=robot 7|cookie=**|rbclass=soc.robot.SomeExample"},
         {

@@ -273,7 +273,7 @@ public class SOCGameElements extends SOCMessageTemplateMi
      * @see #SOCGameElements(String, GEType, int)
      * @throws NullPointerException if {@code etypes} null or {@code values} null
      *     or {@code etypes} contains {@code null}
-     * @throws IllegalArgumentException if {@code etypes.length != values.length}
+     * @throws IllegalArgumentException if {@code etypes.length != values.length}, or {@code etypes} is empty
      */
     public SOCGameElements(final String ga, final GEType[] etypes, final int[] values)
         throws NullPointerException, IllegalArgumentException
@@ -290,6 +290,8 @@ public class SOCGameElements extends SOCMessageTemplateMi
         final int L = etypes.length;
         if (values.length != L)
             throw new IllegalArgumentException("lengths");
+        if (L == 0)
+            throw new IllegalArgumentException("empty");
 
         elementTypes = etypes;
         this.values = values;

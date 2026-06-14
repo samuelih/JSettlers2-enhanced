@@ -158,7 +158,7 @@ public class SOCResourceSet implements ResourceSet, Serializable, Cloneable
      */
     public boolean contains(final int resourceType)
     {
-        if (resourceType >= resources.length)
+        if ((resourceType < SOCResourceConstants.MIN) || (resourceType >= resources.length))
             return false;
         return (resources[resourceType] > 0);
     }

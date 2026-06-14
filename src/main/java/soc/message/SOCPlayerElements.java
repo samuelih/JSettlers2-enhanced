@@ -88,10 +88,11 @@ public class SOCPlayerElements extends SOCMessageTemplateMi
      *             For playing pieces in general, see {@link SOCPlayerElement#elementTypeForPieceType(int)}.
      * @param amt array of the amounts to set or change each element, corresponding to <tt>et[]</tt>
      * @throws NullPointerException if {@code et} null or {@code amt} null, or {@code et} contains null values
+     * @throws IllegalArgumentException if {@code et.length != amt.length}, or {@code et} is empty
      * @since 2.3.00
      */
     public SOCPlayerElements(String ga, int pn, int ac, final PEType[] et, final int[] amt)
-        throws NullPointerException
+        throws NullPointerException, IllegalArgumentException
     {
         this(ga, pn, ac, PEType.getValues(et), amt);
     }
@@ -108,14 +109,19 @@ public class SOCPlayerElements extends SOCMessageTemplateMi
      *             For playing pieces in general, see {@link SOCPlayerElement#elementTypeForPieceType(int)}.
      * @param amt array of the amounts to set or change each element, corresponding to <tt>et[]</tt>
      * @throws NullPointerException if {@code et} null or {@code amt} null
+     * @throws IllegalArgumentException if {@code et.length != amt.length}, or {@code et} is empty
      * @see #SOCPlayerElements(String, int, int, PEType[], int[])
      */
     private SOCPlayerElements(String ga, int pn, int ac, final int[] et, final int[] amt)
-        throws NullPointerException
+        throws NullPointerException, IllegalArgumentException
     {
         super(PLAYERELEMENTS, ga, new int[2 + (2 * et.length)]);
         if (amt == null)
             throw new NullPointerException();
+        if (amt.length != et.length)
+            throw new IllegalArgumentException("lengths");
+        if (et.length == 0)
+            throw new IllegalArgumentException("empty");
 
         playerNumber = pn;
         actionType = ac;
@@ -141,10 +147,11 @@ public class SOCPlayerElements extends SOCMessageTemplateMi
      *             {@link SOCPlayerElement#GAIN}, or {@link SOCPlayerElement#LOSE}
      * @param rs  resource set, to send known resource types; {@link SOCResourceConstants#UNKNOWN} are ignored
      * @throws NullPointerException if {@code rs} null
+     * @throws IllegalArgumentException if {@code rs} has no known resources to send
      * @since 2.0.00
      */
     public SOCPlayerElements(String ga, int pn, int ac, final ResourceSet rs)
-        throws NullPointerException
+        throws NullPointerException, IllegalArgumentException
     {
         super(PLAYERELEMENTS, ga, null);
 
@@ -152,6 +159,9 @@ public class SOCPlayerElements extends SOCMessageTemplateMi
         actionType = ac;
 
         final int typeCount = rs.getResourceTypeCount();
+        if (typeCount == 0)
+            throw new IllegalArgumentException("empty");
+
         pa = new int[2 + 2 * typeCount];
         pa[0] = pn;
         pa[1] = ac;

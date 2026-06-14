@@ -31,7 +31,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/ .
 
-import codecs, getopt, re, sys
+import getopt, io, re, sys
 
 known_dbtypes = ('mysql', 'postgres', 'sqlite')
   # template generation uses mysql for mariadb, so mariadb isn't in this list
@@ -184,7 +184,7 @@ def render_one(dbtype, infile, outfile, compfile):
             file_in = sys.stdin
             infile = '(stdin)'  # for possible syserr.write below
         else:
-            file_in = codecs.open(infile, 'r', encoding='utf8')
+            file_in = io.open(infile, 'r', encoding='utf8')
         with file_in:
             in_str = file_in.read()
 
@@ -196,7 +196,7 @@ def render_one(dbtype, infile, outfile, compfile):
 
         if compfile is not None:
             # comparison mode
-            with codecs.open(compfile, 'r', encoding='utf8') as file_comp:
+            with io.open(compfile, 'r', encoding='utf8') as file_comp:
                comp_str = file_comp.read()
             if out_str != comp_str:
                 sys.stderr.write(compfile + " contents differ from " + infile + " for dbtype " + dbtype + "\n")
@@ -206,7 +206,7 @@ def render_one(dbtype, infile, outfile, compfile):
             if outfile is None or outfile == '-':
                 file_out = sys.stdout
             else:
-                file_out = codecs.open(outfile, 'w', encoding='utf8')
+                file_out = io.open(outfile, 'w', encoding='utf8')
             with file_out:
                 file_out.write(out_str)
     except BaseException as e:

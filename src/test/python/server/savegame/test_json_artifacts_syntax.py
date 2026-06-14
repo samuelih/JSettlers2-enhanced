@@ -6,7 +6,10 @@
 # This file Copyright (C) 2022 Jeremy D Monin <jeremy@nand.net>
 # License: GPLv3
 
-import json, os, sys, unittest
+import io, json, os, sys, unittest
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+SAVEGAME_RESOURCES_DIR = os.path.join(TEST_DIR, "resources", "resources", "savegame")
 
 def try_parse_json(json_str, description):
   """ Try to parse a json string, see if can do so without errors.
@@ -31,7 +34,7 @@ def try_load_savegame(fname, fname_rel_path):
   The standard json module treats trailing commas in lists as an error.
   Returns None if OK, otherwise returns fname and the error.
    """
-  with open(fname_rel_path, "r") as f:
+  with io.open(fname_rel_path, "r", encoding="utf-8") as f:
     return try_parse_json(f.read(), fname)
 
 
@@ -64,19 +67,18 @@ class TestJsonArtifactsSyntax(unittest.TestCase):
 
   def test_parse_all_savegame_files(self):
     """Gather all savegame files, parse each one, print results if not as expected.
-    Current directory should be src/test/python  (running under unittest discover)
     and *.game.json should be under src/test/resources/resources/**/
     """
-    self.assertTrue(os.path.isdir("../../test/resources/resources/savegame"),
-      msg="Can't find ../../test/resources/resources/savegame ; current directory is " + os.getcwd())
+    self.assertTrue(os.path.isdir(SAVEGAME_RESOURCES_DIR),
+      msg="Can't find " + SAVEGAME_RESOURCES_DIR + " ; current directory is " + os.getcwd())
 
     all_savegame_filenames = {}  # key = short, value = full or relative path
-    for root, dirs, files in os.walk("../../test/resources/resources/savegame"):
+    for root, dirs, files in os.walk(SAVEGAME_RESOURCES_DIR):
       for fname in files:
         if fname.lower().endswith(".game.json"):
           all_savegame_filenames[fname] = os.path.join(root, fname)
     self.assertTrue(len(all_savegame_filenames),
-      msg="Can't find *.game.json under ../../test/resources/resources/savegame ; current directory is " + os.getcwd())
+      msg="Can't find *.game.json under " + SAVEGAME_RESOURCES_DIR + " ; current directory is " + os.getcwd())
     all_errors = {}
     for (fname, fn_path) in all_savegame_filenames.items():
       file_errors = try_load_savegame(fname, fn_path)

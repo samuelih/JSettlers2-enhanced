@@ -287,11 +287,14 @@ public class TestResourceSet
     public void onePerType_hasOnePerType()
     {
         SOCResourceSet rs = onePerType();
+        assertFalse(rs.contains(-1));
+        assertFalse(rs.contains(0));
         assertTrue(rs.contains(SOCResourceConstants.CLAY));
         assertTrue(rs.contains(SOCResourceConstants.WHEAT));
         assertTrue(rs.contains(SOCResourceConstants.WOOD));
         assertTrue(rs.contains(SOCResourceConstants.ORE));
         assertTrue(rs.contains(SOCResourceConstants.SHEEP));
+        assertFalse(rs.contains(SOCResourceConstants.MAXPLUSONE));
     }
 
     @Test

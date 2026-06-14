@@ -30,9 +30,10 @@ import soc.util.SOCRobotParameters;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -3023,8 +3024,8 @@ public class SOCDBHelper
         if (! checkConnection())
             return;  // also may throw SQLException
 
-        FileReader fr = new FileReader(setupScriptPath);
-        BufferedReader br = new BufferedReader(fr);
+        FileInputStream fis = new FileInputStream(setupScriptPath);
+        BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
         List<String> sqls = new ArrayList<String>();
 
         // Read 1 line at a time, with continuations; build a list
@@ -3065,14 +3066,14 @@ public class SOCDBHelper
             // done reading the file
             try { br.close(); }
             catch (IOException eclose) {}
-            try { fr.close(); }
+            try { fis.close(); }
             catch (IOException eclose) {}
         }
         catch (IOException e)
         {
             try { br.close(); }
             catch (IOException eclose) {}
-            try { fr.close(); }
+            try { fis.close(); }
             catch (IOException eclose) {}
 
             throw e;

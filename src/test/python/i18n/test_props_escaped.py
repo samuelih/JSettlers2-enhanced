@@ -5,7 +5,10 @@
 # This file Copyright (C) 2019,2022 Jeremy D Monin <jeremy@nand.net>
 # License: GPLv3
 
-import codecs, os, re, unittest
+import io, os, re, unittest
+
+SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+MAIN_RESOURCES_DIR = os.path.join(SRC_DIR, "main", "resources")
 
 def check_missing_escape(localized_str):
   """ Test localized_str contents against java MessageFormat.format format, looking for missing escape chars.
@@ -15,17 +18,17 @@ def check_missing_escape(localized_str):
    """
 
   # look first for {\d positional args
-  if not re.search('{\d', localized_str):
+  if not re.search(r'\{\d', localized_str):
     return -1
 
   # look for ' but not '' ; for { but not either '{ or {\d
-  m = re.search("(^'[^'{])|([^']'[^'{])", localized_str)
+  m = re.search(r"(^'[^'{])|([^']'[^'{])", localized_str)
   if m:
     pos = m.start()
     if localized_str[pos] != "'":
       pos += 1  # since start of match is before the "'"
     return pos
-  m = re.search("([^']\{\D)|([^']\{)$", localized_str)
+  m = re.search(r"([^']\{\D)|([^']\{)$", localized_str)
   if m:
     return m.start()
 
@@ -36,16 +39,16 @@ def check_props_list_missing_escape(props_list):
   If no failures, returns empty list.
   If any failures, returns list of (prop_index+1, prop_char_pos, prop_name) tuples.
   Assumes each props_list element follows same format as lines from a java .properties file
-  with no end-of-line \ continuations:
+  with no end-of-line \\ continuations:
   https://docs.oracle.com/javase/6/docs/api/java/util/Properties.html#load(java.io.Reader)
 
   This unit test parses the lines "manually" instead of using the ConfigParser module,
   to retain line numbers and prevent any interpretation of "#" chars in values as comments.
   """
   fails = []
-  re_empty_line = re.compile("^\s*$")
-  re_comment_line = re.compile("^\s*#")
-  re_data_line = re.compile("^\s*([^=]+?)\s*=\s*(.*?)$")
+  re_empty_line = re.compile(r"^\s*$")
+  re_comment_line = re.compile(r"^\s*#")
+  re_data_line = re.compile(r"^\s*([^=]+?)\s*=\s*(.*?)$")
 
   for linenum in range(len(props_list)):
     propline = props_list[linenum]
@@ -77,7 +80,7 @@ class TestPropsEscaped(unittest.TestCase):
     try:
       self.assertEqual(utf8_list, [int(i) for i in bytearray(bytearray([110, 0xE5]).decode('iso-8859-1').encode('utf8'))], )
     except Exception as e:
-      fail('Cannot convert from iso-8859-1 to utf8, but they should be built-in codecs: ' + str(e))
+      self.fail('Cannot convert from iso-8859-1 to utf8, but they should be built-in codecs: ' + str(e))
 
   def test_check_missing_escape(self):
      self.assertEqual(-1, check_missing_escape(""))
@@ -135,22 +138,21 @@ class TestPropsEscaped(unittest.TestCase):
 
   def test_parse_all_props_files(self):
     """Gather all properties files, parse each one, print results if not as expected.
-    Current directory should be src/test/python  (running under unittest discover)
     and *.properties should be under src/main/resources/**/
     """
-    self.assertTrue(os.path.isdir("../../main/resources"),
-      msg="Can't find ../../main/resources ; current directory is " + os.getcwd())
+    self.assertTrue(os.path.isdir(MAIN_RESOURCES_DIR),
+      msg="Can't find " + MAIN_RESOURCES_DIR + " ; current directory is " + os.getcwd())
 
     all_prop_filenames = []
-    for root, dirs, files in os.walk("../../main/resources"):
+    for root, dirs, files in os.walk(MAIN_RESOURCES_DIR):
       for fname in files:
         if fname.lower().endswith(".properties"):
           all_prop_filenames.append(os.path.join(root, fname))
     self.assertTrue(len(all_prop_filenames),
-      msg="Can't find *.properties under ../../main/resources ; current directory is " + os.getcwd())
+      msg="Can't find *.properties under " + MAIN_RESOURCES_DIR + " ; current directory is " + os.getcwd())
     all_errors = {}
     for fname in all_prop_filenames:
-      with codecs.open(fname, 'r', 'iso-8859-1') as f:
+      with io.open(fname, 'r', encoding='iso-8859-1') as f:
         file_errors = check_props_list_missing_escape(f.readlines())
         if file_errors:
           all_errors[fname] = file_errors

@@ -21,8 +21,6 @@
  **/
 package soc.message;
 
-import java.util.StringTokenizer;
-
 
 /**
  * This message contains a text message for a SoC game.
@@ -183,22 +181,17 @@ public class SOCGameTextMsg extends SOCMessage
      */
     public static SOCGameTextMsg parseDataStr(String s)
     {
-        String ga;
-        String nn;
-        String tm;
-
-        StringTokenizer st = new StringTokenizer(s, sep2_alt);
-
-        try
-        {
-            ga = st.nextToken();
-            nn = st.nextToken();
-            tm = st.nextToken();
-        }
-        catch (Exception e)
-        {
+        final int sep1 = s.indexOf(sep2_alt);
+        if (sep1 == -1)
             return null;
-        }
+
+        final int sep2 = s.indexOf(sep2_alt, sep1 + sep2_alt.length());
+        if (sep2 == -1)
+            return null;
+
+        final String ga = s.substring(0, sep1);
+        final String nn = s.substring(sep1 + sep2_alt.length(), sep2);
+        final String tm = s.substring(sep2 + sep2_alt.length());
 
         return new SOCGameTextMsg(ga, nn, tm);
     }

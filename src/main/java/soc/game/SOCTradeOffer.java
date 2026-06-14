@@ -71,8 +71,8 @@ public class SOCTradeOffer implements Serializable, Cloneable
     {
         this.game = game;
         this.from = from;
-        this.to = to;
-        waitingReply = Arrays.copyOf(to, to.length);
+        this.to = Arrays.copyOf(to, to.length);
+        waitingReply = Arrays.copyOf(this.to, this.to.length);
         this.give = give;
         this.get = get;
     }
@@ -242,9 +242,8 @@ public class SOCTradeOffer implements Serializable, Cloneable
         if (o instanceof SOCTradeOffer)
         {
             SOCTradeOffer offer = (SOCTradeOffer) o;
-            for (int i = 0; i < to.length; i++)
-                if (to[i] != offer.to[i])
-                    return false;
+            if (! Arrays.equals(to, offer.to))
+                return false;
 
             return (from == offer.from
                 && give.equals(offer.give)
@@ -262,8 +261,7 @@ public class SOCTradeOffer implements Serializable, Cloneable
     @Override
     public int hashCode()
     {
-        return give.hashCode() ^ get.hashCode()
-            ^ from ^ Arrays.hashCode(to) ^ Arrays.hashCode(waitingReply);
+        return give.hashCode() ^ get.hashCode() ^ from ^ Arrays.hashCode(to);
     }
 
 }
