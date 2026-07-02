@@ -300,8 +300,8 @@ The current Connect screen always opens `ws://HOST:PORT`. Serve the webapp over
 HTTP for now, or add `wss://` support before putting the page behind HTTPS-only
 hosting; browsers usually block a plain WebSocket from an HTTPS page.
 
-See [`doc/Web-Docker.md`](doc/Web-Docker.md) for the Docker-specific deployment
-notes.
+See [`doc/Web-Docker.md`](doc/Web-Docker.md) for the full web hosting and Docker
+deployment runbook.
 
 
 ## Server Setup and Testing
